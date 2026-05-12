@@ -1,6 +1,21 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import type { FileItem, Category, ConversionMode } from "@/types";
 import { detectCategory, getDefaultOutput, needsLibreOffice, needsImageMagick } from "@/lib/formats";
 import { generateId, getExtension, replaceExtension } from "@/lib/utils";
@@ -28,31 +43,24 @@ const FORMAT_EMOJI: Record<string, string> = {
 };
 
 function ConversionPreview() {
-  const [idx, setIdx]       = useState(0);
+  const [idx, setIdx]         = useState(0);
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     const id = setInterval(() => {
       setVisible(false);
-      setTimeout(() => {
-        setIdx((i) => (i + 1) % EXAMPLES.length);
-        setVisible(true);
-      }, 280);
+      setTimeout(() => { setIdx((i) => (i + 1) % EXAMPLES.length); setVisible(true); }, 280);
     }, 3000);
     return () => clearInterval(id);
   }, []);
 
   const ex = EXAMPLES[idx];
-
   return (
     <div className={`flex items-center gap-4 transition-opacity duration-280 ${visible ? "opacity-100" : "opacity-0"}`}>
-      {/* From card */}
       <div className={`w-28 h-28 sm:w-32 sm:h-32 rounded-2xl bg-gradient-to-br ${ex.fromColor} to-slate-900/80 border border-slate-700/60 flex flex-col items-center justify-center gap-2 shadow-xl`}>
         <span className="text-3xl">{FORMAT_EMOJI[ex.from] ?? "📁"}</span>
         <span className="text-white font-bold text-sm tracking-widest">{ex.from}</span>
       </div>
-
-      {/* Arrow */}
       <div className="flex flex-col items-center gap-1">
         <div className="w-8 h-8 rounded-full bg-slate-800/80 border border-slate-700/60 flex items-center justify-center">
           <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -61,12 +69,88 @@ function ConversionPreview() {
         </div>
         <span className="text-slate-600 text-[9px] font-bold tracking-widest uppercase">TO</span>
       </div>
-
-      {/* To card */}
       <div className={`w-28 h-28 sm:w-32 sm:h-32 rounded-2xl bg-gradient-to-br ${ex.toColor} to-slate-900/80 border border-slate-700/60 flex flex-col items-center justify-center gap-2 shadow-xl`}>
         <span className="text-3xl">{FORMAT_EMOJI[ex.to] ?? "📁"}</span>
         <span className="text-white font-bold text-sm tracking-widest">{ex.to}</span>
       </div>
+    </div>
+  );
+}
+
+/* ── Sortable file card wrapper ──────────────────────────────── */
+function SortableFileCard(props: React.ComponentProps<typeof FileCard>) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: props.item.id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 50 : undefined,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <FileCard {...props} dragHandleProps={{ ...attributes, ...listeners }} />
+    </div>
+  );
+}
+
+/* ── URL input component ─────────────────────────────────────── */
+function UrlInput({ onFiles }: { onFiles: (files: File[]) => void }) {
+  const [url, setUrl]         = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState("");
+
+  const fetch_ = async () => {
+    if (!url.trim()) return;
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/fetch-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: url.trim() }),
+      });
+      if (!res.ok) { setError(await res.text()); return; }
+      const blob = await res.blob();
+      const filename = res.headers.get("x-filename") ?? url.split("/").pop() ?? "file";
+      const file = new File([blob], filename, { type: blob.type });
+      onFiles([file]);
+      setUrl("");
+    } catch {
+      setError("Failed to fetch URL. Make sure it's a direct file link.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex gap-2">
+        <input
+          type="url"
+          value={url}
+          onChange={(e) => { setUrl(e.target.value); setError(""); }}
+          onKeyDown={(e) => e.key === "Enter" && fetch_()}
+          placeholder="https://example.com/file.mp4"
+          className="flex-1 bg-slate-900/60 border border-slate-700/60 text-white text-sm rounded-xl px-4 py-3 placeholder-slate-600 focus:outline-none focus:border-blue-500/60 transition-colors"
+        />
+        <button
+          onClick={fetch_}
+          disabled={loading || !url.trim()}
+          className="px-5 py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors shrink-0"
+        >
+          {loading ? (
+            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          ) : "Fetch"}
+        </button>
+      </div>
+      {error && <p className="text-red-400 text-xs">{error}</p>}
+      <p className="text-slate-600 text-xs">Paste a direct URL to a file. Works with most public file links.</p>
     </div>
   );
 }
@@ -77,27 +161,33 @@ export default function HomePage() {
   const [historyOpen, setHistoryOpen]   = useState(false);
   const [historyCount, setHistoryCount] = useState(0);
   const [historyVersion, setHistoryVersion] = useState(0);
+  const [inputTab, setInputTab]         = useState<"file" | "url">("file");
+  const [zipLoading, setZipLoading]     = useState(false);
 
   useEffect(() => { setHistoryCount(getHistory().length); }, []);
 
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+
+  /* ── File management ─────────────────────────────────────── */
   const updateFile = useCallback((id: string, updates: Partial<FileItem>) => {
     setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, ...updates } : f)));
   }, []);
 
+  const makeItem = (file: File): FileItem => {
+    const ext          = getExtension(file.name);
+    const cat          = detectCategory(file.name) ?? "video";
+    const targetFormat = getDefaultOutput(cat as Category, ext);
+    return {
+      id: generateId(), file,
+      name: file.name, size: file.size,
+      category: cat as Category, extension: ext, targetFormat,
+      mode: "convert" as ConversionMode,
+      quality: 80, status: "idle" as const, progress: 0,
+    };
+  };
+
   const addFiles = useCallback((newFiles: File[]) => {
-    const items: FileItem[] = newFiles.map((file) => {
-      const ext          = getExtension(file.name);
-      const cat          = detectCategory(file.name) ?? "video";
-      const targetFormat = getDefaultOutput(cat as Category, ext);
-      return {
-        id: generateId(), file,
-        name: file.name, size: file.size,
-        category: cat as Category, extension: ext, targetFormat,
-        mode: "convert" as ConversionMode,
-        quality: 80, status: "idle" as const, progress: 0,
-      };
-    });
-    setFiles((prev) => [...prev, ...items]);
+    setFiles((prev) => [...prev, ...newFiles.map(makeItem)]);
   }, []);
 
   const removeFile = useCallback((id: string) => {
@@ -108,6 +198,28 @@ export default function HomePage() {
     });
   }, []);
 
+  const onDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setFiles((prev) => {
+        const from = prev.findIndex((f) => f.id === active.id);
+        const to   = prev.findIndex((f) => f.id === over.id);
+        return arrayMove(prev, from, to);
+      });
+    }
+  }, []);
+
+  /* ── Clipboard paste ─────────────────────────────────────── */
+  useEffect(() => {
+    const handler = (e: ClipboardEvent) => {
+      const items = Array.from(e.clipboardData?.files ?? []);
+      if (items.length > 0) addFiles(items);
+    };
+    window.addEventListener("paste", handler);
+    return () => window.removeEventListener("paste", handler);
+  }, [addFiles]);
+
+  /* ── Conversion ──────────────────────────────────────────── */
   const getEndpoint = (item: FileItem): string => {
     const { category, targetFormat, mode, extension } = item;
     if (mode === "compress") {
@@ -144,7 +256,7 @@ export default function HomePage() {
     if (!clientSide && item.file.size > MAX_SERVER_BYTES) {
       updateFile(item.id, {
         status: "error",
-        error: `File is ${(item.file.size / 1024 / 1024).toFixed(1)} MB — server-side conversions are limited to 4 MB on the free hosting plan. Video, audio and GIF have no size limit (processed in your browser).`,
+        error: `File is ${(item.file.size / 1024 / 1024).toFixed(1)} MB — server-side conversions are limited to 4 MB. Video, audio and GIF have no size limit (processed in your browser).`,
       });
       return;
     }
@@ -208,16 +320,45 @@ export default function HomePage() {
     });
   }, []);
 
+  /* ── Batch ZIP download ──────────────────────────────────── */
+  const downloadAllZip = useCallback(async () => {
+    const done = files.filter((f) => f.status === "done" && f.resultUrl);
+    if (done.length === 0) return;
+    setZipLoading(true);
+    try {
+      const JSZip = (await import("jszip")).default;
+      const zip = new JSZip();
+      await Promise.all(done.map(async (item) => {
+        const res  = await fetch(item.resultUrl!);
+        const blob = await res.blob();
+        const name = item.resultName ?? replaceExtension(item.name, item.targetFormat);
+        zip.file(name, blob);
+      }));
+      const content = await zip.generateAsync({ type: "blob" });
+      const link    = document.createElement("a");
+      link.href     = URL.createObjectURL(content);
+      link.download = "fileflow-converted.zip";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } finally {
+      setZipLoading(false);
+    }
+  }, [files]);
+
+  /* ── Derived state ───────────────────────────────────────── */
   const hasIdle      = files.some((f) => f.status === "idle"       || f.status === "error");
-  const hasDone      = files.some((f) => f.status === "done");
+  const doneFiles    = files.filter((f) => f.status === "done");
+  const hasDone      = doneFiles.length > 0;
   const isConverting = files.some((f) => f.status === "converting" || f.status === "loading-ffmpeg");
+  const doneCount    = doneFiles.length;
+  const totalCount   = files.length;
 
   return (
     <div className="min-h-screen bg-slate-950">
       <Navbar historyCount={historyCount} onHistoryClick={() => setHistoryOpen(true)} />
       <HistoryDrawer open={historyOpen} onClose={() => setHistoryOpen(false)} version={historyVersion} />
 
-      {/* Global hero glow — only visible above the fold */}
+      {/* Hero glow */}
       <div className="fixed inset-x-0 top-0 h-[600px] pointer-events-none z-0">
         <div className="absolute inset-0 hero-glow" />
         <div className="absolute inset-0 dot-pattern opacity-40" />
@@ -225,9 +366,8 @@ export default function HomePage() {
 
       <main className="relative z-10 max-w-5xl mx-auto px-4 pb-24">
 
-        {/* ── Hero ─────────────────────────────────────────────── */}
+        {/* ── Hero ─────────────────────────────────────────── */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-10 pt-16 pb-14">
-          {/* Left — text */}
           <div className="flex-1 max-w-xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-5 tracking-wide">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
@@ -245,54 +385,107 @@ export default function HomePage() {
               images, audio, video, archives and more.
             </p>
           </div>
-
-          {/* Right — animated preview */}
           <div className="flex-shrink-0">
             <ConversionPreview />
           </div>
         </div>
 
-        {/* ── Dropzone / File queue ─────────────────────────────── */}
+        {/* ── Dropzone / File queue ─────────────────────────── */}
         {files.length === 0 ? (
-          <FileDropzone onFiles={addFiles} variant="hero" />
+          <div>
+            {/* Input mode tabs */}
+            <div className="flex gap-1 mb-3 w-fit">
+              {(["file", "url"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setInputTab(tab)}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    inputTab === tab
+                      ? "bg-slate-800 text-white border border-slate-700"
+                      : "text-slate-500 hover:text-slate-300"
+                  }`}
+                >
+                  {tab === "file" ? "Upload File" : "From URL"}
+                </button>
+              ))}
+            </div>
+
+            {inputTab === "file" ? (
+              <FileDropzone onFiles={addFiles} variant="hero" />
+            ) : (
+              <div className="rounded-2xl border border-slate-700/50 bg-slate-900/40 p-8">
+                <UrlInput onFiles={addFiles} />
+              </div>
+            )}
+          </div>
         ) : (
           <div>
+            {/* Queue header */}
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-white font-semibold text-base">
-                Files{" "}
-                <span className="text-slate-500 font-normal text-sm ml-0.5">({files.length})</span>
-              </h2>
+              <div className="flex items-center gap-3">
+                <h2 className="text-white font-semibold text-base">
+                  Files <span className="text-slate-500 font-normal text-sm">({files.length})</span>
+                </h2>
+                {/* Batch progress */}
+                {doneCount > 0 && (
+                  <span className="flex items-center gap-1.5 text-xs text-slate-400">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                    {doneCount} / {totalCount} done
+                  </span>
+                )}
+              </div>
               <div className="flex gap-2 flex-wrap justify-end">
                 {hasIdle && !isConverting && (
-                  <button
-                    onClick={convertAll}
-                    className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm shadow-blue-500/20"
-                  >
+                  <button onClick={convertAll} className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm shadow-blue-500/20">
                     Convert All
                   </button>
                 )}
-                {hasDone && (
+                {hasDone && doneCount >= 2 && (
                   <button
-                    onClick={clearDone}
-                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm rounded-lg transition-colors"
+                    onClick={downloadAllZip}
+                    disabled={zipLoading}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white text-sm rounded-lg transition-colors"
                   >
+                    {zipLoading ? (
+                      <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                    ) : (
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                    )}
+                    Download All (.zip)
+                  </button>
+                )}
+                {hasDone && (
+                  <button onClick={clearDone} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm rounded-lg transition-colors">
                     Clear Done
                   </button>
                 )}
-                <button
-                  onClick={clearAll}
-                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm rounded-lg transition-colors"
-                >
+                <button onClick={clearAll} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm rounded-lg transition-colors">
                   Clear All
                 </button>
               </div>
             </div>
 
-            <div className="space-y-2.5">
-              {files.map((item) => (
-                <FileCard key={item.id} item={item} onConvert={convertFile} onRemove={removeFile} onChange={updateFile} />
-              ))}
-            </div>
+            {/* Sortable file list */}
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+              <SortableContext items={files.map((f) => f.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-2.5">
+                  {files.map((item) => (
+                    <SortableFileCard
+                      key={item.id}
+                      item={item}
+                      onConvert={convertFile}
+                      onRemove={removeFile}
+                      onChange={updateFile}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
 
             <div className="mt-3">
               <FileDropzone onFiles={addFiles} variant="compact" />
@@ -300,15 +493,12 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* ── Bottom sections ───────────────────────────────────── */}
+        {/* ── Bottom sections ───────────────────────────────── */}
         {files.length === 0 && (
           <div className="mt-20 grid grid-cols-1 lg:grid-cols-5 gap-5">
-            {/* Formats section */}
             <div className="lg:col-span-3">
               <FormatsSection />
             </div>
-
-            {/* Privacy card */}
             <div className="lg:col-span-2 rounded-2xl border border-slate-800/70 bg-slate-900/30 p-6 flex flex-col">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-5 h-5 rounded-md bg-green-500/15 border border-green-500/25 flex items-center justify-center">
@@ -318,14 +508,8 @@ export default function HomePage() {
                 </div>
                 <span className="text-green-400 text-[10px] font-bold uppercase tracking-widest">Privacy First</span>
               </div>
-
-              <h2 className="text-white text-xl font-bold mb-3 leading-snug">
-                Your files,<br />handled privately.
-              </h2>
-              <p className="text-slate-500 text-sm leading-relaxed mb-6">
-                No account. No tracking. No data sold. Files are processed and immediately discarded.
-              </p>
-
+              <h2 className="text-white text-xl font-bold mb-3 leading-snug">Your files,<br />handled privately.</h2>
+              <p className="text-slate-500 text-sm leading-relaxed mb-6">No account. No tracking. No data sold. Files are processed and immediately discarded.</p>
               <ul className="space-y-3 mt-auto">
                 {[
                   { icon: "⚡", text: "Video & audio processed locally in your browser — never uploaded" },
