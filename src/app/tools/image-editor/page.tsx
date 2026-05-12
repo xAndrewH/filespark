@@ -116,6 +116,7 @@ function drawStroke(ctx: CanvasRenderingContext2D, s: Stroke, scaleX = 1, scaleY
 }
 
 type Tab = "transform" | "adjust" | "filters" | "markup" | "output";
+type CropDragMode = "new" | "move" | "resize-tl" | "resize-tr" | "resize-bl" | "resize-br";
 
 /* ── Component ──────────────────────────────────────────────────────── */
 export default function ImageEditorPage() {
@@ -133,7 +134,7 @@ export default function ImageEditorPage() {
   const [cropMode, setCropMode]         = useState(false);
   const [cropRatio, setCropRatio]       = useState<number | null>(null);
   const [cropSel, setCropSel]           = useState<{x:number;y:number;w:number;h:number} | null>(null);
-  const cropDragRef = useRef<{sx:number;sy:number;origCrop:CropRegion;editsW:number;editsH:number}|null>(null);
+  const cropDragRef = useRef<{sx:number;sy:number;mode:CropDragMode;initialSel:{x:number;y:number;w:number;h:number}|null;origCrop:CropRegion;editsW:number;editsH:number}|null>(null);
 
   // Markup state
   const [strokes, setStrokes]       = useState<Stroke[]>([]);
@@ -152,23 +153,27 @@ export default function ImageEditorPage() {
   const historyRef = useRef<Snap[]>([]);
   const [canUndo, setCanUndo] = useState(false);
 
+  // Refs that mirror state so pushSnap can read them synchronously
+  const editsRef   = useRef<Edits>(edits);
+  const cropRgnRef = useRef<CropRegion | null>(null);
+  const strokesRef = useRef<Stroke[]>([]);
+
   const previewRef = useRef<HTMLCanvasElement>(null);
   const markupRef  = useRef<HTMLCanvasElement>(null);
   const inputRef   = useRef<HTMLInputElement>(null);
 
+  /* ── Sync refs after every render ──────────────────────────────── */
+  useEffect(() => { editsRef.current   = edits;   }, [edits]);
+  useEffect(() => { cropRgnRef.current = cropRgn; }, [cropRgn]);
+  useEffect(() => { strokesRef.current = strokes; }, [strokes]);
+
   /* ── History helpers ───────────────────────────────────────────── */
   const pushSnap = useCallback(() => {
-    setEditsRaw((e) => {
-      setCropRgn((c) => {
-        setStrokes((s) => {
-          historyRef.current = [...historyRef.current.slice(-49), { edits: e, cropRgn: c, strokes: s }];
-          setCanUndo(true);
-          return s;
-        });
-        return c;
-      });
-      return e;
-    });
+    historyRef.current = [
+      ...historyRef.current.slice(-49),
+      { edits: editsRef.current, cropRgn: cropRgnRef.current, strokes: strokesRef.current },
+    ];
+    setCanUndo(true);
   }, []);
 
   const undo = useCallback(() => {
@@ -267,18 +272,44 @@ export default function ImageEditorPage() {
     if (!cropMode) return;
     const onMove = (e: MouseEvent) => {
       if (!cropDragRef.current || !previewRef.current) return;
-      const { sx, sy, origCrop, editsW, editsH } = cropDragRef.current;
-      const rect  = previewRef.current.getBoundingClientRect();
+      const { sx, sy, mode, initialSel } = cropDragRef.current;
+      const rect   = previewRef.current.getBoundingClientRect();
       const scaleX = previewRef.current.width  / rect.width;
       const scaleY = previewRef.current.height / rect.height;
-      let cx = Math.max(0, Math.min((e.clientX - rect.left)  * scaleX, previewRef.current.width));
-      let cy = Math.max(0, Math.min((e.clientY - rect.top)   * scaleY, previewRef.current.height));
-      let sw = Math.abs(cx - sx);
-      let sh = Math.abs(cy - sy);
-      if (cropRatio) sh = sw / cropRatio;
-      const ox = Math.min(sx, cx);
-      const oy = Math.min(sy, cy);
-      setCropSel({ x: ox, y: oy, w: sw, h: sh });
+      const maxW   = previewRef.current.width;
+      const maxH   = previewRef.current.height;
+      const cx = Math.max(0, Math.min((e.clientX - rect.left) * scaleX, maxW));
+      const cy = Math.max(0, Math.min((e.clientY - rect.top)  * scaleY, maxH));
+      const dx = cx - sx;
+      const dy = cy - sy;
+
+      if (mode === "new") {
+        const sw = Math.abs(cx - sx);
+        const sh = cropRatio ? sw / cropRatio : Math.abs(cy - sy);
+        setCropSel({ x: Math.min(sx, cx), y: Math.min(sy, cy), w: sw, h: sh });
+      } else if (mode === "move" && initialSel) {
+        setCropSel({
+          x: Math.max(0, Math.min(initialSel.x + dx, maxW - initialSel.w)),
+          y: Math.max(0, Math.min(initialSel.y + dy, maxH - initialSel.h)),
+          w: initialSel.w, h: initialSel.h,
+        });
+      } else if (mode === "resize-br" && initialSel) {
+        const nw = Math.max(10, Math.min(initialSel.w + dx, maxW - initialSel.x));
+        const nh = cropRatio ? nw / cropRatio : Math.max(10, Math.min(initialSel.h + dy, maxH - initialSel.y));
+        setCropSel({ ...initialSel, w: nw, h: nh });
+      } else if (mode === "resize-tl" && initialSel) {
+        const nw = Math.max(10, initialSel.w - dx);
+        const nh = cropRatio ? nw / cropRatio : Math.max(10, initialSel.h - dy);
+        setCropSel({ x: Math.max(0, initialSel.x + initialSel.w - nw), y: Math.max(0, initialSel.y + initialSel.h - nh), w: nw, h: nh });
+      } else if (mode === "resize-tr" && initialSel) {
+        const nw = Math.max(10, Math.min(initialSel.w + dx, maxW - initialSel.x));
+        const nh = cropRatio ? nw / cropRatio : Math.max(10, initialSel.h - dy);
+        setCropSel({ ...initialSel, y: Math.max(0, initialSel.y + initialSel.h - nh), w: nw, h: nh });
+      } else if (mode === "resize-bl" && initialSel) {
+        const nw = Math.max(10, initialSel.w - dx);
+        const nh = cropRatio ? nw / cropRatio : Math.max(10, Math.min(initialSel.h + dy, maxH - initialSel.y));
+        setCropSel({ ...initialSel, x: Math.max(0, initialSel.x + initialSel.w - nw), w: nw, h: nh });
+      }
     };
     const onUp = () => {
       cropDragRef.current = null;
@@ -289,21 +320,34 @@ export default function ImageEditorPage() {
     return () => { document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); };
   }, [cropMode, cropRatio]);
 
-  const onCropMouseDown = useCallback((e: React.MouseEvent) => {
-    if (!cropMode || !previewRef.current || !orig) return;
+  const startCropDrag = useCallback((e: React.MouseEvent, mode: CropDragMode) => {
+    if (!previewRef.current || !orig) return;
     const rect = previewRef.current.getBoundingClientRect();
     const scaleX = previewRef.current.width  / rect.width;
     const scaleY = previewRef.current.height / rect.height;
     const sx = (e.clientX - rect.left) * scaleX;
     const sy = (e.clientY - rect.top)  * scaleY;
     cropDragRef.current = {
-      sx, sy,
+      sx, sy, mode,
+      initialSel: cropSel ? { ...cropSel } : null,
       origCrop: cropRgn ?? { x: 0, y: 0, w: orig.naturalWidth, h: orig.naturalHeight },
       editsW: edits.width, editsH: edits.height,
     };
-    setCropSel({ x: sx, y: sy, w: 0, h: 0 });
+    if (mode === "new") setCropSel({ x: sx, y: sy, w: 0, h: 0 });
     e.preventDefault();
-  }, [cropMode, orig, cropRgn, edits.width, edits.height]);
+  }, [orig, cropRgn, cropSel, edits.width, edits.height]);
+
+  const onCropMouseDown = useCallback((e: React.MouseEvent) => {
+    if (!cropMode || !previewRef.current || !orig) return;
+    const rect = previewRef.current.getBoundingClientRect();
+    const scaleX = previewRef.current.width  / rect.width;
+    const scaleY = previewRef.current.height / rect.height;
+    const cx = (e.clientX - rect.left) * scaleX;
+    const cy = (e.clientY - rect.top)  * scaleY;
+    // If there's an existing selection and click is inside it, ignore (overlay handles it)
+    if (cropSel && cropSel.w > 4 && cx >= cropSel.x && cx <= cropSel.x + cropSel.w && cy >= cropSel.y && cy <= cropSel.y + cropSel.h) return;
+    startCropDrag(e, "new");
+  }, [cropMode, orig, cropSel, startCropDrag]);
 
   const applyCrop = useCallback(() => {
     if (!cropSel || !orig || cropSel.w < 5 || cropSel.h < 5) return;
@@ -464,9 +508,9 @@ export default function ImageEditorPage() {
   };
 
   /* ── Subcomponents ──────────────────────────────────────────────── */
-  const Slider = ({ label, value, min, max, step = 1, unit = "", onChange }: {
+  const Slider = ({ label, value, min, max, step = 1, unit = "", onChange, onSnap }: {
     label: string; value: number; min: number; max: number;
-    step?: number; unit?: string; onChange: (v: number) => void;
+    step?: number; unit?: string; onChange: (v: number) => void; onSnap?: () => void;
   }) => (
     <div>
       <div className="flex justify-between mb-1">
@@ -474,6 +518,7 @@ export default function ImageEditorPage() {
         <span className="text-xs text-slate-400 font-mono">{value}{unit}</span>
       </div>
       <input type="range" min={min} max={max} step={step} value={value}
+        onPointerDown={onSnap}
         onChange={(e) => onChange(Number(e.target.value))}
         className="w-full accent-blue-500" />
     </div>
@@ -663,12 +708,12 @@ export default function ImageEditorPage() {
               {activeTab === "adjust" && (
                 <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4 space-y-4">
                   <h3 className="text-white text-sm font-semibold">Adjustments</h3>
-                  <Slider label="Brightness" value={edits.brightness} min={0} max={200} unit="%" onChange={(v) => set("brightness", v)} />
-                  <Slider label="Contrast"   value={edits.contrast}   min={0} max={200} unit="%" onChange={(v) => set("contrast",   v)} />
-                  <Slider label="Saturation" value={edits.saturation} min={0} max={200} unit="%" onChange={(v) => set("saturation", v)} />
-                  <Slider label="Hue rotate" value={edits.hue} min={-180} max={180} unit="°"    onChange={(v) => set("hue",         v)} />
-                  <Slider label="Blur"  value={edits.blur} min={0} max={20} step={0.5} unit="px" onChange={(v) => set("blur",       v)} />
-                  <Slider label="Opacity"    value={edits.opacity}    min={0} max={100} unit="%" onChange={(v) => set("opacity",     v)} />
+                  <Slider label="Brightness" value={edits.brightness} min={0} max={200} unit="%" onSnap={pushSnap} onChange={(v) => setEditsRaw((e) => ({ ...e, brightness: v }))} />
+                  <Slider label="Contrast"   value={edits.contrast}   min={0} max={200} unit="%" onSnap={pushSnap} onChange={(v) => setEditsRaw((e) => ({ ...e, contrast:   v }))} />
+                  <Slider label="Saturation" value={edits.saturation} min={0} max={200} unit="%" onSnap={pushSnap} onChange={(v) => setEditsRaw((e) => ({ ...e, saturation: v }))} />
+                  <Slider label="Hue rotate" value={edits.hue} min={-180} max={180} unit="°"    onSnap={pushSnap} onChange={(v) => setEditsRaw((e) => ({ ...e, hue:        v }))} />
+                  <Slider label="Blur"  value={edits.blur} min={0} max={20} step={0.5} unit="px" onSnap={pushSnap} onChange={(v) => setEditsRaw((e) => ({ ...e, blur:      v }))} />
+                  <Slider label="Opacity"    value={edits.opacity}    min={0} max={100} unit="%" onSnap={pushSnap} onChange={(v) => setEditsRaw((e) => ({ ...e, opacity:   v }))} />
                   <div>
                     <label className="text-xs text-slate-500 block mb-1">Background fill</label>
                     <div className="flex items-center gap-2">
@@ -855,19 +900,27 @@ export default function ImageEditorPage() {
                           }}
                         />
                       </div>
-                      {/* Border + handles */}
-                      <div className="absolute border-2 border-white/80 pointer-events-none"
+                      {/* Draggable crop box */}
+                      <div className="absolute border-2 border-white/80 cursor-move"
                         style={{
                           left:   `${(cropSel.x / previewRef.current.width)  * 100}%`,
                           top:    `${(cropSel.y / previewRef.current.height) * 100}%`,
                           width:  `${(cropSel.w / previewRef.current.width)  * 100}%`,
                           height: `${(cropSel.h / previewRef.current.height) * 100}%`,
-                        }}>
-                        {["-translate-x-1 -translate-y-1 top-0 left-0","-translate-x-1 translate-y-1 bottom-0 left-0","translate-x-1 -translate-y-1 top-0 right-0","translate-x-1 translate-y-1 bottom-0 right-0"].map((cls, i) => (
-                          <div key={i} className={`absolute w-3 h-3 bg-white rounded-sm ${cls}`} />
+                        }}
+                        onMouseDown={(e) => { e.stopPropagation(); startCropDrag(e, "move"); }}>
+                        {/* Corner resize handles */}
+                        {([
+                          { cls: "top-0 left-0 -translate-x-1 -translate-y-1 cursor-nwse-resize", mode: "resize-tl" as CropDragMode },
+                          { cls: "top-0 right-0 translate-x-1 -translate-y-1 cursor-nesw-resize", mode: "resize-tr" as CropDragMode },
+                          { cls: "bottom-0 left-0 -translate-x-1 translate-y-1 cursor-nesw-resize", mode: "resize-bl" as CropDragMode },
+                          { cls: "bottom-0 right-0 translate-x-1 translate-y-1 cursor-nwse-resize", mode: "resize-br" as CropDragMode },
+                        ]).map(({ cls, mode }) => (
+                          <div key={mode} className={`absolute w-3 h-3 bg-white rounded-sm ${cls}`}
+                            onMouseDown={(e) => { e.stopPropagation(); startCropDrag(e, mode); }} />
                         ))}
                         {/* Rule-of-thirds grid */}
-                        <div className="absolute inset-0 opacity-30">
+                        <div className="absolute inset-0 opacity-30 pointer-events-none">
                           <div className="absolute left-1/3 top-0 bottom-0 border-l border-white" />
                           <div className="absolute left-2/3 top-0 bottom-0 border-l border-white" />
                           <div className="absolute top-1/3 left-0 right-0 border-t border-white" />
