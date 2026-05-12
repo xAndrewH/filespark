@@ -416,9 +416,9 @@ export default function HomePage() {
             <div className="flex flex-wrap gap-2">
               {[
                 { label: "File Converter", href: null },
-                { label: "Image Tools", href: "/tools" },
-                { label: "Dev Tools", href: "/tools" },
-                { label: "Design Tools", href: "/tools" },
+                { label: "Image Tools",   href: "/tools#images-pdfs" },
+                { label: "Dev Tools",     href: "/tools#text-code" },
+                { label: "Design Tools",  href: "/tools#design-visual" },
               ].map(({ label, href }) =>
                 href ? (
                   <Link key={label} href={href} className="px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-400 hover:text-white text-xs transition-colors">
