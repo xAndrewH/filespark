@@ -537,9 +537,12 @@ export default function HomePage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
-                { href: "/tools/qr",           icon: "⬛", label: "QR Code Generator", desc: "URL, text, or any data → scannable QR"  },
-                { href: "/tools/pdf-merge",     icon: "📄", label: "PDF Merge",          desc: "Combine multiple PDFs into one file"   },
-                { href: "/tools/image-editor",  icon: "🖼️", label: "Image Editor",       desc: "Resize, rotate and flip images"        },
+                { href: "/tools/password",      icon: "🔑", label: "Password Generator", desc: "Cryptographically secure passwords"      },
+                { href: "/tools/color-picker",  icon: "🎨", label: "Color Picker",        desc: "HEX, RGB, HSL, CMYK values + palette"  },
+                { href: "/tools/json",          icon: "{ }", label: "JSON Formatter",     desc: "Validate, format, and minify JSON"      },
+                { href: "/tools/image-compressor", icon: "🗜️", label: "Image Compressor", desc: "Compress images — no size limits"      },
+                { href: "/tools/word-counter",  icon: "📝", label: "Word Counter",        desc: "Words, chars, sentences, reading time"  },
+                { href: "/tools/units",         icon: "📐", label: "Unit Converter",      desc: "Length, weight, temp, data and more"   },
               ].map(({ href, icon, label, desc }) => (
                 <Link
                   key={href}
