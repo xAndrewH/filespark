@@ -1,10 +1,12 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { ToolsScrollSaver, ToolsScrollRestorer } from "@/components/ToolsScrollHandler";
 
 export const metadata: Metadata = { title: "Tools — FileFlow" };
 
 const CATEGORIES = [
   {
+    id: "text-code",
     name: "Text & Code",
     tools: [
       { href: "/tools/word-counter",  icon: "📝", title: "Word Counter",             description: "Count words, characters, sentences, and reading time. Includes top-word frequency." },
@@ -20,6 +22,7 @@ const CATEGORIES = [
     ],
   },
   {
+    id: "design-visual",
     name: "Design & Visual",
     tools: [
       { href: "/tools/color-picker",   icon: "🎨", title: "Color Picker",             description: "Pick a color and instantly get HEX, RGB, HSL, and CMYK values. Build palettes." },
@@ -32,6 +35,7 @@ const CATEGORIES = [
     ],
   },
   {
+    id: "converters",
     name: "Converters & Calculators",
     tools: [
       { href: "/tools/units",          icon: "📐", title: "Unit Converter",           description: "Convert length, weight, temperature, area, volume, speed, and data units." },
@@ -43,12 +47,14 @@ const CATEGORIES = [
     ],
   },
   {
+    id: "reference",
     name: "Reference",
     tools: [
       { href: "/tools/http-status",    icon: "📡", title: "HTTP Status Codes",        description: "Searchable reference for every HTTP status code with descriptions." },
     ],
   },
   {
+    id: "images-pdfs",
     name: "Images & PDFs",
     tools: [
       { href: "/tools/image-editor",       icon: "🖼️", title: "Image Editor",        description: "Resize, rotate, flip, and adjust quality. Supports JPG, PNG, WEBP and more." },
@@ -80,8 +86,8 @@ export default function ToolsPage() {
         </div>
 
         <div className="space-y-12">
-          {CATEGORIES.map(({ name, tools }) => (
-            <div key={name}>
+          {CATEGORIES.map(({ id, name, tools }) => (
+            <div key={name} id={id} className="scroll-mt-8">
               <h2 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-4">{name}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {tools.map(({ href, icon, title, description }) => (
@@ -111,5 +117,7 @@ export default function ToolsPage() {
         </div>
       </div>
     </div>
+    <ToolsScrollSaver />
+    <ToolsScrollRestorer />
   );
 }
