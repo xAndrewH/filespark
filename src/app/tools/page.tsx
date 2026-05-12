@@ -22,17 +22,30 @@ const CATEGORIES = [
   {
     name: "Design & Visual",
     tools: [
-      { href: "/tools/color-picker",  icon: "🎨", title: "Color Picker",             description: "Pick a color and instantly get HEX, RGB, HSL, and CMYK values. Build palettes." },
-      { href: "/tools/gradient",      icon: "🌈", title: "CSS Gradient Builder",     description: "Build linear and radial gradients visually and copy the CSS output." },
-      { href: "/tools/favicon",       icon: "⭐", title: "Favicon Generator",        description: "Upload any image and get favicon PNGs at all standard sizes as a ZIP." },
+      { href: "/tools/color-picker",   icon: "🎨", title: "Color Picker",             description: "Pick a color and instantly get HEX, RGB, HSL, and CMYK values. Build palettes." },
+      { href: "/tools/palette",        icon: "🖌️", title: "Color Palette Generator",  description: "Generate complementary, triadic, analogous, and shade palettes from any color." },
+      { href: "/tools/gradient",       icon: "🌈", title: "CSS Gradient Builder",     description: "Build linear and radial gradients visually and copy the CSS output." },
+      { href: "/tools/glassmorphism",  icon: "🪟", title: "Glassmorphism Generator",  description: "Build glass-effect UI cards with blur, opacity, and border controls." },
+      { href: "/tools/box-shadow",     icon: "🔲", title: "Box Shadow Builder",       description: "Build CSS box shadows with multiple layers, presets, and live preview." },
+      { href: "/tools/border-radius",  icon: "⬜", title: "Border Radius Builder",    description: "Shape rounded corners per-side visually and copy the CSS output." },
+      { href: "/tools/favicon",        icon: "⭐", title: "Favicon Generator",        description: "Upload any image and get favicon PNGs at all standard sizes as a ZIP." },
     ],
   },
   {
     name: "Converters & Calculators",
     tools: [
-      { href: "/tools/units",         icon: "📐", title: "Unit Converter",           description: "Convert length, weight, temperature, area, volume, speed, and data units." },
-      { href: "/tools/cron",          icon: "⏱️", title: "Cron Expression Builder",  description: "Build and validate cron schedules with presets and next-run preview." },
-      { href: "/tools/password",      icon: "🔑", title: "Password Generator",       description: "Cryptographically secure passwords with strength scoring and bulk generation." },
+      { href: "/tools/units",          icon: "📐", title: "Unit Converter",           description: "Convert length, weight, temperature, area, volume, speed, and data units." },
+      { href: "/tools/aspect-ratio",   icon: "⛶",  title: "Aspect Ratio Calculator",  description: "Calculate width or height while locking an aspect ratio. Includes presets." },
+      { href: "/tools/timestamp",      icon: "🕐", title: "Timestamp Converter",      description: "Convert Unix timestamps to human-readable dates and back, with a live clock." },
+      { href: "/tools/base-converter", icon: "🔢", title: "Number Base Converter",    description: "Convert numbers between binary, octal, decimal, and hexadecimal with bit view." },
+      { href: "/tools/cron",           icon: "⏱️", title: "Cron Expression Builder",  description: "Build and validate cron schedules with presets and next-run preview." },
+      { href: "/tools/password",       icon: "🔑", title: "Password Generator",       description: "Cryptographically secure passwords with strength scoring and bulk generation." },
+    ],
+  },
+  {
+    name: "Reference",
+    tools: [
+      { href: "/tools/http-status",    icon: "📡", title: "HTTP Status Codes",        description: "Searchable reference for every HTTP status code with descriptions." },
     ],
   },
   {
