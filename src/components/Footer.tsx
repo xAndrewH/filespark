@@ -6,6 +6,7 @@ export default function Footer() {
       <div className="max-w-5xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
         <span>© {new Date().getFullYear()} FileFlow. Free to use, no account required.</span>
         <div className="flex items-center gap-4">
+          <Link href="/tools" className="hover:text-slate-400 transition-colors">Tools</Link>
           <Link href="/privacy" className="hover:text-slate-400 transition-colors">Privacy Policy</Link>
           <Link href="/terms" className="hover:text-slate-400 transition-colors">Terms of Use</Link>
         </div>

@@ -1,8 +1,10 @@
 "use client";
 
+import { useMemo, useEffect, useState } from "react";
 import type { FileItem, Category } from "@/types";
 import { OUTPUT_FORMATS } from "@/lib/formats";
 import { formatBytes, replaceExtension } from "@/lib/utils";
+import SearchableSelect from "./SearchableSelect";
 
 const ICONS: Record<Category, string> = {
   video:    "🎬",
@@ -32,23 +34,48 @@ const STATUS_BORDER: Record<string, string> = {
   error:            "border-red-900/40",
 };
 
+const PREVIEW_CATEGORIES = new Set<Category>(["image", "gif"]);
+
+function ImageThumbnail({ file }: { file: File }) {
+  const [src, setSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    const url = URL.createObjectURL(file);
+    setSrc(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  if (!src) return <span className="text-xl">🖼️</span>;
+
+  return (
+    <img
+      src={src}
+      alt=""
+      className="w-full h-full object-cover rounded-lg"
+      onError={() => setSrc(null)}
+    />
+  );
+}
+
 interface Props {
   item: FileItem;
   onConvert: (item: FileItem) => void;
   onRemove: (id: string) => void;
   onChange: (id: string, updates: Partial<FileItem>) => void;
+  dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
-export default function FileCard({ item, onConvert, onRemove, onChange }: Props) {
+export default function FileCard({ item, onConvert, onRemove, onChange, dragHandleProps }: Props) {
   const allOutputs = OUTPUT_FORMATS[item.category];
-  const outputFormats = allOutputs.filter(
+  const outputFormats = useMemo(() => allOutputs.filter(
     (f) => f !== item.extension && f !== (item.extension === "jpg" ? "jpeg" : item.extension)
-  );
+  ), [allOutputs, item.extension]);
 
   const canCompress = ["image", "video", "audio"].includes(item.category);
   const isProcessing = item.status === "converting" || item.status === "loading-ffmpeg";
   const isDone = item.status === "done";
   const isError = item.status === "error";
+  const showPreview = PREVIEW_CATEGORIES.has(item.category);
 
   const downloadName = item.resultName ?? replaceExtension(item.name, item.targetFormat);
 
@@ -59,30 +86,46 @@ export default function FileCard({ item, onConvert, onRemove, onChange }: Props)
 
       <div className="pl-5 pr-4 py-4">
         <div className="flex items-start gap-3">
-          {/* Category icon badge */}
-          <div className="shrink-0 w-9 h-9 rounded-lg bg-slate-800 border border-slate-700/60 flex items-center justify-center text-base mt-0.5">
-            {ICONS[item.category]}
+          {/* Icon / thumbnail */}
+          <div className="shrink-0 w-10 h-10 rounded-lg bg-slate-800 border border-slate-700/60 overflow-hidden flex items-center justify-center text-lg mt-0.5">
+            {showPreview ? <ImageThumbnail file={item.file} /> : ICONS[item.category]}
           </div>
 
           {/* Content */}
           <div className="flex-1 min-w-0">
-            {/* Header row */}
+            {/* Header */}
             <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-white font-medium text-sm truncate leading-snug" title={item.name}>
                   {item.name}
                 </p>
                 <p className="text-slate-500 text-xs mt-0.5">{formatBytes(item.size)}</p>
               </div>
-              <button
-                onClick={() => onRemove(item.id)}
-                title="Remove"
-                className="text-slate-600 hover:text-slate-300 transition-colors shrink-0 p-1 -mr-0.5 rounded-md hover:bg-slate-800"
-              >
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                </svg>
-              </button>
+              <div className="flex items-center gap-1 shrink-0">
+                {/* Drag handle */}
+                {dragHandleProps && (
+                  <div
+                    {...dragHandleProps}
+                    className="p-1 text-slate-600 hover:text-slate-400 cursor-grab active:cursor-grabbing transition-colors rounded"
+                    title="Drag to reorder"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                      <circle cx="4" cy="3" r="1" /><circle cx="8" cy="3" r="1" />
+                      <circle cx="4" cy="6" r="1" /><circle cx="8" cy="6" r="1" />
+                      <circle cx="4" cy="9" r="1" /><circle cx="8" cy="9" r="1" />
+                    </svg>
+                  </div>
+                )}
+                <button
+                  onClick={() => onRemove(item.id)}
+                  title="Remove"
+                  className="text-slate-600 hover:text-slate-300 transition-colors p-1 rounded-md hover:bg-slate-800"
+                >
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             {/* Controls — idle or error */}
@@ -114,19 +157,13 @@ export default function FileCard({ item, onConvert, onRemove, onChange }: Props)
                   </div>
                 )}
 
-                {/* Format selector */}
+                {/* Format selector — searchable */}
                 {item.mode === "convert" && outputFormats.length > 0 && (
-                  <select
+                  <SearchableSelect
                     value={item.targetFormat}
-                    onChange={(e) => onChange(item.id, { targetFormat: e.target.value })}
-                    className="bg-slate-800/80 border border-slate-700/80 text-white text-xs rounded-lg px-2 py-1.5 cursor-pointer focus:outline-none focus:border-blue-500/70"
-                  >
-                    {outputFormats.map((f) => (
-                      <option key={f} value={f}>
-                        {f.toUpperCase()}
-                      </option>
-                    ))}
-                  </select>
+                    options={outputFormats}
+                    onChange={(val) => onChange(item.id, { targetFormat: val })}
+                  />
                 )}
 
                 {/* Quality slider */}
@@ -145,7 +182,6 @@ export default function FileCard({ item, onConvert, onRemove, onChange }: Props)
                   </div>
                 )}
 
-                {/* Convert / Compress button */}
                 <button
                   onClick={() => onConvert(item)}
                   className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs font-semibold rounded-lg transition-colors shrink-0 shadow-sm shadow-blue-500/20"
