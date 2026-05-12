@@ -136,8 +136,20 @@ export default function HomePage() {
     setHistoryVersion((v) => v + 1);
   }, []);
 
+  // Vercel free tier hard limit — 4.5 MB request body
+  const MAX_SERVER_BYTES = 4 * 1024 * 1024; // 4 MB with a small buffer
+
   const convertFile = useCallback(async (item: FileItem) => {
     const clientSide = ["video", "audio", "gif"].includes(item.category);
+
+    // Catch oversized files before they hit Vercel's payload limit
+    if (!clientSide && item.file.size > MAX_SERVER_BYTES) {
+      updateFile(item.id, {
+        status: "error",
+        error: `File is ${(item.file.size / 1024 / 1024).toFixed(1)} MB — server-side conversions are limited to 4 MB on the free hosting plan. Video, audio and GIF have no size limit (processed in your browser).`,
+      });
+      return;
+    }
 
     if (clientSide) {
       updateFile(item.id, { status: "loading-ffmpeg", progress: 0 });
