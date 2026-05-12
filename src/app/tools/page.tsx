@@ -116,8 +116,8 @@ export default function ToolsPage() {
           ))}
         </div>
       </div>
+      <ToolsScrollSaver />
+      <ToolsScrollRestorer />
     </div>
-    <ToolsScrollSaver />
-    <ToolsScrollRestorer />
   );
 }
