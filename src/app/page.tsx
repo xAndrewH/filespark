@@ -18,6 +18,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import type { FileItem, Category, ConversionMode } from "@/types";
 import { detectCategory, getDefaultOutput, needsLibreOffice, needsImageMagick } from "@/lib/formats";
+import { imageNeedsServer } from "@/lib/image-client";
 import { generateId, getExtension, replaceExtension } from "@/lib/utils";
 import { addHistoryEntry, getHistory } from "@/lib/history";
 import Navbar from "@/components/Navbar";
@@ -251,23 +252,47 @@ export default function HomePage() {
   const MAX_SERVER_BYTES = 4 * 1024 * 1024;
 
   const convertFile = useCallback(async (item: FileItem) => {
-    const clientSide = ["video", "audio", "gif"].includes(item.category);
+    const outputFmt   = item.mode === "compress" ? item.extension : item.targetFormat;
+    const isFFmpeg    = ["video", "audio", "gif"].includes(item.category);
+    const isImgClient = item.category === "image" && !imageNeedsServer(item.extension, outputFmt);
+    const clientSide  = isFFmpeg || isImgClient;
 
     if (!clientSide && item.file.size > MAX_SERVER_BYTES) {
       updateFile(item.id, {
         status: "error",
-        error: `File is ${(item.file.size / 1024 / 1024).toFixed(1)} MB — server-side conversions are limited to 4 MB. Video, audio and GIF have no size limit (processed in your browser).`,
+        error: `File is ${(item.file.size / 1024 / 1024).toFixed(1)} MB — server-side conversions are limited to 4 MB. Images (JPEG/PNG/WEBP) are processed in your browser with no size limit.`,
       });
       return;
     }
 
-    if (clientSide) {
+    // ── Browser image conversion (Canvas API) ─────────────────
+    if (isImgClient) {
+      updateFile(item.id, { status: "converting", progress: 5 });
+      try {
+        const { convertImageClient } = await import("@/lib/image-client");
+        const blob = await convertImageClient(
+          item.file, outputFmt, item.quality,
+          (pct) => updateFile(item.id, { progress: pct })
+        );
+        const resultUrl  = URL.createObjectURL(blob);
+        const resultName = item.mode === "compress"
+          ? replaceExtension(item.name, outputFmt).replace(`.${outputFmt}`, `_compressed.${outputFmt}`)
+          : replaceExtension(item.name, outputFmt);
+        updateFile(item.id, { status: "done", progress: 100, resultUrl, resultName });
+        saveToHistory(item, blob.size);
+      } catch (err) {
+        updateFile(item.id, { status: "error", error: err instanceof Error ? err.message : "Conversion failed" });
+      }
+      return;
+    }
+
+    // ── FFmpeg (video / audio / gif) ──────────────────────────
+    if (isFFmpeg) {
       updateFile(item.id, { status: "loading-ffmpeg", progress: 0 });
       try {
         const { loadFFmpeg, convertWithFFmpeg } = await import("@/lib/ffmpeg-client");
         const ff = await loadFFmpeg();
         updateFile(item.id, { status: "converting" });
-        const outputFmt  = item.mode === "compress" ? item.extension : item.targetFormat;
         const blob       = await convertWithFFmpeg(ff, item.file, outputFmt, item.quality, (pct) => updateFile(item.id, { progress: pct }));
         const resultUrl  = URL.createObjectURL(blob);
         const resultName = item.mode === "compress"
@@ -278,29 +303,30 @@ export default function HomePage() {
       } catch (err) {
         updateFile(item.id, { status: "error", error: err instanceof Error ? err.message : "Conversion failed" });
       }
-    } else {
-      updateFile(item.id, { status: "converting", progress: 10 });
-      try {
-        const formData = new FormData();
-        formData.append("file", item.file);
-        formData.append("format", item.mode === "compress" ? item.extension : item.targetFormat);
-        formData.append("quality", String(item.quality));
-        formData.append("mode", item.mode);
-        updateFile(item.id, { progress: 30 });
-        const response = await fetch(getEndpoint(item), { method: "POST", body: formData });
-        updateFile(item.id, { progress: 80 });
-        if (!response.ok) throw new Error((await response.text()) || `Server error ${response.status}`);
-        const blob       = await response.blob();
-        const resultUrl  = URL.createObjectURL(blob);
-        const outputExt  = item.mode === "compress" ? item.extension : item.targetFormat;
-        const resultName = item.mode === "compress"
-          ? replaceExtension(item.name, outputExt).replace(`.${outputExt}`, `_compressed.${outputExt}`)
-          : replaceExtension(item.name, item.targetFormat);
-        updateFile(item.id, { status: "done", progress: 100, resultUrl, resultName });
-        saveToHistory(item, blob.size);
-      } catch (err) {
-        updateFile(item.id, { status: "error", error: err instanceof Error ? err.message : "Conversion failed" });
-      }
+      return;
+    }
+
+    // ── Server-side (PDF, documents, fonts, archives, exotic images) ──
+    updateFile(item.id, { status: "converting", progress: 10 });
+    try {
+      const formData = new FormData();
+      formData.append("file", item.file);
+      formData.append("format", outputFmt);
+      formData.append("quality", String(item.quality));
+      formData.append("mode", item.mode);
+      updateFile(item.id, { progress: 30 });
+      const response = await fetch(getEndpoint(item), { method: "POST", body: formData });
+      updateFile(item.id, { progress: 80 });
+      if (!response.ok) throw new Error((await response.text()) || `Server error ${response.status}`);
+      const blob       = await response.blob();
+      const resultUrl  = URL.createObjectURL(blob);
+      const resultName = item.mode === "compress"
+        ? replaceExtension(item.name, outputFmt).replace(`.${outputFmt}`, `_compressed.${outputFmt}`)
+        : replaceExtension(item.name, item.targetFormat);
+      updateFile(item.id, { status: "done", progress: 100, resultUrl, resultName });
+      saveToHistory(item, blob.size);
+    } catch (err) {
+      updateFile(item.id, { status: "error", error: err instanceof Error ? err.message : "Conversion failed" });
     }
   }, [updateFile, saveToHistory]);
 
