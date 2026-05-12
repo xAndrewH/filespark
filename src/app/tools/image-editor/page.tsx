@@ -141,7 +141,7 @@ export default function ImageEditorPage() {
   const [curStroke, setCurStrokeState] = useState<Stroke | null>(null);
   const curStrokeRef = useRef<Stroke | null>(null);
   const setCurStroke = (s: Stroke | null) => { curStrokeRef.current = s; setCurStrokeState(s); };
-  const [markupTool, setMarkupTool] = useState<Stroke["tool"]>("pen");
+  const [markupTool, setMarkupTool] = useState<Stroke["tool"] | "eraser">("pen");
   const [markupColor, setMarkupColor] = useState("#ef4444");
   const [markupSize, setMarkupSize]   = useState(4);
   const [markupFontSize, setMarkupFontSize] = useState(24);
