@@ -1,0 +1,39 @@
+{
+  "name": "fileconverter",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
+    "archiver": "^8.0.0",
+    "heic-convert": "^2.1.0",
+    "next": "16.2.6",
+    "pdf-lib": "^1.17.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "sharp": "^0.34.5",
+    "tar": "^7.5.15",
+    "ttf2woff": "^3.0.0",
+    "unzipper": "^0.12.3",
+    "wawoff2": "^2.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/archiver": "^7.0.0",
+    "@types/node": "^20.19.40",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/tar": "^6.1.13",
+    "@types/unzipper": "^0.10.11",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
