@@ -115,7 +115,7 @@ export default function FileDropzone({ category = "all", onFiles, variant = "her
         </button>
 
         <p className="text-slate-600 text-xs">
-          Video &amp; audio processed locally · Images &amp; docs up to 4 MB
+          Video, audio &amp; images processed locally in your browser · No file size limits
         </p>
         {input}
       </div>
