@@ -45,14 +45,31 @@ body {
   background: #475569;
 }
 
-/* Smooth progress bar */
+/* Indeterminate progress pulse */
 @keyframes progress-pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  50% { opacity: 0.55; }
+}
+.progress-indeterminate {
+  animation: progress-pulse 1.4s ease-in-out infinite;
 }
 
-.progress-indeterminate {
-  animation: progress-pulse 1.5s ease-in-out infinite;
+/* Progress shimmer */
+@keyframes progress-shimmer {
+  0%   { transform: translateX(-200%); }
+  100% { transform: translateX(300%); }
+}
+.progress-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.progress-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  animation: progress-shimmer 1.6s ease-in-out infinite;
 }
 
 /* Dropzone drag animation */
@@ -60,9 +77,20 @@ body {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
 }
-
 .bounce-soft {
   animation: bounce-soft 1s ease-in-out infinite;
+}
+
+/* Hero radial glow overlay — apply to the hero wrapper */
+.hero-glow {
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -8%, rgba(59,130,246,0.14) 0%, rgba(139,92,246,0.06) 45%, transparent 70%);
+}
+
+/* Subtle dot grid pattern */
+.dot-pattern {
+  background-image: radial-gradient(circle, rgba(148,163,184,0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
 }
 
 /* Custom select arrow */
