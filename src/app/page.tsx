@@ -557,15 +557,15 @@ export default function HomePage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
+                { href: "/tools/word-counter",       icon: "📝", label: "Word Counter",         desc: "Words, chars, sentences, reading time"  },
+                { href: "/tools/lorem",              icon: "¶",  label: "Lorem Ipsum",            desc: "Generate placeholder text instantly"     },
+                { href: "/tools/color-picker",       icon: "🎨", label: "Color Picker",           desc: "HEX, RGB, HSL, CMYK values + palette"   },
+                { href: "/tools/units",              icon: "📐", label: "Unit Converter",         desc: "Length, weight, temp, data and more"     },
                 { href: "/tools/image-editor",       icon: "🖼️", label: "Image Editor",           desc: "Resize, rotate and flip images"          },
                 { href: "/tools/image-compressor",   icon: "🗜️", label: "Image Compressor",       desc: "Compress images — no size limits"        },
-                { href: "/tools/background-remover", icon: "✂️", label: "Background Remover",      desc: "AI background removal in your browser"   },
-                { href: "/tools/gradient",           icon: "🌈", label: "CSS Gradient Builder",    desc: "Build gradients and copy the CSS"        },
-                { href: "/tools/box-shadow",         icon: "🔲", label: "Box Shadow Builder",      desc: "Visual CSS box-shadow generator"         },
-                { href: "/tools/palette",            icon: "🖌️", label: "Color Palette Generator", desc: "Harmonious palettes from any base color" },
-                { href: "/tools/word-counter",       icon: "📝", label: "Word Counter",            desc: "Words, chars, sentences, reading time"   },
-                { href: "/tools/json",               icon: "{ }", label: "JSON Formatter",         desc: "Validate, format, and minify JSON"       },
-                { href: "/tools/timestamp",          icon: "🕐", label: "Timestamp Converter",     desc: "Unix ↔ human-readable date and time"     },
+                { href: "/tools/background-remover", icon: "✂️", label: "Background Remover",     desc: "AI background removal in your browser"   },
+                { href: "/tools/qr",                 icon: "⬛", label: "QR Code Generator",      desc: "URL, text, or any data → scannable QR"  },
+                { href: "/tools/diff",               icon: "⟺",  label: "Text Diff Checker",      desc: "See exactly what changed between texts"  },
               ].map(({ href, icon, label, desc }) => (
                 <Link
                   key={href}
