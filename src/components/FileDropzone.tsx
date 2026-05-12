@@ -103,7 +103,9 @@ export default function FileDropzone({ category = "all", onFiles, variant = "her
           </svg>
         </button>
 
-        <p className="text-slate-600 text-xs">Multiple files supported · up to 500 MB each</p>
+        <p className="text-slate-600 text-xs">
+          Video &amp; audio: no size limit (browser) · Images &amp; PDFs: up to 4 MB
+        </p>
         {input}
       </div>
     );
