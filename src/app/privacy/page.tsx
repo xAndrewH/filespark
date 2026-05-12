@@ -37,8 +37,8 @@ export default function PrivacyPage() {
               Server-side conversions delete the file immediately after the converted result is returned to you.
             </p>
             <p className="mt-3">
-              Video, audio, and GIF conversions happen entirely in your browser using WebAssembly — your files
-              are never sent to our servers at all.
+              Video, audio, GIF, and image conversions (JPEG, PNG, WEBP, HEIC, and more) happen entirely
+              in your browser — your files are never sent to our servers at all.
             </p>
           </section>
 

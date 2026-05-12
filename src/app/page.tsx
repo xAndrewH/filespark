@@ -261,7 +261,7 @@ export default function HomePage() {
     if (!clientSide && item.file.size > MAX_SERVER_BYTES) {
       updateFile(item.id, {
         status: "error",
-        error: `File is ${(item.file.size / 1024 / 1024).toFixed(1)} MB — server-side conversions are limited to 4 MB. Images (JPEG/PNG/WEBP) are processed in your browser with no size limit.`,
+        error: `File is ${(item.file.size / 1024 / 1024).toFixed(1)} MB — documents, PDFs, and fonts are limited to 4 MB when processed on the server. Images, video, and audio have no size limit (converted in your browser).`,
       });
       return;
     }
@@ -398,7 +398,7 @@ export default function HomePage() {
           <div className="flex-1 max-w-xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-5 tracking-wide">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-              Free · No account · No limits on video
+              Free · No account · No file size limits
             </div>
             <h1 className="text-5xl sm:text-6xl font-bold tracking-tight text-white leading-[1.08] mb-5">
               Convert<br />
@@ -579,7 +579,7 @@ export default function HomePage() {
               <p className="text-slate-500 text-sm leading-relaxed mb-6">No account. No tracking. No data sold. Files are processed and immediately discarded.</p>
               <ul className="space-y-3 mt-auto">
                 {[
-                  { icon: "⚡", text: "Video & audio processed locally in your browser — never uploaded" },
+                  { icon: "⚡", text: "Video, audio & images processed locally in your browser — never uploaded" },
                   { icon: "🗑️", text: "Server files deleted immediately after conversion" },
                   { icon: "🔑", text: "No account, login, or email — ever" },
                   { icon: "📜", text: "History stored only in your browser" },
