@@ -28,7 +28,6 @@ const CATEGORIES = [
     name: "Images & PDFs",
     tools: [
       { href: "/tools/image-editor",       icon: "🖼️", title: "Image Editor",            description: "Resize, rotate, flip, and adjust quality. Supports JPG, PNG, WEBP and more." },
-      { href: "/tools/image-compressor",   icon: "🗜️", title: "Image Compressor",        description: "Compress JPEG, PNG, and WEBP images in bulk with quality control." },
       { href: "/tools/svg-to-png",         icon: "✦",  title: "SVG to PNG",              description: "Convert SVG files or pasted code to PNG at up to 4× scale." },
       { href: "/tools/background-remover", icon: "✂️", title: "Background Remover",      description: "AI-powered background removal — runs entirely in your browser." },
       { href: "/tools/pdf-merge",          icon: "📄", title: "PDF Merge",               description: "Combine multiple PDFs into one document, reorder pages before merging." },

@@ -540,7 +540,7 @@ export default function HomePage() {
                 { href: "/tools/password",      icon: "🔑", label: "Password Generator", desc: "Cryptographically secure passwords"      },
                 { href: "/tools/color-picker",  icon: "🎨", label: "Color Picker",        desc: "HEX, RGB, HSL, CMYK values + palette"  },
                 { href: "/tools/json",          icon: "{ }", label: "JSON Formatter",     desc: "Validate, format, and minify JSON"      },
-                { href: "/tools/image-compressor", icon: "🗜️", label: "Image Compressor", desc: "Compress images — no size limits"      },
+                { href: "/tools/hash",          icon: "🔐", label: "Hash Generator",      desc: "SHA-256, SHA-512 and more"             },
                 { href: "/tools/word-counter",  icon: "📝", label: "Word Counter",        desc: "Words, chars, sentences, reading time"  },
                 { href: "/tools/units",         icon: "📐", label: "Unit Converter",      desc: "Length, weight, temp, data and more"   },
               ].map(({ href, icon, label, desc }) => (
