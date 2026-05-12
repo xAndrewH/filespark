@@ -25,10 +25,12 @@ function save(entries: HistoryEntry[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 }
 
-export function addHistoryEntry(entry: Omit<HistoryEntry, "id" | "timestamp">): void {
+export function addHistoryEntry(entry: Omit<HistoryEntry, "id" | "timestamp">): string {
+  const id = crypto.randomUUID();
   const entries = load();
-  entries.unshift({ ...entry, id: crypto.randomUUID(), timestamp: Date.now() });
+  entries.unshift({ ...entry, id, timestamp: Date.now() });
   save(entries.slice(0, MAX_ENTRIES));
+  return id;
 }
 
 export function getHistory(): HistoryEntry[] {

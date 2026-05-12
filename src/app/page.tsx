@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   DndContext,
@@ -165,6 +165,7 @@ export default function HomePage() {
   const [historyVersion, setHistoryVersion] = useState(0);
   const [inputTab, setInputTab]         = useState<"file" | "url">("file");
   const [zipLoading, setZipLoading]     = useState(false);
+  const sessionDownloads                = useRef<Map<string, { url: string; filename: string }>>(new Map());
 
   useEffect(() => { setHistoryCount(getHistory().length); }, []);
 
@@ -240,12 +241,13 @@ export default function HomePage() {
     return "/api/convert/image";
   };
 
-  const saveToHistory = useCallback((item: FileItem, resultSize: number) => {
-    addHistoryEntry({
+  const saveToHistory = useCallback((item: FileItem, resultSize: number, resultUrl: string, resultName: string) => {
+    const id = addHistoryEntry({
       originalName: item.name, originalSize: item.size, originalExt: item.extension,
       targetFormat: item.mode === "compress" ? item.extension : item.targetFormat,
       resultSize, category: item.category, mode: item.mode,
     });
+    sessionDownloads.current.set(id, { url: resultUrl, filename: resultName });
     setHistoryCount(getHistory().length);
     setHistoryVersion((v) => v + 1);
   }, []);
@@ -280,7 +282,7 @@ export default function HomePage() {
           ? replaceExtension(item.name, outputFmt).replace(`.${outputFmt}`, `_compressed.${outputFmt}`)
           : replaceExtension(item.name, outputFmt);
         updateFile(item.id, { status: "done", progress: 100, resultUrl, resultName });
-        saveToHistory(item, blob.size);
+        saveToHistory(item, blob.size, resultUrl, resultName);
       } catch (err) {
         updateFile(item.id, { status: "error", error: err instanceof Error ? err.message : "Conversion failed" });
       }
@@ -300,7 +302,7 @@ export default function HomePage() {
           ? replaceExtension(item.name, outputFmt).replace(`.${outputFmt}`, `_compressed.${outputFmt}`)
           : replaceExtension(item.name, outputFmt);
         updateFile(item.id, { status: "done", progress: 100, resultUrl, resultName });
-        saveToHistory(item, blob.size);
+        saveToHistory(item, blob.size, resultUrl, resultName);
       } catch (err) {
         updateFile(item.id, { status: "error", error: err instanceof Error ? err.message : "Conversion failed" });
       }
@@ -325,7 +327,7 @@ export default function HomePage() {
         ? replaceExtension(item.name, outputFmt).replace(`.${outputFmt}`, `_compressed.${outputFmt}`)
         : replaceExtension(item.name, item.targetFormat);
       updateFile(item.id, { status: "done", progress: 100, resultUrl, resultName });
-      saveToHistory(item, blob.size);
+      saveToHistory(item, blob.size, resultUrl, resultName);
     } catch (err) {
       updateFile(item.id, { status: "error", error: err instanceof Error ? err.message : "Conversion failed" });
     }
@@ -383,7 +385,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-slate-950">
       <Navbar historyCount={historyCount} onHistoryClick={() => setHistoryOpen(true)} />
-      <HistoryDrawer open={historyOpen} onClose={() => setHistoryOpen(false)} version={historyVersion} />
+      <HistoryDrawer open={historyOpen} onClose={() => setHistoryOpen(false)} version={historyVersion} sessionDownloads={sessionDownloads.current} />
 
       {/* Hero glow */}
       <div className="fixed inset-x-0 top-0 h-[600px] pointer-events-none z-0">
@@ -401,16 +403,34 @@ export default function HomePage() {
               Free · No account · No file size limits
             </div>
             <h1 className="text-5xl sm:text-6xl font-bold tracking-tight text-white leading-[1.08] mb-5">
-              Convert<br />
+              Convert & Create<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-violet-400">
-                Any File
+                Anything
               </span>
             </h1>
-            <p className="text-slate-400 text-lg leading-relaxed">
-              Drop a file and pick what to turn it into.{" "}
-              <span className="text-slate-200 font-medium">80+ formats</span> across documents,
-              images, audio, video, archives and more.
+            <p className="text-slate-400 text-lg leading-relaxed mb-5">
+              Convert <span className="text-slate-200 font-medium">80+ file formats</span> — documents,
+              images, audio, video, archives and more. Plus <span className="text-slate-200 font-medium">32 free browser tools</span> for design,
+              development, and productivity. No upload required.
             </p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { label: "File Converter", href: null },
+                { label: "Image Tools", href: "/tools" },
+                { label: "Dev Tools", href: "/tools" },
+                { label: "Design Tools", href: "/tools" },
+              ].map(({ label, href }) =>
+                href ? (
+                  <Link key={label} href={href} className="px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-400 hover:text-white text-xs transition-colors">
+                    {label}
+                  </Link>
+                ) : (
+                  <span key={label} className="px-3 py-1 rounded-full bg-blue-600/20 border border-blue-500/30 text-blue-300 text-xs">
+                    {label}
+                  </span>
+                )
+              )}
+            </div>
           </div>
           <div className="flex-shrink-0">
             <ConversionPreview />
@@ -525,8 +545,8 @@ export default function HomePage() {
           <div className="mt-14">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-white font-semibold text-base">Free Tools</h2>
-                <p className="text-slate-500 text-xs mt-0.5">Standalone utilities — no upload needed</p>
+                <h2 className="text-white font-semibold text-base">32 Free Tools</h2>
+                <p className="text-slate-500 text-xs mt-0.5">Design, dev & productivity utilities — no upload, no account</p>
               </div>
               <Link href="/tools" className="text-xs text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1">
                 View all
@@ -537,12 +557,15 @@ export default function HomePage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
-                { href: "/tools/image-editor",       icon: "🖼️", label: "Image Editor",        desc: "Resize, rotate and flip images"         },
-                { href: "/tools/image-compressor",   icon: "🗜️", label: "Image Compressor",    desc: "Compress images — no size limits"       },
-                { href: "/tools/word-counter",       icon: "📝", label: "Word Counter",         desc: "Words, chars, sentences, reading time"  },
-                { href: "/tools/background-remover", icon: "✂️", label: "Background Remover",   desc: "AI background removal in your browser"  },
-                { href: "/tools/qr",                 icon: "⬛", label: "QR Code Generator",    desc: "URL, text, or any data → scannable QR"  },
-                { href: "/tools/units",              icon: "📐", label: "Unit Converter",        desc: "Length, weight, temp, data and more"    },
+                { href: "/tools/image-editor",       icon: "🖼️", label: "Image Editor",           desc: "Resize, rotate and flip images"          },
+                { href: "/tools/image-compressor",   icon: "🗜️", label: "Image Compressor",       desc: "Compress images — no size limits"        },
+                { href: "/tools/background-remover", icon: "✂️", label: "Background Remover",      desc: "AI background removal in your browser"   },
+                { href: "/tools/gradient",           icon: "🌈", label: "CSS Gradient Builder",    desc: "Build gradients and copy the CSS"        },
+                { href: "/tools/box-shadow",         icon: "🔲", label: "Box Shadow Builder",      desc: "Visual CSS box-shadow generator"         },
+                { href: "/tools/palette",            icon: "🖌️", label: "Color Palette Generator", desc: "Harmonious palettes from any base color" },
+                { href: "/tools/word-counter",       icon: "📝", label: "Word Counter",            desc: "Words, chars, sentences, reading time"   },
+                { href: "/tools/json",               icon: "{ }", label: "JSON Formatter",         desc: "Validate, format, and minify JSON"       },
+                { href: "/tools/timestamp",          icon: "🕐", label: "Timestamp Converter",     desc: "Unix ↔ human-readable date and time"     },
               ].map(({ href, icon, label, desc }) => (
                 <Link
                   key={href}
@@ -578,14 +601,14 @@ export default function HomePage() {
                 </div>
                 <span className="text-green-400 text-[10px] font-bold uppercase tracking-widest">Privacy First</span>
               </div>
-              <h2 className="text-white text-xl font-bold mb-3 leading-snug">Your files,<br />handled privately.</h2>
-              <p className="text-slate-500 text-sm leading-relaxed mb-6">No account. No tracking. No data sold. Files are processed and immediately discarded.</p>
+              <h2 className="text-white text-xl font-bold mb-3 leading-snug">Private by design.<br />Free by default.</h2>
+              <p className="text-slate-500 text-sm leading-relaxed mb-6">No account. No tracking. No data sold. All tools run in your browser — nothing leaves your device unless you convert a document server-side.</p>
               <ul className="space-y-3 mt-auto">
                 {[
-                  { icon: "⚡", text: "Video, audio & images processed locally in your browser — never uploaded" },
-                  { icon: "🗑️", text: "Server files deleted immediately after conversion" },
+                  { icon: "⚡", text: "Images, video, audio & all 32 tools run entirely in your browser" },
+                  { icon: "🗑️", text: "Server-side conversions delete your file immediately after" },
                   { icon: "🔑", text: "No account, login, or email — ever" },
-                  { icon: "📜", text: "History stored only in your browser" },
+                  { icon: "📜", text: "Conversion history stored only in your browser" },
                 ].map(({ icon, text }) => (
                   <li key={text} className="flex items-start gap-3 text-sm text-slate-400">
                     <span className="flex-shrink-0 mt-0.5 text-base">{icon}</span>

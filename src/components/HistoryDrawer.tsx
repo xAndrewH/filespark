@@ -35,9 +35,10 @@ interface Props {
   onClose: () => void;
   /** Incremented by parent whenever a new entry is saved so the drawer refreshes */
   version: number;
+  sessionDownloads: Map<string, { url: string; filename: string }>;
 }
 
-export default function HistoryDrawer({ open, onClose, version }: Props) {
+export default function HistoryDrawer({ open, onClose, version, sessionDownloads }: Props) {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const drawerRef = useRef<HTMLDivElement>(null);
 
@@ -147,7 +148,7 @@ export default function HistoryDrawer({ open, onClose, version }: Props) {
                   </p>
                   <div className="space-y-1.5">
                     {group.map((entry) => (
-                      <HistoryCard key={entry.id} entry={entry} onDelete={handleDelete} />
+                      <HistoryCard key={entry.id} entry={entry} onDelete={handleDelete} download={sessionDownloads.get(entry.id)} />
                     ))}
                   </div>
                 </div>
@@ -167,14 +168,25 @@ export default function HistoryDrawer({ open, onClose, version }: Props) {
   );
 }
 
-function HistoryCard({ entry, onDelete }: { entry: HistoryEntry; onDelete: (id: string) => void }) {
+function HistoryCard({ entry, onDelete, download }: {
+  entry: HistoryEntry;
+  onDelete: (id: string) => void;
+  download?: { url: string; filename: string };
+}) {
   const emoji = CATEGORY_EMOJI[entry.category] ?? "📁";
   const time  = new Date(entry.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  const date  = new Date(entry.timestamp).toLocaleDateString([], { month: "short", day: "numeric" });
 
   const sizeChange = entry.resultSize && entry.originalSize
     ? Math.round(((entry.resultSize - entry.originalSize) / entry.originalSize) * 100)
     : null;
+
+  const handleDownload = () => {
+    if (!download) return;
+    const a = document.createElement("a");
+    a.href = download.url;
+    a.download = download.filename;
+    a.click();
+  };
 
   return (
     <div className="group flex items-start gap-3 p-3 rounded-xl bg-slate-900 hover:bg-slate-800/80 transition-colors">
@@ -215,16 +227,36 @@ function HistoryCard({ entry, onDelete }: { entry: HistoryEntry; onDelete: (id: 
         </div>
       </div>
 
-      {/* Delete */}
-      <button
-        onClick={() => onDelete(entry.id)}
-        className="opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 flex items-center justify-center rounded-md text-slate-600 hover:text-red-400 hover:bg-slate-700 flex-shrink-0"
-        aria-label="Remove"
-      >
-        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+      {/* Actions */}
+      <div className="flex flex-col gap-1 flex-shrink-0">
+        {download ? (
+          <button
+            onClick={handleDownload}
+            className="w-6 h-6 flex items-center justify-center rounded-md text-slate-400 hover:text-blue-400 hover:bg-slate-700 transition-colors"
+            aria-label="Download"
+            title="Re-download"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+          </button>
+        ) : (
+          <div className="w-6 h-6 flex items-center justify-center rounded-md text-slate-700" title="Not available after page refresh">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+          </div>
+        )}
+        <button
+          onClick={() => onDelete(entry.id)}
+          className="opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 flex items-center justify-center rounded-md text-slate-600 hover:text-red-400 hover:bg-slate-700"
+          aria-label="Remove"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }
