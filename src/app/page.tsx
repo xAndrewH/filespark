@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import Link from "next/link";
 import {
   DndContext,
   closestCenter,
@@ -519,9 +520,49 @@ export default function HomePage() {
           </div>
         )}
 
+        {/* ── Tools strip ──────────────────────────────────── */}
+        {files.length === 0 && (
+          <div className="mt-14">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-white font-semibold text-base">Free Tools</h2>
+                <p className="text-slate-500 text-xs mt-0.5">Standalone utilities — no upload needed</p>
+              </div>
+              <Link href="/tools" className="text-xs text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1">
+                View all
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {[
+                { href: "/tools/qr",           icon: "⬛", label: "QR Code Generator", desc: "URL, text, or any data → scannable QR"  },
+                { href: "/tools/pdf-merge",     icon: "📄", label: "PDF Merge",          desc: "Combine multiple PDFs into one file"   },
+                { href: "/tools/image-editor",  icon: "🖼️", label: "Image Editor",       desc: "Resize, rotate and flip images"        },
+              ].map(({ href, icon, label, desc }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="group flex items-center gap-3 p-4 rounded-xl bg-slate-900/40 border border-slate-800/60 hover:border-slate-700 hover:bg-slate-900/70 transition-all duration-150"
+                >
+                  <span className="text-2xl shrink-0">{icon}</span>
+                  <div className="min-w-0">
+                    <p className="text-white text-sm font-medium group-hover:text-blue-300 transition-colors">{label}</p>
+                    <p className="text-slate-500 text-xs truncate mt-0.5">{desc}</p>
+                  </div>
+                  <svg className="w-3.5 h-3.5 text-slate-600 group-hover:text-blue-400 shrink-0 ml-auto transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ── Bottom sections ───────────────────────────────── */}
         {files.length === 0 && (
-          <div className="mt-20 grid grid-cols-1 lg:grid-cols-5 gap-5">
+          <div className="mt-10 grid grid-cols-1 lg:grid-cols-5 gap-5">
             <div className="lg:col-span-3">
               <FormatsSection />
             </div>

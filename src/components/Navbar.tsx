@@ -30,12 +30,12 @@ export default function Navbar({ historyCount, onHistoryClick }: Props) {
         <div className="flex items-center gap-2.5">
           <Link
             href="/tools"
-            className="hidden sm:flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors font-medium"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white text-sm font-medium transition-all duration-150"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l5.654-4.654m5.654-4.654l3.029-2.498a4.25 4.25 0 011.244 4.753l-1.272 3.186" />
             </svg>
-            Tools
+            <span>Tools</span>
           </Link>
           <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-500 bg-slate-900 border border-slate-800 rounded-full px-3 py-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse inline-block" />
