@@ -58,6 +58,7 @@ const CATEGORIES = [
     name: "Images & PDFs",
     tools: [
       { href: "/tools/image-editor",       icon: "🖼️", title: "Image Editor",        description: "Resize, rotate, flip, and adjust quality. Supports JPG, PNG, WEBP and more." },
+      { href: "/tools/raster-to-svg",      icon: "✦",  title: "PNG / JPG → SVG",     description: "Vectorize raster images to scalable SVG with color trace, B&W trace, or embed." },
       { href: "/tools/image-compressor",   icon: "🗜️", title: "Image Compressor",    description: "Compress JPEG, PNG, and WEBP images in bulk with quality control." },
       { href: "/tools/svg-to-png",         icon: "✦",  title: "SVG to PNG",          description: "Convert SVG files or pasted code to PNG at up to 4× scale." },
       { href: "/tools/background-remover", icon: "✂️", title: "Background Remover",  description: "AI-powered background removal — runs entirely in your browser." },
