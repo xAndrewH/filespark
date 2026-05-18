@@ -376,12 +376,12 @@ export default function ImageEditorPage() {
   const markupDragRef = useRef(false);
 
   const getMarkupPos = (e: React.MouseEvent) => {
-    const mc = markupRef.current;
-    if (!mc) return null;
-    const rect = mc.getBoundingClientRect();
+    const pc = previewRef.current;
+    if (!pc) return null;
+    const rect = pc.getBoundingClientRect();
     return {
-      x: (e.clientX - rect.left) * (mc.width  / rect.width),
-      y: (e.clientY - rect.top)  * (mc.height / rect.height),
+      x: (e.clientX - rect.left) * (pc.width  / rect.width),
+      y: (e.clientY - rect.top)  * (pc.height / rect.height),
     };
   };
 
@@ -486,10 +486,7 @@ export default function ImageEditorPage() {
     final.width = pc.width; final.height = pc.height;
     const ctx = final.getContext("2d")!;
     ctx.drawImage(pc, 0, 0);
-    // Composite markup
-    if (strokes.length > 0 && markupRef.current) {
-      ctx.drawImage(markupRef.current, 0, 0);
-    }
+    for (const s of strokes) drawStroke(ctx, s);
     const mime = outputFmt === "png" ? "image/png" : outputFmt === "webp" ? "image/webp" : "image/jpeg";
     final.toBlob((blob) => {
       if (!blob) return;
