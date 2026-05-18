@@ -18,8 +18,10 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { FileItem, Category, ConversionMode } from "@/types";
-import { detectCategory, getDefaultOutput, needsLibreOffice, needsImageMagick } from "@/lib/formats";
+import { detectCategory, getDefaultOutput, needsImageMagick } from "@/lib/formats";
 import { imageNeedsServer } from "@/lib/image-client";
+import { archiveNeedsServer } from "@/lib/archive-client";
+import { getCloudConvertKey } from "@/lib/cloudconvert-client";
 import { generateId, getExtension, replaceExtension } from "@/lib/utils";
 import { addHistoryEntry, getHistory } from "@/lib/history";
 import Navbar from "@/components/Navbar";
@@ -27,6 +29,7 @@ import FileDropzone from "@/components/FileDropzone";
 import FileCard from "@/components/FileCard";
 import FormatsSection from "@/components/FormatsSection";
 import HistoryDrawer from "@/components/HistoryDrawer";
+import CloudConvertKeyModal from "@/components/CloudConvertKeyModal";
 
 /* ── Rotating conversion examples ───────────────────────────── */
 const EXAMPLES = [
@@ -165,6 +168,7 @@ export default function HomePage() {
   const [historyVersion, setHistoryVersion] = useState(0);
   const [inputTab, setInputTab]         = useState<"file" | "url">("file");
   const [zipLoading, setZipLoading]     = useState(false);
+  const [keyModalOpen, setKeyModalOpen] = useState(false);
   const sessionDownloads                = useRef<Map<string, { url: string; filename: string }>>(new Map());
 
   useEffect(() => { setHistoryCount(getHistory().length); }, []);
@@ -223,24 +227,6 @@ export default function HomePage() {
   }, [addFiles]);
 
   /* ── Conversion ──────────────────────────────────────────── */
-  const getEndpoint = (item: FileItem): string => {
-    const { category, targetFormat, mode, extension } = item;
-    if (mode === "compress") {
-      if (category === "image") return "/api/compress/image";
-      if (category === "pdf")   return "/api/convert/pdf";
-    }
-    if (category === "document") return "/api/convert/document";
-    if (category === "ebook")    return "/api/convert/ebook";
-    if (category === "font")     return "/api/convert/font";
-    if (category === "archive")  return "/api/convert/archive";
-    if (category === "pdf" && needsLibreOffice(category, targetFormat)) return "/api/convert/document";
-    if (category === "pdf") return "/api/convert/pdf";
-    if (category === "image" && targetFormat === "pdf")                    return "/api/convert/pdf";
-    if (category === "image" && needsImageMagick(extension, targetFormat)) return "/api/convert/imagemagick";
-    if (category === "image") return "/api/convert/image";
-    return "/api/convert/image";
-  };
-
   const saveToHistory = useCallback((item: FileItem, resultSize: number, resultUrl: string, resultName: string) => {
     const id = addHistoryEntry({
       originalName: item.name, originalSize: item.size, originalExt: item.extension,
@@ -252,86 +238,107 @@ export default function HomePage() {
     setHistoryVersion((v) => v + 1);
   }, []);
 
-  const MAX_SERVER_BYTES = 4 * 1024 * 1024;
+  const finishConvert = useCallback((item: FileItem, blob: Blob, outputFmt: string) => {
+    const resultUrl  = URL.createObjectURL(blob);
+    const resultName = item.mode === "compress"
+      ? replaceExtension(item.name, outputFmt).replace(`.${outputFmt}`, `_compressed.${outputFmt}`)
+      : replaceExtension(item.name, outputFmt);
+    updateFile(item.id, { status: "done", progress: 100, resultUrl, resultName });
+    saveToHistory(item, blob.size, resultUrl, resultName);
+  }, [updateFile, saveToHistory]);
 
   const convertFile = useCallback(async (item: FileItem) => {
-    const outputFmt   = item.mode === "compress" ? item.extension : item.targetFormat;
-    const isFFmpeg    = ["video", "audio", "gif"].includes(item.category);
-    const isImgClient = item.category === "image" && !imageNeedsServer(item.extension, outputFmt);
-    const clientSide  = isFFmpeg || isImgClient;
+    const outputFmt = item.mode === "compress" ? item.extension : item.targetFormat;
+    const { category, extension } = item;
 
-    if (!clientSide && item.file.size > MAX_SERVER_BYTES) {
-      updateFile(item.id, {
-        status: "error",
-        error: `File is ${(item.file.size / 1024 / 1024).toFixed(1)} MB — documents, PDFs, and fonts are limited to 4 MB when processed on the server. Images, video, and audio have no size limit (converted in your browser).`,
-      });
-      return;
-    }
+    const isFFmpeg        = ["video", "audio", "gif"].includes(category);
+    const isImgClient     = category === "image" && !imageNeedsServer(extension, outputFmt) && !needsImageMagick(extension, outputFmt);
+    const isImgMagick     = category === "image" && needsImageMagick(extension, outputFmt);
+    const isFontClient    = category === "font";
+    const isPdfClient     = category === "pdf" && outputFmt === "pdf";
+    const isArchiveClient = category === "archive" && !archiveNeedsServer(extension, outputFmt);
+    const needsCC         = category === "document" || category === "ebook" ||
+                            (category === "pdf" && ["docx", "epub"].includes(outputFmt));
 
-    // ── Browser image conversion (Canvas API) ─────────────────
-    if (isImgClient) {
-      updateFile(item.id, { status: "converting", progress: 5 });
-      try {
-        const { convertImageClient } = await import("@/lib/image-client");
-        const blob = await convertImageClient(
-          item.file, outputFmt, item.quality,
-          (pct) => updateFile(item.id, { progress: pct })
-        );
-        const resultUrl  = URL.createObjectURL(blob);
-        const resultName = item.mode === "compress"
-          ? replaceExtension(item.name, outputFmt).replace(`.${outputFmt}`, `_compressed.${outputFmt}`)
-          : replaceExtension(item.name, outputFmt);
-        updateFile(item.id, { status: "done", progress: 100, resultUrl, resultName });
-        saveToHistory(item, blob.size, resultUrl, resultName);
-      } catch (err) {
-        updateFile(item.id, { status: "error", error: err instanceof Error ? err.message : "Conversion failed" });
-      }
-      return;
-    }
+    updateFile(item.id, { status: "converting", progress: 5 });
 
-    // ── FFmpeg (video / audio / gif) ──────────────────────────
-    if (isFFmpeg) {
-      updateFile(item.id, { status: "loading-ffmpeg", progress: 0 });
-      try {
+    try {
+      // ── FFmpeg (video / audio / gif) ────────────────────────
+      if (isFFmpeg) {
+        updateFile(item.id, { status: "loading-ffmpeg", progress: 0 });
         const { loadFFmpeg, convertWithFFmpeg } = await import("@/lib/ffmpeg-client");
         const ff = await loadFFmpeg();
         updateFile(item.id, { status: "converting" });
-        const blob       = await convertWithFFmpeg(ff, item.file, outputFmt, item.quality, (pct) => updateFile(item.id, { progress: pct }));
-        const resultUrl  = URL.createObjectURL(blob);
-        const resultName = item.mode === "compress"
-          ? replaceExtension(item.name, outputFmt).replace(`.${outputFmt}`, `_compressed.${outputFmt}`)
-          : replaceExtension(item.name, outputFmt);
-        updateFile(item.id, { status: "done", progress: 100, resultUrl, resultName });
-        saveToHistory(item, blob.size, resultUrl, resultName);
-      } catch (err) {
-        updateFile(item.id, { status: "error", error: err instanceof Error ? err.message : "Conversion failed" });
+        finishConvert(item, await convertWithFFmpeg(ff, item.file, outputFmt, item.quality, (pct) => updateFile(item.id, { progress: pct })), outputFmt);
+        return;
       }
-      return;
-    }
 
-    // ── Server-side (PDF, documents, fonts, archives, exotic images) ──
-    updateFile(item.id, { status: "converting", progress: 10 });
-    try {
-      const formData = new FormData();
-      formData.append("file", item.file);
-      formData.append("format", outputFmt);
-      formData.append("quality", String(item.quality));
-      formData.append("mode", item.mode);
-      updateFile(item.id, { progress: 30 });
-      const response = await fetch(getEndpoint(item), { method: "POST", body: formData });
+      // ── Browser Canvas (common image formats) ───────────────
+      if (isImgClient) {
+        const { convertImageClient } = await import("@/lib/image-client");
+        finishConvert(item, await convertImageClient(item.file, outputFmt, item.quality, (pct) => updateFile(item.id, { progress: pct })), outputFmt);
+        return;
+      }
+
+      // ── ImageMagick WASM (exotic image formats) ──────────────
+      if (isImgMagick) {
+        updateFile(item.id, { progress: 20 });
+        const { convertWithImageMagick } = await import("@/lib/imagemagick-client");
+        finishConvert(item, await convertWithImageMagick(item.file, outputFmt), outputFmt);
+        return;
+      }
+
+      // ── Font (browser WASM) ─────────────────────────────────
+      if (isFontClient) {
+        const { convertFontClient } = await import("@/lib/font-client");
+        finishConvert(item, await convertFontClient(item.file, outputFmt), outputFmt);
+        return;
+      }
+
+      // ── PDF (browser, pdf-lib) ──────────────────────────────
+      if (isPdfClient) {
+        const { convertPdfClient } = await import("@/lib/pdf-client");
+        finishConvert(item, await convertPdfClient([item.file], outputFmt, item.mode), outputFmt);
+        return;
+      }
+
+      // ── Archive (browser, jszip + fflate) ───────────────────
+      if (isArchiveClient) {
+        const { convertArchiveClient } = await import("@/lib/archive-client");
+        finishConvert(item, await convertArchiveClient(item.file, outputFmt), outputFmt);
+        return;
+      }
+
+      // ── CloudConvert (documents, ebooks, PDF→DOCX/EPUB) ─────
+      if (needsCC) {
+        if (!getCloudConvertKey()) {
+          updateFile(item.id, {
+            status: "error",
+            error: "A CloudConvert API key is required for document and eBook conversions. Click the 🔑 key icon in the toolbar to add your free key (25 free conversions/day).",
+          });
+          return;
+        }
+        const { convertWithCloudConvert } = await import("@/lib/cloudconvert-client");
+        finishConvert(item, await convertWithCloudConvert(item.file, extension, outputFmt, (msg) => updateFile(item.id, { status: "converting", progress: 40, error: undefined, resultUrl: undefined, resultName: undefined, ...{ _msg: msg } })), outputFmt);
+        return;
+      }
+
+      // ── Server fallback (AVIF, TIFF, BMP via Sharp) ─────────
+      updateFile(item.id, { progress: 20 });
+      const endpoint = category === "image" && outputFmt === "pdf" ? "/api/convert/pdf" : "/api/convert/image";
+      const fd = new FormData();
+      fd.append("file", item.file); fd.append("format", outputFmt);
+      fd.append("quality", String(item.quality)); fd.append("mode", item.mode);
+      updateFile(item.id, { progress: 40 });
+      const res = await fetch(endpoint, { method: "POST", body: fd });
       updateFile(item.id, { progress: 80 });
-      if (!response.ok) throw new Error((await response.text()) || `Server error ${response.status}`);
-      const blob       = await response.blob();
-      const resultUrl  = URL.createObjectURL(blob);
-      const resultName = item.mode === "compress"
-        ? replaceExtension(item.name, outputFmt).replace(`.${outputFmt}`, `_compressed.${outputFmt}`)
-        : replaceExtension(item.name, item.targetFormat);
-      updateFile(item.id, { status: "done", progress: 100, resultUrl, resultName });
-      saveToHistory(item, blob.size, resultUrl, resultName);
+      if (!res.ok) throw new Error((await res.text()) || `Server error ${res.status}`);
+      finishConvert(item, await res.blob(), outputFmt);
+
     } catch (err) {
       updateFile(item.id, { status: "error", error: err instanceof Error ? err.message : "Conversion failed" });
     }
-  }, [updateFile, saveToHistory]);
+  }, [updateFile, saveToHistory, finishConvert]);
 
   const convertAll = useCallback(() => {
     files.filter((f) => f.status === "idle" || f.status === "error").forEach(convertFile);
@@ -384,8 +391,9 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-slate-950">
-      <Navbar historyCount={historyCount} onHistoryClick={() => setHistoryOpen(true)} />
+      <Navbar historyCount={historyCount} onHistoryClick={() => setHistoryOpen(true)} onKeyClick={() => setKeyModalOpen(true)} />
       <HistoryDrawer open={historyOpen} onClose={() => setHistoryOpen(false)} version={historyVersion} sessionDownloads={sessionDownloads.current} />
+      <CloudConvertKeyModal open={keyModalOpen} onClose={() => setKeyModalOpen(false)} />
 
       {/* Hero glow */}
       <div className="fixed inset-x-0 top-0 h-[600px] pointer-events-none z-0">
