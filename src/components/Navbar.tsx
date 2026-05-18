@@ -5,9 +5,10 @@ import Link from "next/link";
 interface Props {
   historyCount: number;
   onHistoryClick: () => void;
+  onKeyClick?: () => void;
 }
 
-export default function Navbar({ historyCount, onHistoryClick }: Props) {
+export default function Navbar({ historyCount, onHistoryClick, onKeyClick }: Props) {
   return (
     <nav className="border-b border-slate-800/70 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
@@ -41,6 +42,19 @@ export default function Navbar({ historyCount, onHistoryClick }: Props) {
             <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse inline-block" />
             <span>80+ formats</span>
           </div>
+
+          {onKeyClick && (
+            <button
+              onClick={onKeyClick}
+              title="CloudConvert API Key (for document & eBook conversion)"
+              className="flex items-center justify-center w-9 h-9 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-amber-400 transition-all duration-150"
+              aria-label="CloudConvert API key settings"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+              </svg>
+            </button>
+          )}
 
           <button
             onClick={onHistoryClick}
