@@ -4,8 +4,7 @@ import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
 
 type BgOption = "transparent" | "white" | "black" | "custom" | "blur";
-type ModelSize = "small" | "medium";
-type OutputType = "foreground" | "background" | "mask";
+type ModelSize = "isnet_quint8" | "isnet";
 
 function applyBackground(resultUrl: string, bg: BgOption, customColor: string): Promise<string> {
   return new Promise((resolve) => {
@@ -57,8 +56,7 @@ export default function BackgroundRemoverPage() {
   const [progress, setProgress]     = useState("");
   const [error, setError]           = useState("");
   const [fileName, setFileName]     = useState("image");
-  const [model, setModel]           = useState<ModelSize>("medium");
-  const [outputType, setOutputType] = useState<OutputType>("foreground");
+  const [model, setModel]           = useState<ModelSize>("isnet");
   const [bg, setBg]                 = useState<BgOption>("transparent");
   const [customColor, setCustomColor] = useState("#3b82f6");
   const [sliderPos, setSliderPos]   = useState(50);
@@ -86,7 +84,6 @@ export default function BackgroundRemoverPage() {
       setProgress("Processing image…");
       const blob = await removeBackground(file, {
         model,
-        output: { type: outputType },
         progress: (_key: string, current: number, total: number) => {
           if (total > 0) setProgress(`AI model: ${Math.round((current / total) * 100)}%`);
         },
@@ -100,7 +97,7 @@ export default function BackgroundRemoverPage() {
     }
     setProgress("");
     setProcessing(false);
-  }, [model, outputType, bg, customColor, updateDisplay]);
+  }, [model, bg, customColor, updateDisplay]);
 
   const handleFile = (file: File) => {
     if (!file.type.startsWith("image/")) return;
@@ -145,19 +142,9 @@ export default function BackgroundRemoverPage() {
               {/* Model */}
               <div className="flex items-center gap-2">
                 <span className="text-slate-400 text-xs">Model</span>
-                {(["small","medium"] as ModelSize[]).map((m) => (
+                {([["isnet_quint8", "Fast"], ["isnet", "Quality"]] as [ModelSize, string][]).map(([m, label]) => (
                   <button key={m} onClick={() => setModel(m)}
                     className={`px-2.5 py-1 rounded-lg text-xs capitalize transition-colors ${model === m ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-400 hover:text-white"}`}>
-                    {m === "small" ? "Fast" : "Quality"}
-                  </button>
-                ))}
-              </div>
-              {/* Output type */}
-              <div className="flex items-center gap-2">
-                <span className="text-slate-400 text-xs">Extract</span>
-                {([["foreground","Subject"],["background","Background"],["mask","Mask"]] as [OutputType,string][]).map(([id, label]) => (
-                  <button key={id} onClick={() => setOutputType(id)}
-                    className={`px-2.5 py-1 rounded-lg text-xs transition-colors ${outputType === id ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-400 hover:text-white"}`}>
                     {label}
                   </button>
                 ))}
