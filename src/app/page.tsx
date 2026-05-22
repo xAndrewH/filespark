@@ -418,7 +418,7 @@ export default function HomePage() {
             </h1>
             <p className="text-slate-400 text-lg leading-relaxed mb-5">
               Convert <span className="text-slate-200 font-medium">80+ file formats</span> — documents,
-              images, audio, video, archives and more. Plus <span className="text-slate-200 font-medium">32 free browser tools</span> for design,
+              images, audio, video, archives and more. Plus <span className="text-slate-200 font-medium">40 free browser tools</span> for design,
               development, and productivity. No upload required.
             </p>
             <div className="flex flex-wrap gap-2">
@@ -553,7 +553,7 @@ export default function HomePage() {
           <div className="mt-14">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-white font-semibold text-base">32 Free Tools</h2>
+                <h2 className="text-white font-semibold text-base">40 Free Tools</h2>
                 <p className="text-slate-500 text-xs mt-0.5">Design, dev & productivity utilities — no upload, no account</p>
               </div>
               <Link href="/tools" className="text-xs text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1">
@@ -613,7 +613,7 @@ export default function HomePage() {
               <p className="text-slate-500 text-sm leading-relaxed mb-6">No account. No tracking. No data sold. All tools run in your browser — nothing leaves your device unless you convert a document server-side.</p>
               <ul className="space-y-3 mt-auto">
                 {[
-                  { icon: "⚡", text: "Images, video, audio & all 32 tools run entirely in your browser" },
+                  { icon: "⚡", text: "Images, video, audio & all 40 tools run entirely in your browser" },
                   { icon: "🗑️", text: "Server-side conversions delete your file immediately after" },
                   { icon: "🔑", text: "No account, login, or email — ever" },
                   { icon: "📜", text: "Conversion history stored only in your browser" },
