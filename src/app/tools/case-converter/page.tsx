@@ -13,10 +13,26 @@ interface CaseOption {
   fn: (s: string) => string;
 }
 
+// Splits any casing style into individual words so chaining always works.
+// Handles: "hello world", "hello_world", "hello-world", "helloWorld", "HelloWorld", "HELLO_WORLD"
+function splitWords(s: string): string[] {
+  return s
+    .replace(/([a-z])([A-Z])/g, "$1 $2")         // camelCase → camel Case
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")   // ACRONYMCase → ACRONYM Case
+    .match(/[a-zA-Z0-9]+/g) ?? [];
+}
+
+const TITLE_MINOR = new Set([
+  "a","an","the","and","but","or","for","nor","as","at","by","from",
+  "in","into","near","of","off","on","onto","out","over","so","to",
+  "up","via","with","yet",
+]);
+
 const CASES: CaseOption[] = [
   {
     id: "sentence", abbr: "Sc", label: "Sentence case", color: "bg-orange-700",
-    fn: s => s.length === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1).toLowerCase(),
+    // Lowercase everything, then capitalize first letter of each sentence
+    fn: s => s.toLowerCase().replace(/(^|[.!?]\s+)([a-z])/g, (_, p, c) => p + c.toUpperCase()),
   },
   {
     id: "lower", abbr: "lc", label: "lower case", color: "bg-green-700",
@@ -28,47 +44,66 @@ const CASES: CaseOption[] = [
   },
   {
     id: "capitalized", abbr: "CC", label: "Capitalized Case", color: "bg-purple-700",
-    fn: s => s.replace(/\b\w/g, c => c.toUpperCase()),
+    // Every word capitalized, no exceptions
+    fn: s => s.toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase()),
   },
   {
     id: "alternating", abbr: "aC", label: "aLtErNaTiNg cAsE", color: "bg-yellow-600",
-    fn: s => s.split("").map((c, i) => i % 2 === 0 ? c.toLowerCase() : c.toUpperCase()).join(""),
+    // Only count letters (not spaces/punct) for consistent alternating per word
+    fn: s => {
+      let i = 0;
+      return s.replace(/[a-zA-Z]/g, c => (i++ % 2 === 0 ? c.toLowerCase() : c.toUpperCase()));
+    },
   },
   {
     id: "title", abbr: "TC", label: "Title Case", color: "bg-teal-700",
-    fn: s => s.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()),
+    // Capitalize all words except minor words (unless first or last)
+    fn: s => {
+      const tokens = s.split(/(\s+)/);
+      let wordIdx = 0;
+      const wordCount = tokens.filter(t => !/^\s+$/.test(t)).length;
+      return tokens.map(t => {
+        if (/^\s+$/.test(t)) return t;
+        const lower = t.toLowerCase();
+        const isFirst = wordIdx === 0;
+        const isLast = wordIdx === wordCount - 1;
+        wordIdx++;
+        if (!isFirst && !isLast && TITLE_MINOR.has(lower)) return lower;
+        return lower.charAt(0).toUpperCase() + lower.slice(1);
+      }).join("");
+    },
   },
   {
     id: "inverse", abbr: "iC", label: "InVeRsE CaSe", color: "bg-pink-700",
-    fn: s => s.split("").map(c => c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase()).join(""),
+    fn: s => s.split("").map(c => /[a-zA-Z]/.test(c) ? (c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase()) : c).join(""),
   },
   {
     id: "camel", abbr: "cC", label: "camelCase", color: "bg-indigo-700",
-    fn: s => { const w = s.match(/[a-zA-Z0-9]+/g) ?? []; return w.map((x, i) => i === 0 ? x.toLowerCase() : x.charAt(0).toUpperCase() + x.slice(1).toLowerCase()).join(""); },
+    fn: s => { const w = splitWords(s); return w.map((x, i) => i === 0 ? x.toLowerCase() : x.charAt(0).toUpperCase() + x.slice(1).toLowerCase()).join(""); },
   },
   {
     id: "pascal", abbr: "PC", label: "PascalCase", color: "bg-violet-700",
-    fn: s => { const w = s.match(/[a-zA-Z0-9]+/g) ?? []; return w.map(x => x.charAt(0).toUpperCase() + x.slice(1).toLowerCase()).join(""); },
+    fn: s => splitWords(s).map(x => x.charAt(0).toUpperCase() + x.slice(1).toLowerCase()).join(""),
   },
   {
     id: "snake", abbr: "sc", label: "snake_case", color: "bg-amber-700",
-    fn: s => { const w = s.match(/[a-zA-Z0-9]+/g) ?? []; return w.map(x => x.toLowerCase()).join("_"); },
+    fn: s => splitWords(s).map(x => x.toLowerCase()).join("_"),
   },
   {
     id: "constant", abbr: "SC", label: "CONSTANT_CASE", color: "bg-red-700",
-    fn: s => { const w = s.match(/[a-zA-Z0-9]+/g) ?? []; return w.map(x => x.toUpperCase()).join("_"); },
+    fn: s => splitWords(s).map(x => x.toUpperCase()).join("_"),
   },
   {
     id: "kebab", abbr: "kc", label: "kebab-case", color: "bg-cyan-700",
-    fn: s => { const w = s.match(/[a-zA-Z0-9]+/g) ?? []; return w.map(x => x.toLowerCase()).join("-"); },
+    fn: s => splitWords(s).map(x => x.toLowerCase()).join("-"),
   },
   {
     id: "dot", abbr: "dc", label: "dot.case", color: "bg-lime-700",
-    fn: s => { const w = s.match(/[a-zA-Z0-9]+/g) ?? []; return w.map(x => x.toLowerCase()).join("."); },
+    fn: s => splitWords(s).map(x => x.toLowerCase()).join("."),
   },
   {
     id: "path", abbr: "pc", label: "path/case", color: "bg-rose-700",
-    fn: s => { const w = s.match(/[a-zA-Z0-9]+/g) ?? []; return w.map(x => x.toLowerCase()).join("/"); },
+    fn: s => splitWords(s).map(x => x.toLowerCase()).join("/"),
   },
 ];
 
