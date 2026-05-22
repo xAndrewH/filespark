@@ -97,7 +97,7 @@ border-radius: ${borderRadius}px;`;
                   <span className="text-blue-400 font-mono text-sm">{value}{unit}</span>
                 </div>
                 <input type="range" min={min} max={max} value={value}
-                  onChange={e => set(+e.target.value)} className="w-full" />
+                  onChange={e => set(+e.target.value)} className="w-full accent-blue-500" />
               </div>
             ))}
             <div className="flex items-center gap-3">

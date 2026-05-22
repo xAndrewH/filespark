@@ -103,7 +103,7 @@ export default function BorderRadiusPage() {
                   <span className="text-blue-400 font-mono text-sm">{corners[key]}{unit}</span>
                 </div>
                 <input type="range" min={0} max={max} value={corners[key]}
-                  onChange={e => update(key, +e.target.value)} className="w-full" />
+                  onChange={e => update(key, +e.target.value)} className="w-full accent-blue-500" />
               </div>
             ))}
           </div>

@@ -58,6 +58,8 @@ export default function ImageCompressorPage() {
   const [results, setResults]             = useState<Result[]>([]);
   const [processing, setProcessing]       = useState(false);
   const [preview, setPreview]             = useState<string | null>(null);
+  const [compareId, setCompareId]         = useState<string | null>(null);
+  const [comparePos, setComparePos]       = useState(50);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const processFiles = useCallback(async (files: File[]) => {
@@ -217,6 +219,7 @@ export default function ImageCompressorPage() {
 
               {results.map((r) => {
                 const saved = Math.round((1 - r.compressedSize / r.originalSize) * 100);
+                const isComparing = compareId === r.id;
                 return (
                   <div key={r.id} className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4">
                     <div className="flex items-center gap-4">
@@ -245,11 +248,55 @@ export default function ImageCompressorPage() {
                           </div>
                         )}
                       </div>
-                      <button onClick={() => download(r)}
-                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors shrink-0">
-                        ↓
-                      </button>
+                      <div className="flex flex-col gap-1.5 shrink-0">
+                        <button onClick={() => download(r)}
+                          className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors">
+                          ↓
+                        </button>
+                        <button
+                          onClick={() => { setCompareId(isComparing ? null : r.id); setComparePos(50); }}
+                          className={`px-3 py-1.5 border text-xs rounded-lg transition-colors ${isComparing ? "bg-blue-600/20 border-blue-500/40 text-blue-300" : "bg-slate-800 border-slate-700 text-slate-400 hover:text-white"}`}>
+                          ⇔
+                        </button>
+                      </div>
                     </div>
+
+                    {/* Before / after comparison slider */}
+                    {isComparing && (
+                      <div className="mt-3 space-y-1.5">
+                        <div className="relative overflow-hidden rounded-xl select-none"
+                          style={{ background: "repeating-conic-gradient(#374151 0% 25%,#1e293b 0% 50%) 0 0/12px 12px" }}>
+                          {/* After (compressed) — full width */}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={r.url} alt="Compressed" className="w-full block" />
+                          {/* Before (original) — clipped */}
+                          <div className="absolute inset-0 overflow-hidden" style={{ width: `${comparePos}%` }}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={r.originalUrl} alt="Original" className="block"
+                              style={{ width: `${10000 / comparePos}%`, maxWidth: "none" }} />
+                          </div>
+                          {/* Handle */}
+                          <div className="absolute inset-y-0 flex items-center justify-center pointer-events-none"
+                            style={{ left: `${comparePos}%`, transform: "translateX(-50%)" }}>
+                            <div className="w-0.5 h-full bg-white/80" />
+                            <div className="absolute w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center">
+                              <svg className="w-4 h-4 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l-3 3 3 3M16 9l3 3-3 3" />
+                              </svg>
+                            </div>
+                          </div>
+                          {/* Drag layer */}
+                          <div className="absolute inset-0 cursor-ew-resize"
+                            onMouseMove={(e) => { if (e.buttons !== 1) return; const rect = e.currentTarget.getBoundingClientRect(); setComparePos(Math.max(2, Math.min(98, ((e.clientX - rect.left) / rect.width) * 100))); }}
+                            onTouchMove={(e) => { const rect = e.currentTarget.getBoundingClientRect(); const t = e.touches[0]; setComparePos(Math.max(2, Math.min(98, ((t.clientX - rect.left) / rect.width) * 100))); }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-[10px] text-slate-600 px-1">
+                          <span>← Original</span>
+                          <span>Compressed →</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}

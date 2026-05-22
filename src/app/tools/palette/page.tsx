@@ -134,18 +134,18 @@ export default function PalettePage() {
 
           {/* Palette strip */}
           <div className="h-20 rounded-2xl overflow-hidden flex border border-slate-800">
-            {palette.map(p => (
-              <div key={p.hex} className="flex-1" style={{ background: p.hex }} />
+            {palette.map((p, i) => (
+              <div key={i} className="flex-1" style={{ background: p.hex }} />
             ))}
           </div>
 
           {/* Color cards */}
           <div className="grid grid-cols-1 gap-2">
-            {palette.map(p => {
+            {palette.map((p, i) => {
               const { r, g, b } = hexToRgb(p.hex);
               const [ph, ps, pl] = hexToHsl(p.hex);
               return (
-                <div key={p.hex} className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4 flex items-center gap-4">
+                <div key={i} className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4 flex items-center gap-4">
                   <div className="w-14 h-14 rounded-xl shrink-0 border border-white/10" style={{ background: p.hex }} />
                   <div className="flex-1 min-w-0">
                     <p className="text-white font-mono font-bold">{p.hex.toUpperCase()}</p>

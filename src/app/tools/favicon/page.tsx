@@ -10,7 +10,10 @@ function resizeToCanvas(img: HTMLImageElement, size: number): HTMLCanvasElement 
   canvas.width = size;
   canvas.height = size;
   const ctx = canvas.getContext("2d")!;
-  ctx.drawImage(img, 0, 0, size, size);
+  const aspect = img.naturalWidth / img.naturalHeight;
+  const drawW = aspect >= 1 ? size : size * aspect;
+  const drawH = aspect <= 1 ? size : size / aspect;
+  ctx.drawImage(img, (size - drawW) / 2, (size - drawH) / 2, drawW, drawH);
   return canvas;
 }
 
