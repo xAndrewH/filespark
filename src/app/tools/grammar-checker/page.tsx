@@ -19,14 +19,15 @@ export default function GrammarCheckerPage() {
   const [checked, setChecked] = useState(false);
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
 
-  const check = useCallback(async () => {
-    if (!text.trim()) return;
+  const check = useCallback(async (t?: string) => {
+    const src = t ?? text;
+    if (!src.trim()) return;
     setLoading(true);
     setChecked(false);
     setMatches([]);
     setActiveIdx(null);
     try {
-      const body = new URLSearchParams({ text, language: "en-US" });
+      const body = new URLSearchParams({ text: src, language: "en-US" });
       const res = await fetch("https://api.languagetool.org/v2/check", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -43,23 +44,40 @@ export default function GrammarCheckerPage() {
     }
   }, [text]);
 
-  const applyFix = (match: Match, replacement: string) => {
-    const before = text.slice(0, match.offset);
-    const after = text.slice(match.offset + match.length);
-    const newText = before + replacement + after;
+  const applyFix = useCallback((match: Match, replacement: string) => {
+    const newText = text.slice(0, match.offset) + replacement + text.slice(match.offset + match.length);
     setText(newText);
+    // Remove the fixed match and shift remaining offsets
+    const diff = replacement.length - match.length;
+    setMatches(prev =>
+      prev
+        .filter(m => m !== match)
+        .map(m => m.offset > match.offset ? { ...m, offset: m.offset + diff } : m)
+    );
+    setActiveIdx(null);
+  }, [text]);
+
+  const fixAll = useCallback(() => {
+    // Apply all first-suggestion fixes from last to first to preserve offsets
+    const fixable = [...matches]
+      .filter(m => m.replacements.length > 0)
+      .sort((a, b) => b.offset - a.offset);
+    let result = text;
+    for (const m of fixable) {
+      result = result.slice(0, m.offset) + m.replacements[0].value + result.slice(m.offset + m.length);
+    }
+    setText(result);
     setMatches([]);
     setChecked(false);
     setActiveIdx(null);
-  };
+  }, [text, matches]);
 
   const categoryColor: Record<string, string> = {
-    "GRAMMAR": "text-red-400 bg-red-950/40 border-red-800/50",
-    "SPELLING": "text-yellow-400 bg-yellow-950/40 border-yellow-800/50",
-    "PUNCTUATION": "text-orange-400 bg-orange-950/40 border-orange-800/50",
-    "STYLE": "text-blue-400 bg-blue-950/40 border-blue-800/50",
+    GRAMMAR: "text-red-400 bg-red-950/40 border-red-800/50",
+    SPELLING: "text-yellow-400 bg-yellow-950/40 border-yellow-800/50",
+    PUNCTUATION: "text-orange-400 bg-orange-950/40 border-orange-800/50",
+    STYLE: "text-blue-400 bg-blue-950/40 border-blue-800/50",
   };
-
   const getColor = (cat: string) => categoryColor[cat] ?? "text-slate-400 bg-slate-800/60 border-slate-700/50";
 
   const renderHighlighted = () => {
@@ -87,6 +105,7 @@ export default function GrammarCheckerPage() {
   };
 
   const highlighted = renderHighlighted();
+  const fixableCount = matches.filter(m => m.replacements.length > 0).length;
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -109,17 +128,25 @@ export default function GrammarCheckerPage() {
             />
             <div className="flex items-center justify-between px-4 py-3 border-t border-slate-800/60">
               <span className="text-slate-600 text-xs">{text.trim().split(/\s+/).filter(Boolean).length} words</span>
-              <button onClick={check} disabled={loading || !text.trim()}
-                className="px-5 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition-colors">
-                {loading ? "Checking…" : "Check text"}
-              </button>
+              <div className="flex items-center gap-2">
+                {fixableCount > 0 && (
+                  <button onClick={fixAll}
+                    className="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-sm font-semibold rounded-lg transition-colors">
+                    Fix all ({fixableCount})
+                  </button>
+                )}
+                <button onClick={() => check()} disabled={loading || !text.trim()}
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition-colors">
+                  {loading ? "Checking…" : "Check text"}
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Highlighted preview */}
           {highlighted && (
             <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4">
-              <p className="text-slate-500 text-xs mb-2">Click a highlighted word to see suggestions</p>
+              <p className="text-slate-500 text-xs mb-2">Click a highlighted word to see and apply suggestions</p>
               <div className="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap font-sans">{highlighted}</div>
             </div>
           )}
@@ -127,30 +154,45 @@ export default function GrammarCheckerPage() {
           {checked && matches.length === 0 && (
             <div className="flex items-center gap-3 bg-emerald-950/40 border border-emerald-800/50 rounded-xl p-4">
               <span className="text-emerald-400 text-lg">✓</span>
-              <p className="text-emerald-400 text-sm">No issues found!</p>
+              <p className="text-emerald-400 text-sm">No issues found — your text looks great!</p>
             </div>
           )}
 
           {matches.length > 0 && (
             <div className="space-y-2">
-              <p className="text-slate-400 text-sm font-medium">{matches.length} issue{matches.length !== 1 ? "s" : ""} found</p>
+              <div className="flex items-center justify-between">
+                <p className="text-slate-400 text-sm font-medium">{matches.length} issue{matches.length !== 1 ? "s" : ""} found</p>
+                {fixableCount > 0 && (
+                  <button onClick={fixAll}
+                    className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold rounded-lg transition-colors">
+                    Fix all {fixableCount} auto-fixable
+                  </button>
+                )}
+              </div>
               {matches.map((m, i) => (
                 <div key={i}
                   onClick={() => setActiveIdx(activeIdx === i ? null : i)}
                   className={`border rounded-xl p-4 cursor-pointer transition-all ${getColor(m.rule.category.name)} ${activeIdx === i ? "ring-1 ring-blue-500/50" : ""}`}>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span className="text-xs font-medium uppercase tracking-wide opacity-70">{m.rule.category.name}</span>
-                        <code className="text-xs opacity-50 font-mono">"{text.slice(m.offset, m.offset + m.length)}"</code>
+                        <code className="text-xs opacity-50 font-mono">&ldquo;{text.slice(m.offset, m.offset + m.length)}&rdquo;</code>
                       </div>
                       <p className="text-sm leading-relaxed">{m.message}</p>
                     </div>
+                    {m.replacements.length > 0 && (
+                      <button
+                        onClick={e => { e.stopPropagation(); applyFix(m, m.replacements[0].value); }}
+                        className="shrink-0 px-2.5 py-1 bg-white/10 hover:bg-white/20 rounded-md text-xs font-mono transition-colors border border-white/10">
+                        → {m.replacements[0].value}
+                      </button>
+                    )}
                   </div>
-                  {m.replacements.length > 0 && activeIdx === i && (
+                  {m.replacements.length > 1 && activeIdx === i && (
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <span className="text-xs opacity-60">Suggestions:</span>
-                      {m.replacements.slice(0, 5).map((r, ri) => (
+                      <span className="text-xs opacity-60">All suggestions:</span>
+                      {m.replacements.slice(0, 6).map((r, ri) => (
                         <button key={ri} onClick={e => { e.stopPropagation(); applyFix(m, r.value); }}
                           className="px-2.5 py-1 bg-white/10 hover:bg-white/20 rounded-md text-xs font-mono transition-colors">
                           {r.value}
