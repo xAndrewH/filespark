@@ -52,7 +52,7 @@ export default function FileDropzone({ category = "all", onFiles, variant = "her
       type="file"
       multiple
       accept={accept}
-      onChange={(e) => handleFiles(e.target.files)}
+      onChange={(e) => { handleFiles(e.target.files); e.currentTarget.value = ""; }}
       className="hidden"
       onClick={(e) => e.stopPropagation()}
     />

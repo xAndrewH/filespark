@@ -562,7 +562,7 @@ export default function ImageEditorPage() {
               <p className="text-xs opacity-60 mt-1">or click to browse · JPG, PNG, WEBP, GIF, BMP…</p>
             </div>
             <input ref={inputRef} type="file" accept="image/*" className="hidden"
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) setFile(f); }}
+              onChange={(e) => { const f = e.target.files?.[0]; e.currentTarget.value = ""; if (f) setFile(f); }}
               onClick={(e) => e.stopPropagation()} />
           </div>
         ) : (

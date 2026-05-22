@@ -195,7 +195,7 @@ export default function PdfToImagesPage() {
               </>
             )}
             <input ref={fileRef} type="file" accept="application/pdf,.pdf" className="hidden"
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
+              onChange={(e) => { const f = e.target.files?.[0]; e.currentTarget.value = ""; if (f) handleFile(f); }} />
           </div>
 
           {error && (

@@ -82,7 +82,16 @@ export default function BorderRadiusPage() {
           <div className="flex items-center gap-4">
             <div className="flex gap-1 bg-slate-900/60 border border-slate-800/60 rounded-xl p-1">
               {(["px", "%"] as const).map(u => (
-                <button key={u} onClick={() => setUnit(u)}
+                <button key={u} onClick={() => {
+                  setUnit(u);
+                  const newMax = u === "%" ? 50 : 120;
+                  setCorners(c => ({
+                    tl: Math.min(c.tl, newMax),
+                    tr: Math.min(c.tr, newMax),
+                    br: Math.min(c.br, newMax),
+                    bl: Math.min(c.bl, newMax),
+                  }));
+                }}
                   className={`px-4 py-1 rounded-lg text-sm transition-colors ${unit === u ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"}`}>
                   {u}
                 </button>

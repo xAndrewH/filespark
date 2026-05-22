@@ -93,7 +93,7 @@ export default function FaviconPage() {
                 <p className="text-slate-600 text-xs mt-1">Best results with a square image (at least 512×512)</p>
               </>
             )}
-            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
+            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; e.currentTarget.value = ""; if (f) handleFile(f); }} />
           </div>
 
           {previews.length > 0 && (
