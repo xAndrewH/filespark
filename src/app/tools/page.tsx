@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
-import { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Type, FileCode, GitCompare, AlignLeft, Shuffle, Link as LucideLink, Hash, Braces, Search, Table2, CaseSensitive, SpellCheck, Code2, Wand2, Paintbrush, Terminal, Pipette, Palette, Blend, Layers, BoxSelect, SquareDashed, Bookmark, Ruler, Maximize2, Clock, Binary, Timer, Key, Calculator, Coins, Hourglass, Percent, BarChart2, ImagePlus, Minimize2, Scissors, PenTool, FileImage, Camera, FilePlus2, ScanLine, QrCode, Globe, BookOpen, Tag, ArrowLeftRight, Image, ZoomIn, FileMinus2, Replace, Barcode, CalendarDays, Receipt, Wifi, MapPin, Play } from "lucide-react";
 
 type IconComponent = React.ComponentType<{ className?: string }>;
@@ -107,8 +107,43 @@ const COMING_SOON: { icon: IconComponent; title: string; description: string }[]
 ];
 
 export default function ToolsPage() {
-  const [query, setQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  return (
+    <Suspense>
+      <ToolsPageInner />
+    </Suspense>
+  );
+}
+
+function ToolsPageInner() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
+  const [activeCategory, setActiveCategory] = useState<string | null>(() => searchParams.get("cat") ?? null);
+
+  // Keep URL in sync with filter state so the back button restores it
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    if (activeCategory) params.set("cat", activeCategory);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [query, activeCategory, router, pathname]);
+
+  // Restore scroll position when returning from a tool page
+  useEffect(() => {
+    const saved = sessionStorage.getItem("tools-scroll");
+    if (saved) {
+      sessionStorage.removeItem("tools-scroll");
+      const top = parseInt(saved, 10);
+      requestAnimationFrame(() => window.scrollTo({ top, behavior: "instant" as ScrollBehavior }));
+    }
+  }, []);
+
+  const saveScroll = useCallback(() => {
+    sessionStorage.setItem("tools-scroll", String(window.scrollY));
+  }, []);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -121,7 +156,6 @@ export default function ToolsPage() {
 
   const isSearching = query.trim().length > 0 || activeCategory !== null;
 
-  // Group filtered results by category for non-search view
   const groupedFiltered = useMemo(() => {
     return CATEGORIES.map(c => ({
       ...c,
@@ -170,9 +204,9 @@ export default function ToolsPage() {
         {/* Category filter pills */}
         <div className="flex flex-wrap gap-2 mb-8">
           <button
-            onClick={() => setActiveCategory(null)}
+            onClick={() => { setQuery(""); setActiveCategory(null); }}
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-              activeCategory === null
+              activeCategory === null && query === ""
                 ? "bg-blue-600 text-white"
                 : "bg-slate-800/60 border border-slate-700/50 text-slate-400 hover:text-white"
             }`}>
@@ -181,7 +215,7 @@ export default function ToolsPage() {
           {CATEGORIES.map(c => (
             <button
               key={c.id}
-              onClick={() => setActiveCategory(activeCategory === c.id ? null : c.id)}
+              onClick={() => { setQuery(""); setActiveCategory(activeCategory === c.id ? null : c.id); }}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                 activeCategory === c.id
                   ? "bg-blue-600 text-white"
@@ -200,19 +234,19 @@ export default function ToolsPage() {
           </div>
         )}
 
-        {/* Search results — flat list */}
+        {/* Search results - flat list */}
         {isSearching && filtered.length > 0 && (
           <div>
             <p className="text-slate-500 text-xs mb-4">{filtered.length} result{filtered.length !== 1 ? "s" : ""}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {filtered.map(({ href, icon, title, description, category }) => (
-                <ToolCard key={href} href={href} icon={icon} title={title} description={description} tag={category} />
+                <ToolCard key={href} href={href} icon={icon} title={title} description={description} tag={category} onNavigate={saveScroll} />
               ))}
             </div>
           </div>
         )}
 
-        {/* Default — grouped by category */}
+        {/* Default - grouped by category */}
         {!isSearching && (
           <div className="space-y-10">
             {groupedFiltered.map(({ id, name, tools }) => (
@@ -224,7 +258,7 @@ export default function ToolsPage() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {tools.map(({ href, icon, title, description }) => (
-                    <ToolCard key={href} href={href} icon={icon} title={title} description={description} />
+                    <ToolCard key={href} href={href} icon={icon} title={title} description={description} onNavigate={saveScroll} />
                   ))}
                 </div>
               </section>
@@ -250,12 +284,13 @@ export default function ToolsPage() {
   );
 }
 
-function ToolCard({ href, icon: Icon, title, description, tag }: {
-  href: string; icon: IconComponent; title: string; description: string; tag?: string;
+function ToolCard({ href, icon: Icon, title, description, tag, onNavigate }: {
+  href: string; icon: IconComponent; title: string; description: string; tag?: string; onNavigate: () => void;
 }) {
   return (
     <Link
       href={href}
+      onClick={onNavigate}
       className="group flex items-start gap-3 p-4 rounded-xl bg-slate-900/40 border border-slate-800/60 hover:border-slate-700/80 hover:bg-slate-900/70 transition-all duration-150"
     >
       <div className="shrink-0 w-9 h-9 rounded-lg bg-slate-800 border border-slate-700/60 flex items-center justify-center">
