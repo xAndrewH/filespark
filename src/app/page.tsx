@@ -613,7 +613,7 @@ export default function HomePage() {
         </div>
 
         {/* ── FORMATS + PRIVACY ─────────────────────────────────── */}
-        <div className="max-w-5xl mx-auto px-4 py-16 space-y-5">
+        <div className="max-w-5xl mx-auto px-4 py-16 space-y-10">
           <div>
             <FormatsSection />
           </div>

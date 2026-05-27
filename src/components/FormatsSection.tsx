@@ -103,20 +103,6 @@ export default function FormatsSection({ selectedCategory }: Props) {
               Across {FORMAT_GROUPS.length} categories — from everyday files to the obscure ones.
             </p>
           </div>
-          {/* Mini stat grid */}
-          <div className="hidden sm:grid grid-cols-3 gap-2 shrink-0">
-            {FORMAT_GROUPS.map(g => (
-              <button key={g.label} onClick={() => setActive(g.label)}
-                className={`text-center px-3 py-2 rounded-xl border text-xs transition-all ${
-                  active === g.label
-                    ? COLOR_MAP[g.color].pill
-                    : "bg-slate-800/40 border-slate-700/40 text-slate-500 hover:text-slate-300"
-                }`}>
-                <div className="text-lg mb-0.5">{g.icon}</div>
-                <div className="font-semibold tabular-nums">{g.formats.length}</div>
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
