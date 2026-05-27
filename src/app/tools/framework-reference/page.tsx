@@ -127,7 +127,14 @@ export default function FrameworkReferencePage() {
           Tools
         </Link>
         <h1 className="text-3xl font-bold text-white mb-1">Framework Reference</h1>
-        <p className="text-slate-500 text-sm mb-8">Searchable code snippets for Tailwind, Bootstrap, Sass, React, and Next.js.</p>
+        <p className="text-slate-500 text-sm mb-4">Searchable code snippets for Tailwind, Bootstrap, Sass, React, and Next.js.</p>
+        <a href="https://devdocs.io" target="_blank" rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-slate-900/60 border border-slate-700/60 hover:border-blue-500/60 rounded-xl text-sm text-slate-300 hover:text-blue-300 transition-colors">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+          Full API docs at devdocs.io
+        </a>
 
         {/* Framework tabs */}
         <div className="flex flex-wrap gap-2 mb-5">

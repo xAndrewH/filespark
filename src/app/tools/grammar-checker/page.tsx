@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 
 interface Match {
@@ -18,6 +18,7 @@ export default function GrammarCheckerPage() {
   const [loading, setLoading] = useState(false);
   const [checked, setChecked] = useState(false);
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const check = useCallback(async (t?: string) => {
     const src = t ?? text;
@@ -104,6 +105,15 @@ export default function GrammarCheckerPage() {
     );
   };
 
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (text.trim().split(/\s+/).filter(Boolean).length >= 5) {
+      debounceRef.current = setTimeout(() => check(text), 1800);
+    }
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text]);
+
   const highlighted = renderHighlighted();
   const fixableCount = matches.filter(m => m.replacements.length > 0).length;
 
@@ -121,13 +131,16 @@ export default function GrammarCheckerPage() {
           <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl overflow-hidden">
             <textarea
               value={text}
-              onChange={e => { setText(e.target.value); setChecked(false); setMatches([]); }}
+              onChange={e => { setText(e.target.value); setChecked(false); setMatches([]); setActiveIdx(null); }}
               placeholder="Paste or type your text here to check for grammar and spelling mistakes…"
               rows={8}
               className="w-full bg-transparent px-4 py-4 text-slate-200 text-sm leading-relaxed resize-none focus:outline-none placeholder:text-slate-600"
             />
             <div className="flex items-center justify-between px-4 py-3 border-t border-slate-800/60">
-              <span className="text-slate-600 text-xs">{text.trim().split(/\s+/).filter(Boolean).length} words</span>
+              <div className="flex items-center gap-2">
+                <span className="text-slate-600 text-xs">{text.trim().split(/\s+/).filter(Boolean).length} words</span>
+                {loading && <span className="text-slate-500 text-xs animate-pulse">Checking…</span>}
+              </div>
               <div className="flex items-center gap-2">
                 {fixableCount > 0 && (
                   <button onClick={fixAll}
@@ -137,7 +150,7 @@ export default function GrammarCheckerPage() {
                 )}
                 <button onClick={() => check()} disabled={loading || !text.trim()}
                   className="px-5 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition-colors">
-                  {loading ? "Checking…" : "Check text"}
+                  {loading ? "Checking…" : "Check now"}
                 </button>
               </div>
             </div>

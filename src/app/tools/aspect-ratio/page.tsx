@@ -71,7 +71,7 @@ export default function AspectRatioPage() {
 
   const w = parseFloat(width) || 0;
   const h = parseFloat(height) || 0;
-  const simplified = w && h ? simplifyRatio(w, h) : null;
+  const simplified = rw && rh ? simplifyRatio(rw, rh) : null;
   const diagonal = w && h ? Math.sqrt(w * w + h * h).toFixed(1) : null;
 
   const previewW = 280;
@@ -141,7 +141,7 @@ export default function AspectRatioPage() {
           {w > 0 && h > 0 && (
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: "Simplified", value: simplified ? `${simplified.rw}:${simplified.rh}` : "—" },
+                { label: "Simplified", value: simplified && (simplified.rw !== rw || simplified.rh !== rh) ? `${simplified.rw}:${simplified.rh}` : `${rw}:${rh}` },
                 { label: "Diagonal", value: diagonal ? `${diagonal} px` : "—" },
                 { label: "Megapixels", value: w && h ? `${(w * h / 1000000).toFixed(2)} MP` : "—" },
               ].map(({ label, value }) => (

@@ -21,7 +21,10 @@ const CATEGORIES = [
       { href: "/tools/csv-json",        icon: "⇄",  title: "CSV ↔ JSON",               description: "Convert between CSV and JSON with a live table preview." },
       { href: "/tools/case-converter",  icon: "Aa", title: "Case Converter",           description: "Convert text between camelCase, snake_case, kebab-case, and more." },
       { href: "/tools/grammar-checker", icon: "✏️", title: "Grammar & Spell Checker",  description: "Check grammar, spelling, and style powered by LanguageTool." },
-      { href: "/tools/code-beautifier", icon: "✨", title: "Code Beautifier",           description: "Format HTML, JavaScript, CSS, and Python with one click." },
+      { href: "/tools/html-beautifier",  icon: "🌐", title: "HTML Beautifier",           description: "Format and indent HTML following W3C best practices." },
+      { href: "/tools/js-beautifier",    icon: "✨", title: "JavaScript Beautifier",     description: "Format JavaScript and TypeScript following Airbnb / ESLint standards." },
+      { href: "/tools/css-beautifier",   icon: "🎨", title: "CSS Beautifier",            description: "Format CSS, SCSS, and Sass with proper spacing and rule separation." },
+      { href: "/tools/python-beautifier",icon: "🐍", title: "Python Beautifier",         description: "Format Python code with PEP 8 compliant 4-space indentation." },
     ],
   },
   {
@@ -83,6 +86,13 @@ const CATEGORIES = [
 
 const ALL_TOOLS = CATEGORIES.flatMap(c => c.tools.map(t => ({ ...t, category: c.name, categoryId: c.id })));
 const TOTAL = ALL_TOOLS.length;
+
+const COMING_SOON = [
+  { icon: "🔍", title: "Upscale Image",            description: "AI-powered image upscaling up to 4× resolution." },
+  { icon: "📑", title: "Reorder / Delete PDF Pages", description: "Drag to reorder or remove pages from a PDF before saving." },
+  { icon: "🔎", title: "Find & Replace",             description: "Find and replace text across one or multiple files." },
+  { icon: "▮", title: "Barcode Generator",          description: "Generate Code 128, QR, EAN, and UPC barcodes." },
+];
 
 export default function ToolsPage() {
   const [query, setQuery] = useState("");
@@ -207,6 +217,20 @@ export default function ToolsPage() {
                 </div>
               </section>
             ))}
+
+            {/* Coming soon */}
+            <section className="scroll-mt-8">
+              <div className="flex items-center gap-3 mb-4">
+                <h2 className="text-white text-sm font-semibold">Coming Soon</h2>
+                <div className="h-px flex-1 bg-slate-800/60" />
+                <span className="text-slate-600 text-xs">4</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {COMING_SOON.map(({ icon, title, description }) => (
+                  <ComingSoonCard key={title} icon={icon} title={title} description={description} />
+                ))}
+              </div>
+            </section>
           </div>
         )}
       </div>
@@ -236,5 +260,22 @@ function ToolCard({ href, icon, title, description, tag }: {
         {tag && <span className="inline-block mt-1.5 text-[10px] text-slate-600 bg-slate-800/60 px-1.5 py-0.5 rounded-md">{tag}</span>}
       </div>
     </Link>
+  );
+}
+
+function ComingSoonCard({ icon, title, description }: { icon: string; title: string; description: string }) {
+  return (
+    <div className="flex items-start gap-3 p-4 rounded-xl bg-slate-900/20 border border-slate-800/40 opacity-60 cursor-default select-none">
+      <div className="shrink-0 w-9 h-9 rounded-lg bg-slate-800/60 border border-slate-700/40 flex items-center justify-center text-lg grayscale">
+        {icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <h3 className="text-slate-400 font-medium text-sm leading-snug">{title}</h3>
+          <span className="text-[9px] font-semibold tracking-wide uppercase text-slate-600 bg-slate-800 px-1.5 py-0.5 rounded-full border border-slate-700/50">Soon</span>
+        </div>
+        <p className="text-slate-600 text-xs leading-relaxed mt-0.5 line-clamp-2">{description}</p>
+      </div>
+    </div>
   );
 }

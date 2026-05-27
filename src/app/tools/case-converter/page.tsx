@@ -31,35 +31,36 @@ const TITLE_MINOR = new Set([
 const CASES: CaseOption[] = [
   {
     id: "sentence", abbr: "Sc", label: "Sentence case", color: "bg-orange-700",
-    // Lowercase everything, then capitalize first letter of each sentence
-    fn: s => s.toLowerCase().replace(/(^|[.!?]\s+)([a-z])/g, (_, p, c) => p + c.toUpperCase()),
+    fn: s => {
+      const n = /\s/.test(s) ? s : splitWords(s).join(" ");
+      return n.toLowerCase().replace(/(^|[.!?]\s+)([a-z])/g, (_, p, c) => p + c.toUpperCase());
+    },
   },
   {
     id: "lower", abbr: "lc", label: "lower case", color: "bg-green-700",
-    fn: s => s.toLowerCase(),
+    fn: s => (/\s/.test(s) ? s : splitWords(s).join(" ")).toLowerCase(),
   },
   {
     id: "upper", abbr: "UC", label: "UPPER CASE", color: "bg-blue-700",
-    fn: s => s.toUpperCase(),
+    fn: s => (/\s/.test(s) ? s : splitWords(s).join(" ")).toUpperCase(),
   },
   {
     id: "capitalized", abbr: "CC", label: "Capitalized Case", color: "bg-purple-700",
-    // Every word capitalized, no exceptions
-    fn: s => s.toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase()),
+    fn: s => (/\s/.test(s) ? s : splitWords(s).join(" ")).toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase()),
   },
   {
     id: "alternating", abbr: "aC", label: "aLtErNaTiNg cAsE", color: "bg-yellow-600",
-    // Only count letters (not spaces/punct) for consistent alternating per word
     fn: s => {
+      const n = /\s/.test(s) ? s : splitWords(s).join(" ");
       let i = 0;
-      return s.replace(/[a-zA-Z]/g, c => (i++ % 2 === 0 ? c.toLowerCase() : c.toUpperCase()));
+      return n.replace(/[a-zA-Z]/g, c => (i++ % 2 === 0 ? c.toLowerCase() : c.toUpperCase()));
     },
   },
   {
     id: "title", abbr: "TC", label: "Title Case", color: "bg-teal-700",
-    // Capitalize all words except minor words (unless first or last)
     fn: s => {
-      const tokens = s.split(/(\s+)/);
+      const n = /\s/.test(s) ? s : splitWords(s).join(" ");
+      const tokens = n.split(/(\s+)/);
       let wordIdx = 0;
       const wordCount = tokens.filter(t => !/^\s+$/.test(t)).length;
       return tokens.map(t => {
@@ -75,7 +76,7 @@ const CASES: CaseOption[] = [
   },
   {
     id: "inverse", abbr: "iC", label: "InVeRsE CaSe", color: "bg-pink-700",
-    fn: s => s.split("").map(c => /[a-zA-Z]/.test(c) ? (c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase()) : c).join(""),
+    fn: s => (/\s/.test(s) ? s : splitWords(s).join(" ")).split("").map(c => /[a-zA-Z]/.test(c) ? (c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase()) : c).join(""),
   },
   {
     id: "camel", abbr: "cC", label: "camelCase", color: "bg-indigo-700",
