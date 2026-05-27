@@ -92,6 +92,7 @@ const COMING_SOON = [
   { icon: "📑", title: "Reorder / Delete PDF Pages", description: "Drag to reorder or remove pages from a PDF before saving." },
   { icon: "🔎", title: "Find & Replace",             description: "Find and replace text across one or multiple files." },
   { icon: "▮", title: "Barcode Generator",          description: "Generate Code 128, QR, EAN, and UPC barcodes." },
+  { icon: "🎂", title: "Age Calculator",             description: "Calculate exact age in years, months, and days from a birthdate." },
 ];
 
 export default function ToolsPage() {
@@ -223,7 +224,7 @@ export default function ToolsPage() {
               <div className="flex items-center gap-3 mb-4">
                 <h2 className="text-white text-sm font-semibold">Coming Soon</h2>
                 <div className="h-px flex-1 bg-slate-800/60" />
-                <span className="text-slate-600 text-xs">4</span>
+                <span className="text-slate-600 text-xs">5</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {COMING_SOON.map(({ icon, title, description }) => (
