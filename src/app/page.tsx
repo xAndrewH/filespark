@@ -395,208 +395,226 @@ export default function HomePage() {
       <HistoryDrawer open={historyOpen} onClose={() => setHistoryOpen(false)} version={historyVersion} sessionDownloads={sessionDownloads.current} />
       <CloudConvertKeyModal open={keyModalOpen} onClose={() => setKeyModalOpen(false)} />
 
-      {/* Hero glow */}
-      <div className="fixed inset-x-0 top-0 h-[600px] pointer-events-none z-0">
+      {/* Background */}
+      <div className="fixed inset-x-0 top-0 h-[800px] pointer-events-none z-0">
         <div className="absolute inset-0 hero-glow" />
-        <div className="absolute inset-0 dot-pattern opacity-40" />
+        <div className="absolute inset-0 dot-pattern opacity-30" />
+        <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-b from-transparent to-slate-950" />
       </div>
 
-      <main className="relative z-10 max-w-5xl mx-auto px-4 pb-24">
+      <main className="relative z-10">
 
-        {/* ── Hero ─────────────────────────────────────────── */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-10 pt-16 pb-14">
-          <div className="flex-1 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-5 tracking-wide">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-              Free · No account · No file size limits
-            </div>
-            <h1 className="text-5xl sm:text-6xl font-bold tracking-tight text-white leading-[1.08] mb-5">
-              Convert & Create<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-violet-400">
-                Anything
-              </span>
-            </h1>
-            <p className="text-slate-400 text-lg leading-relaxed mb-5">
-              Convert <span className="text-slate-200 font-medium">80+ file formats</span> — documents,
-              images, audio, video, archives and more. Plus <span className="text-slate-200 font-medium">43 free browser tools</span> for design,
-              development, and productivity. No upload required.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { label: "File Converter", href: null },
-                { label: "Image Tools",   href: "/tools#images-pdfs" },
-                { label: "Dev Tools",     href: "/tools#text-code" },
-                { label: "Design Tools",  href: "/tools#design-visual" },
-              ].map(({ label, href }) =>
-                href ? (
-                  <Link key={label} href={href} className="px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-400 hover:text-white text-xs transition-colors">
-                    {label}
-                  </Link>
-                ) : (
-                  <span key={label} className="px-3 py-1 rounded-full bg-blue-600/20 border border-blue-500/30 text-blue-300 text-xs">
-                    {label}
-                  </span>
-                )
-              )}
-            </div>
+        {/* ── HERO ─────────────────────────────────────────────── */}
+        <div className="max-w-5xl mx-auto px-4 pt-20 pb-12 text-center">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-7 tracking-wide">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+            100% free · No account · No file size limits
           </div>
-          <div className="flex-shrink-0">
+
+          <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tight text-white leading-[1.02] mb-6">
+            Convert files.<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-violet-400 to-pink-400">
+              Use tools.
+            </span>
+          </h1>
+
+          <p className="text-slate-400 text-xl leading-relaxed mb-10 max-w-2xl mx-auto">
+            Convert <span className="text-white font-semibold">80+ file formats</span> and access{" "}
+            <span className="text-white font-semibold">43 free browser tools</span> — no upload, no account, nothing stored.
+          </p>
+
+          {/* Stat chips */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
+            {[
+              { icon: "🔄", value: "80+", label: "formats" },
+              { icon: "⚡", value: "43",  label: "tools" },
+              { icon: "🔒", value: "100%", label: "private" },
+              { icon: "💸", value: "Free", label: "forever" },
+            ].map(({ icon, value, label }) => (
+              <div key={label} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900/70 border border-slate-800/80">
+                <span className="text-base">{icon}</span>
+                <span className="text-white font-bold text-sm">{value}</span>
+                <span className="text-slate-500 text-sm">{label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Rotating conversion preview */}
+          <div className="flex justify-center mb-4">
             <ConversionPreview />
           </div>
         </div>
 
-        {/* ── Dropzone / File queue ─────────────────────────── */}
-        {files.length === 0 ? (
-          <div>
-            {/* Input mode tabs */}
-            <div className="flex gap-1 mb-3 w-fit">
-              {(["file", "url"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setInputTab(tab)}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    inputTab === tab
-                      ? "bg-slate-800 text-white border border-slate-700"
-                      : "text-slate-500 hover:text-slate-300"
-                  }`}
-                >
-                  {tab === "file" ? "Upload File" : "From URL"}
-                </button>
-              ))}
-            </div>
-
-            {inputTab === "file" ? (
-              <FileDropzone onFiles={addFiles} variant="hero" />
-            ) : (
-              <div className="rounded-2xl border border-slate-700/50 bg-slate-900/40 p-8">
-                <UrlInput onFiles={addFiles} />
-              </div>
-            )}
-          </div>
-        ) : (
-          <div>
-            {/* Queue header */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <h2 className="text-white font-semibold text-base">
-                  Files <span className="text-slate-500 font-normal text-sm">({files.length})</span>
-                </h2>
-                {/* Batch progress */}
-                {doneCount > 0 && (
-                  <span className="flex items-center gap-1.5 text-xs text-slate-400">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
-                    {doneCount} / {totalCount} done
-                  </span>
-                )}
-              </div>
-              <div className="flex gap-2 flex-wrap justify-end">
-                {hasIdle && !isConverting && (
-                  <button onClick={convertAll} className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm shadow-blue-500/20">
-                    Convert All
+        {/* ── FILE CONVERTER ───────────────────────────────────── */}
+        <div className="max-w-5xl mx-auto px-4 pb-20">
+          {files.length === 0 ? (
+            <div>
+              <div className="flex gap-1 mb-3 w-fit">
+                {(["file", "url"] as const).map((tab) => (
+                  <button key={tab} onClick={() => setInputTab(tab)}
+                    className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      inputTab === tab ? "bg-slate-800 text-white border border-slate-700" : "text-slate-500 hover:text-slate-300"
+                    }`}>
+                    {tab === "file" ? "Upload File" : "From URL"}
                   </button>
-                )}
-                {hasDone && doneCount >= 2 && (
-                  <button
-                    onClick={downloadAllZip}
-                    disabled={zipLoading}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white text-sm rounded-lg transition-colors"
-                  >
-                    {zipLoading ? (
-                      <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                      </svg>
-                    ) : (
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                    )}
-                    Download All (.zip)
-                  </button>
-                )}
-                {hasDone && (
-                  <button onClick={clearDone} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm rounded-lg transition-colors">
-                    Clear Done
-                  </button>
-                )}
-                <button onClick={clearAll} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm rounded-lg transition-colors">
-                  Clear All
-                </button>
+                ))}
               </div>
-            </div>
-
-            {/* Sortable file list */}
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-              <SortableContext items={files.map((f) => f.id)} strategy={verticalListSortingStrategy}>
-                <div className="space-y-2.5">
-                  {files.map((item) => (
-                    <SortableFileCard
-                      key={item.id}
-                      item={item}
-                      onConvert={convertFile}
-                      onRemove={removeFile}
-                      onChange={updateFile}
-                    />
-                  ))}
+              {inputTab === "file" ? (
+                <FileDropzone onFiles={addFiles} variant="hero" />
+              ) : (
+                <div className="rounded-2xl border border-slate-700/50 bg-slate-900/40 p-8">
+                  <UrlInput onFiles={addFiles} />
                 </div>
-              </SortableContext>
-            </DndContext>
-
-            <div className="mt-3">
-              <FileDropzone onFiles={addFiles} variant="compact" />
+              )}
             </div>
-          </div>
-        )}
-
-        {/* ── Tools strip ──────────────────────────────────── */}
-        {files.length === 0 && (
-          <div className="mt-14">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-white font-semibold text-base">43 Free Tools</h2>
-                <p className="text-slate-500 text-xs mt-0.5">Design, dev & productivity utilities — no upload, no account</p>
+          ) : (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-white font-semibold text-base">
+                    Files <span className="text-slate-500 font-normal text-sm">({files.length})</span>
+                  </h2>
+                  {doneCount > 0 && (
+                    <span className="flex items-center gap-1.5 text-xs text-slate-400">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                      {doneCount} / {totalCount} done
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-2 flex-wrap justify-end">
+                  {hasIdle && !isConverting && (
+                    <button onClick={convertAll} className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm shadow-blue-500/20">Convert All</button>
+                  )}
+                  {hasDone && doneCount >= 2 && (
+                    <button onClick={downloadAllZip} disabled={zipLoading}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white text-sm rounded-lg transition-colors">
+                      {zipLoading ? (
+                        <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                      ) : (
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                      )}
+                      Download All (.zip)
+                    </button>
+                  )}
+                  {hasDone && (
+                    <button onClick={clearDone} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm rounded-lg transition-colors">Clear Done</button>
+                  )}
+                  <button onClick={clearAll} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm rounded-lg transition-colors">Clear All</button>
+                </div>
               </div>
-              <Link href="/tools" className="text-xs text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1">
-                View all
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+                <SortableContext items={files.map((f) => f.id)} strategy={verticalListSortingStrategy}>
+                  <div className="space-y-2.5">
+                    {files.map((item) => (
+                      <SortableFileCard key={item.id} item={item} onConvert={convertFile} onRemove={removeFile} onChange={updateFile} />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+              <div className="mt-3">
+                <FileDropzone onFiles={addFiles} variant="compact" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── TOOLS SECTION ────────────────────────────────────── */}
+        <div className="border-t border-slate-800/60 bg-gradient-to-b from-slate-900/60 to-slate-950">
+          <div className="max-w-5xl mx-auto px-4 py-16">
+
+            {/* Section header */}
+            <div className="flex items-end justify-between mb-12">
+              <div>
+                <p className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-2">Browser Tools</p>
+                <h2 className="text-4xl font-black text-white leading-tight">
+                  43 tools.<br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-pink-400">Zero installs.</span>
+                </h2>
+                <p className="text-slate-500 text-sm mt-3 max-w-sm">Every tool runs entirely in your browser. No sign-up, no uploads, no waiting.</p>
+              </div>
+              <Link href="/tools"
+                className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/60 text-slate-300 hover:text-white text-sm transition-colors shrink-0">
+                All tools
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {[
-                { href: "/tools/word-counter",       icon: "📝", label: "Word Counter",         desc: "Words, chars, sentences, reading time"  },
-                { href: "/tools/lorem",              icon: "¶",  label: "Lorem Ipsum",            desc: "Generate placeholder text instantly"     },
-                { href: "/tools/color-picker",       icon: "🎨", label: "Color Picker",           desc: "HEX, RGB, HSL, CMYK values + palette"   },
-                { href: "/tools/units",              icon: "📐", label: "Unit Converter",         desc: "Length, weight, temp, data and more"     },
-                { href: "/tools/image-editor",       icon: "🖼️", label: "Image Editor",           desc: "Resize, rotate and flip images"          },
-                { href: "/tools/image-compressor",   icon: "🗜️", label: "Image Compressor",       desc: "Compress images — no size limits"        },
-                { href: "/tools/background-remover", icon: "✂️", label: "Background Remover",     desc: "AI background removal in your browser"   },
-                { href: "/tools/qr",                 icon: "⬛", label: "QR Code Generator",      desc: "URL, text, or any data → scannable QR"  },
-                { href: "/tools/diff",               icon: "⟺",  label: "Text Diff Checker",      desc: "See exactly what changed between texts"  },
-              ].map(({ href, icon, label, desc }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="group flex items-center gap-3 p-4 rounded-xl bg-slate-900/40 border border-slate-800/60 hover:border-slate-700 hover:bg-slate-900/70 transition-all duration-150"
-                >
-                  <span className="text-2xl shrink-0">{icon}</span>
-                  <div className="min-w-0">
-                    <p className="text-white text-sm font-medium group-hover:text-blue-300 transition-colors">{label}</p>
-                    <p className="text-slate-500 text-xs truncate mt-0.5">{desc}</p>
-                  </div>
-                  <svg className="w-3.5 h-3.5 text-slate-600 group-hover:text-blue-400 shrink-0 ml-auto transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </Link>
-              ))}
+
+            {/* ── Text & Code ── */}
+            <ToolCategory label="Text & Code" icon="✍️" href="/tools#text-code" tools={[
+              { href: "/tools/word-counter",    icon: "📝", title: "Word Counter",          desc: "Words, chars, sentences, reading time" },
+              { href: "/tools/markdown",        icon: "✍️", title: "Markdown Editor",        desc: "Live HTML preview split-pane editor" },
+              { href: "/tools/diff",            icon: "⟺",  title: "Text Diff",              desc: "Word-level inline diff, split view" },
+              { href: "/tools/lorem",           icon: "¶",  title: "Lorem Ipsum",            desc: "Paragraphs, sentences, or words" },
+              { href: "/tools/base64",          icon: "🔤", title: "Base64",                 desc: "Encode or decode Base64 strings" },
+              { href: "/tools/url-encode",      icon: "🔗", title: "URL Encoder",            desc: "Percent-encode or decode URLs" },
+              { href: "/tools/hash",            icon: "🔐", title: "Hash Generator",         desc: "SHA-1, SHA-256, SHA-384, SHA-512" },
+              { href: "/tools/json",            icon: "{ }", title: "JSON Formatter",        desc: "Validate, format, and minify JSON" },
+              { href: "/tools/regex",           icon: ".*", title: "Regex Tester",           desc: "Live match highlighting" },
+              { href: "/tools/csv-json",        icon: "⇄",  title: "CSV ↔ JSON",             desc: "Convert with live table preview" },
+              { href: "/tools/case-converter",  icon: "Aa", title: "Case Converter",        desc: "camelCase, snake_case, kebab & more" },
+              { href: "/tools/grammar-checker", icon: "✏️", title: "Grammar Checker",        desc: "Powered by LanguageTool API" },
+              { href: "/tools/html-beautifier", icon: "🌐", title: "HTML Beautifier",        desc: "Format HTML with W3C standards" },
+              { href: "/tools/js-beautifier",   icon: "✨", title: "JS Beautifier",          desc: "Format JavaScript & TypeScript" },
+              { href: "/tools/css-beautifier",  icon: "🎨", title: "CSS Beautifier",         desc: "Format CSS and SCSS" },
+              { href: "/tools/python-beautifier",icon: "🐍", title: "Python Beautifier",     desc: "PEP 8 compliant formatting" },
+            ]} />
+
+            {/* ── Design & Visual ── */}
+            <ToolCategory label="Design & Visual" icon="🎨" href="/tools#design-visual" tools={[
+              { href: "/tools/color-picker",   icon: "🎨", title: "Color Picker",            desc: "HEX, RGB, HSL, CMYK values" },
+              { href: "/tools/palette",        icon: "🖌️", title: "Palette Generator",        desc: "Complementary, triadic, analogous" },
+              { href: "/tools/gradient",       icon: "🌈", title: "CSS Gradient Builder",    desc: "Linear & radial with CSS output" },
+              { href: "/tools/glassmorphism",  icon: "🪟", title: "Glassmorphism",           desc: "Glass-effect UI cards" },
+              { href: "/tools/box-shadow",     icon: "🔲", title: "Box Shadow Builder",      desc: "Multi-layer shadows, live preview" },
+              { href: "/tools/border-radius",  icon: "⬜", title: "Border Radius",           desc: "Per-side visual builder" },
+              { href: "/tools/favicon",        icon: "⭐", title: "Favicon Generator",       desc: "All standard sizes from any image" },
+            ]} />
+
+            {/* ── Converters & Calculators ── */}
+            <ToolCategory label="Converters & Calculators" icon="🔢" href="/tools#converters" tools={[
+              { href: "/tools/units",              icon: "📐", title: "Unit Converter",        desc: "Length, weight, temp, area & more" },
+              { href: "/tools/aspect-ratio",       icon: "⛶",  title: "Aspect Ratio",          desc: "Lock ratio, solve dimensions" },
+              { href: "/tools/timestamp",          icon: "🕐", title: "Timestamp Converter",   desc: "Unix ↔ human-readable dates" },
+              { href: "/tools/base-converter",     icon: "🔢", title: "Number Base",           desc: "Binary, octal, decimal, hex" },
+              { href: "/tools/cron",               icon: "⏱️", title: "Cron Builder",          desc: "Schedule expressions + preview" },
+              { href: "/tools/password",           icon: "🔑", title: "Password Generator",    desc: "Cryptographically secure" },
+              { href: "/tools/calculator",         icon: "🧮", title: "Calculator",            desc: "Basic + scientific, with history" },
+              { href: "/tools/currency-converter", icon: "💱", title: "Currency Converter",    desc: "Live rates for 160+ currencies" },
+              { href: "/tools/time-calculator",    icon: "⏱",  title: "Time Calculator",       desc: "Durations, add & subtract time" },
+            ]} />
+
+            {/* ── Images & PDFs ── */}
+            <ToolCategory label="Images & PDFs" icon="🖼️" href="/tools#images-pdfs" tools={[
+              { href: "/tools/image-editor",       icon: "🖼️", title: "Image Editor",          desc: "Resize, crop, rotate, markup" },
+              { href: "/tools/image-compressor",   icon: "🗜️", title: "Image Compressor",       desc: "Compress JPEG, PNG, WEBP in bulk" },
+              { href: "/tools/background-remover", icon: "✂️", title: "Background Remover",    desc: "AI-powered, runs in browser" },
+              { href: "/tools/raster-to-svg",      icon: "✦",  title: "PNG/JPG → SVG",         desc: "Vectorize raster images" },
+              { href: "/tools/svg-to-png",         icon: "✦",  title: "SVG → PNG",             desc: "Up to 4× scale output" },
+              { href: "/tools/exif",               icon: "📷", title: "EXIF Viewer",            desc: "Camera, GPS & image metadata" },
+              { href: "/tools/pdf-merge",          icon: "📄", title: "PDF Merge",              desc: "Combine & reorder PDFs" },
+              { href: "/tools/pdf-to-images",      icon: "🖨️", title: "PDF to Images",         desc: "Each page to PNG" },
+              { href: "/tools/qr",                 icon: "⬛", title: "QR Generator",          desc: "Any URL or text → QR PNG" },
+            ]} />
+
+            {/* ── Reference ── */}
+            <ToolCategory label="Reference" icon="📚" href="/tools#reference" tools={[
+              { href: "/tools/http-status",         icon: "📡", title: "HTTP Status Codes",    desc: "Searchable reference for every code" },
+              { href: "/tools/framework-reference", icon: "📚", title: "Framework Reference",  desc: "Tailwind, Bootstrap, React, Next.js" },
+            ]} />
+
+            <div className="mt-10 text-center">
+              <Link href="/tools"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition-colors shadow-lg shadow-blue-500/20">
+                Browse all 43 tools
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+              </Link>
             </div>
           </div>
-        )}
+        </div>
 
-        {/* ── Bottom sections ───────────────────────────────── */}
-        {files.length === 0 && (
-          <div className="mt-10 grid grid-cols-1 lg:grid-cols-5 gap-5">
+        {/* ── FORMATS + PRIVACY ─────────────────────────────────── */}
+        <div className="max-w-5xl mx-auto px-4 py-16">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
             <div className="lg:col-span-3">
               <FormatsSection />
             </div>
@@ -626,8 +644,43 @@ export default function HomePage() {
               </ul>
             </div>
           </div>
-        )}
+        </div>
+
       </main>
     </div>
   );
 }
+
+/* ── Tool category section ───────────────────────────────────── */
+function ToolCategory({ label, icon, href, tools }: {
+  label: string; icon: string; href: string;
+  tools: { href: string; icon: string; title: string; desc: string }[];
+}) {
+  return (
+    <div className="mb-10">
+      <div className="flex items-center gap-3 mb-4">
+        <Link href={href} className="flex items-center gap-2 group">
+          <span className="text-base">{icon}</span>
+          <span className="text-white text-sm font-semibold group-hover:text-blue-300 transition-colors">{label}</span>
+        </Link>
+        <div className="h-px flex-1 bg-slate-800/60" />
+        <span className="text-slate-600 text-xs">{tools.length}</span>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+        {tools.map(({ href: toolHref, icon: toolIcon, title, desc }) => (
+          <Link key={toolHref} href={toolHref}
+            className="group flex items-start gap-2.5 p-3 rounded-xl bg-slate-900/50 border border-slate-800/60 hover:border-slate-700 hover:bg-slate-900 transition-all duration-150">
+            <div className="shrink-0 w-8 h-8 rounded-lg bg-slate-800 border border-slate-700/60 flex items-center justify-center text-base mt-0.5">
+              {toolIcon}
+            </div>
+            <div className="min-w-0">
+              <p className="text-white text-xs font-medium group-hover:text-blue-300 transition-colors leading-snug">{title}</p>
+              <p className="text-slate-600 text-[11px] leading-relaxed mt-0.5 line-clamp-2">{desc}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
