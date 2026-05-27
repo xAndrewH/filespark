@@ -29,6 +29,15 @@ export default function Navbar({ historyCount, onHistoryClick, onKeyClick }: Pro
 
         {/* Right side */}
         <div className="flex items-center gap-2.5">
+          <a
+            href="https://buymeacoffee.com/Huppa"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow-500/15 hover:bg-yellow-500/25 border border-yellow-500/30 hover:border-yellow-500/50 text-yellow-400 hover:text-yellow-300 text-sm font-medium transition-all duration-150"
+          >
+            <span className="text-base leading-none">☕</span>
+            <span className="hidden sm:block">Buy me a coffee</span>
+          </a>
           <Link
             href="/tools"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white text-sm font-medium transition-all duration-150"

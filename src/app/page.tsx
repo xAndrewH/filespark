@@ -658,6 +658,51 @@ export default function HomePage() {
             </div>
         </div>
 
+        {/* ── SUPPORT / DONATE ───────────────────────────────────── */}
+        <div className="max-w-5xl mx-auto px-4 pb-20">
+          <div className="relative rounded-2xl overflow-hidden border border-yellow-500/20 bg-gradient-to-br from-yellow-500/5 via-slate-900/60 to-slate-900/40">
+            {/* Top accent */}
+            <div className="h-1 w-full bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400" />
+            <div className="px-8 py-10 flex flex-col sm:flex-row items-center gap-8">
+              {/* Left: coffee icon */}
+              <div className="shrink-0 w-20 h-20 rounded-2xl bg-yellow-500/15 border border-yellow-500/25 flex items-center justify-center text-5xl">
+                ☕
+              </div>
+              {/* Center: text */}
+              <div className="flex-1 text-center sm:text-left">
+                <p className="text-xs font-bold text-yellow-400 uppercase tracking-widest mb-2">Support FileFlow</p>
+                <h2 className="text-2xl font-black text-white mb-2">
+                  Like what you see?
+                </h2>
+                <p className="text-slate-400 text-sm leading-relaxed max-w-md">
+                  FileFlow is completely free — no ads, no subscriptions, no data harvesting. If it's saved you time, consider buying me a coffee to keep it running and growing.
+                </p>
+                <div className="flex flex-wrap gap-3 mt-5 justify-center sm:justify-start">
+                  {["100% free forever", "No ads ever", "New tools regularly"].map(t => (
+                    <span key={t} className="flex items-center gap-1.5 text-xs text-slate-400">
+                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 shrink-0" />
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              {/* Right: CTA */}
+              <div className="shrink-0 flex flex-col items-center gap-3">
+                <a
+                  href="https://buymeacoffee.com/Huppa"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-bold text-sm transition-all duration-150 shadow-lg shadow-yellow-500/20 hover:shadow-yellow-400/30 hover:scale-105"
+                >
+                  <span className="text-xl">☕</span>
+                  Buy me a coffee
+                </a>
+                <p className="text-slate-600 text-xs">Even $1 makes a difference</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </main>
     </div>
   );
