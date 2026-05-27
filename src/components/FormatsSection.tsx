@@ -5,13 +5,13 @@ import { useState, useEffect } from "react";
 interface FormatGroup {
   label: string;
   icon: string;
+  color: string;
   formats: string[];
 }
 
 const FORMAT_GROUPS: FormatGroup[] = [
   {
-    label: "Images",
-    icon: "🖼️",
+    label: "Images", icon: "🖼️", color: "blue",
     formats: [
       "JPG","JPEG","JFIF","JPE","PNG","WEBP","AVIF","GIF","TIFF","BMP",
       "SVG","APNG","HEIC","HEIF","PSD","EPS","AI","XCF","TGA","ICO",
@@ -19,67 +19,63 @@ const FORMAT_GROUPS: FormatGroup[] = [
     ],
   },
   {
-    label: "Video",
-    icon: "🎬",
+    label: "Video", icon: "🎬", color: "violet",
     formats: ["MP4","AVI","MOV","MKV","WEBM","FLV","WMV","MPEG","MPG","M4V","3GP"],
   },
   {
-    label: "Audio",
-    icon: "🎵",
+    label: "Audio", icon: "🎵", color: "green",
     formats: ["MP3","WAV","FLAC","AAC","OGG","M4A","WMA","OPUS"],
   },
   {
-    label: "Documents",
-    icon: "📝",
+    label: "Documents", icon: "📝", color: "orange",
     formats: ["DOCX","DOC","ODT","RTF","TXT","CSV","PDF"],
   },
   {
-    label: "Spreadsheets",
-    icon: "📊",
+    label: "Spreadsheets", icon: "📊", color: "emerald",
     formats: ["XLSX","XLS","ODS","CSV"],
   },
   {
-    label: "Slides",
-    icon: "📑",
+    label: "Slides", icon: "📑", color: "amber",
     formats: ["PPTX","PPT","ODP"],
   },
   {
-    label: "E-books",
-    icon: "📚",
+    label: "E-books", icon: "📚", color: "pink",
     formats: [
       "EPUB","MOBI","AZW","AZW3","FB2","LIT","LRF","PDB",
       "HTMLZ","TXTZ","CBZ","CBR","CHM","DJVU","PRC",
     ],
   },
   {
-    label: "Archives",
-    icon: "📦",
+    label: "Archives", icon: "📦", color: "slate",
     formats: ["ZIP","TAR","GZ","BZ2","7Z","RAR","XZ"],
   },
   {
-    label: "Fonts",
-    icon: "🔤",
+    label: "Fonts", icon: "🔤", color: "cyan",
     formats: ["TTF","OTF","WOFF","WOFF2"],
   },
 ];
 
+const COLOR_MAP: Record<string, { pill: string; badge: string; count: string }> = {
+  blue:    { pill: "bg-blue-500/15 border-blue-500/40 text-blue-300",    badge: "bg-blue-500/10 border-blue-500/20 text-blue-300 hover:bg-blue-500/20",    count: "bg-blue-500/20 text-blue-300" },
+  violet:  { pill: "bg-violet-500/15 border-violet-500/40 text-violet-300", badge: "bg-violet-500/10 border-violet-500/20 text-violet-300 hover:bg-violet-500/20", count: "bg-violet-500/20 text-violet-300" },
+  green:   { pill: "bg-green-500/15 border-green-500/40 text-green-300",  badge: "bg-green-500/10 border-green-500/20 text-green-300 hover:bg-green-500/20",  count: "bg-green-500/20 text-green-300" },
+  orange:  { pill: "bg-orange-500/15 border-orange-500/40 text-orange-300", badge: "bg-orange-500/10 border-orange-500/20 text-orange-300 hover:bg-orange-500/20", count: "bg-orange-500/20 text-orange-300" },
+  emerald: { pill: "bg-emerald-500/15 border-emerald-500/40 text-emerald-300", badge: "bg-emerald-500/10 border-emerald-500/20 text-emerald-300 hover:bg-emerald-500/20", count: "bg-emerald-500/20 text-emerald-300" },
+  amber:   { pill: "bg-amber-500/15 border-amber-500/40 text-amber-300",  badge: "bg-amber-500/10 border-amber-500/20 text-amber-300 hover:bg-amber-500/20",  count: "bg-amber-500/20 text-amber-300" },
+  pink:    { pill: "bg-pink-500/15 border-pink-500/40 text-pink-300",    badge: "bg-pink-500/10 border-pink-500/20 text-pink-300 hover:bg-pink-500/20",    count: "bg-pink-500/20 text-pink-300" },
+  slate:   { pill: "bg-slate-600/30 border-slate-500/40 text-slate-300",  badge: "bg-slate-700/40 border-slate-600/30 text-slate-300 hover:bg-slate-700/60",  count: "bg-slate-600/30 text-slate-300" },
+  cyan:    { pill: "bg-cyan-500/15 border-cyan-500/40 text-cyan-300",    badge: "bg-cyan-500/10 border-cyan-500/20 text-cyan-300 hover:bg-cyan-500/20",    count: "bg-cyan-500/20 text-cyan-300" },
+};
+
 const CATEGORY_MAP: Record<string, string> = {
-  image:    "Images",
-  video:    "Video",
-  audio:    "Audio",
-  gif:      "Video",
-  pdf:      "Documents",
-  document: "Documents",
-  ebook:    "E-books",
-  archive:  "Archives",
-  font:     "Fonts",
+  image: "Images", video: "Video", audio: "Audio", gif: "Video",
+  pdf: "Documents", document: "Documents", ebook: "E-books",
+  archive: "Archives", font: "Fonts",
 };
 
 const TOTAL_UNIQUE = [...new Set(FORMAT_GROUPS.flatMap((g) => g.formats))].length;
 
-interface Props {
-  selectedCategory?: string;
-}
+interface Props { selectedCategory?: string }
 
 export default function FormatsSection({ selectedCategory }: Props) {
   const [active, setActive] = useState("Images");
@@ -91,67 +87,74 @@ export default function FormatsSection({ selectedCategory }: Props) {
   }, [selectedCategory]);
 
   const current = FORMAT_GROUPS.find((g) => g.label === active) ?? FORMAT_GROUPS[0];
+  const colors = COLOR_MAP[current.color];
 
   return (
-    <div className="rounded-2xl border border-slate-800/70 bg-slate-900/30 overflow-hidden">
+    <div className="rounded-2xl border border-slate-800/60 bg-slate-900/40 overflow-hidden">
       {/* Header */}
-      <div className="px-5 pt-5 pb-4 border-b border-slate-800/60">
-        <div className="flex items-center gap-1.5 mb-2.5">
-          <div className="w-5 h-5 rounded-md bg-blue-500/15 border border-blue-500/25 flex items-center justify-center">
-            <svg className="w-2.5 h-2.5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-              <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
-            </svg>
+      <div className="px-6 pt-6 pb-5">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-2">Supported Formats</p>
+            <h2 className="text-3xl font-black text-white leading-tight">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">{TOTAL_UNIQUE}+</span> formats
+            </h2>
+            <p className="text-slate-500 text-sm mt-1.5 leading-relaxed">
+              Across {FORMAT_GROUPS.length} categories — from everyday files to the obscure ones.
+            </p>
           </div>
-          <span className="text-blue-400 text-[10px] font-bold uppercase tracking-widest">Formats Supported</span>
+          {/* Mini stat grid */}
+          <div className="hidden sm:grid grid-cols-3 gap-2 shrink-0">
+            {FORMAT_GROUPS.slice(0, 3).map(g => (
+              <button key={g.label} onClick={() => setActive(g.label)}
+                className={`text-center px-3 py-2 rounded-xl border text-xs transition-all ${
+                  active === g.label
+                    ? COLOR_MAP[g.color].pill
+                    : "bg-slate-800/40 border-slate-700/40 text-slate-500 hover:text-slate-300"
+                }`}>
+                <div className="text-lg mb-0.5">{g.icon}</div>
+                <div className="font-semibold tabular-nums">{g.formats.length}</div>
+              </button>
+            ))}
+          </div>
         </div>
-        <h2 className="text-white text-xl font-bold tracking-tight mb-1.5 leading-snug">
-          {TOTAL_UNIQUE}+ formats across {FORMAT_GROUPS.length} categories.
-        </h2>
-        <p className="text-slate-500 text-xs leading-relaxed">
-          The everyday ones, the niche ones, and the ones you&apos;ve probably never heard of —
-          all available right now.
-        </p>
       </div>
 
       {/* Category pills */}
-      <div className="px-4 py-3 flex flex-wrap gap-1.5 border-b border-slate-800/60">
-        {FORMAT_GROUPS.map(({ label, icon, formats }) => {
+      <div className="px-5 pb-4 flex flex-wrap gap-1.5">
+        {FORMAT_GROUPS.map(({ label, icon, color, formats }) => {
           const isActive = active === label;
           return (
-            <button
-              key={label}
-              onClick={() => setActive(label)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-all duration-150 ${
-                isActive
-                  ? "bg-blue-600/20 border-blue-500/40 text-blue-300 shadow-sm shadow-blue-500/10"
-                  : "bg-slate-800/40 border-slate-700/50 text-slate-400 hover:text-slate-200 hover:border-slate-600/60 hover:bg-slate-800/70"
-              }`}
-            >
-              <span className="text-[11px]">{icon}</span>
-              <span>{label}</span>
-              <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold tabular-nums ${
-                isActive ? "bg-blue-500/25 text-blue-300" : "bg-slate-700/70 text-slate-500"
+            <button key={label} onClick={() => setActive(label)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150 ${
+                isActive ? COLOR_MAP[color].pill : "bg-slate-800/40 border-slate-700/40 text-slate-500 hover:text-slate-200 hover:bg-slate-800/70"
               }`}>
-                {formats.length}
-              </span>
+              <span>{icon}</span>
+              <span>{label}</span>
+              <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold tabular-nums ${
+                isActive ? COLOR_MAP[color].count : "bg-slate-700/60 text-slate-600"
+              }`}>{formats.length}</span>
             </button>
           );
         })}
       </div>
 
+      {/* Divider */}
+      <div className="mx-5 border-t border-slate-800/60 mb-4" />
+
       {/* Format badges */}
-      <div className="px-5 py-4">
+      <div className="px-5 pb-5">
         <div className="flex flex-wrap gap-1.5">
           {current.formats.map((fmt) => (
-            <span
-              key={fmt}
-              className="px-2.5 py-1 rounded-lg bg-slate-800/60 border border-slate-700/50 text-slate-300 text-xs font-mono tracking-wide hover:border-slate-600 hover:text-white hover:bg-slate-800 transition-all duration-100 cursor-default select-none"
-            >
-              {fmt}
+            <span key={fmt}
+              className={`px-2.5 py-1 rounded-lg border text-xs font-mono tracking-wide transition-all duration-100 cursor-default select-none ${colors.badge}`}>
+              .{fmt.toLowerCase()}
             </span>
           ))}
         </div>
+        <p className="text-slate-700 text-xs mt-3">
+          {current.formats.length} {current.label.toLowerCase()} format{current.formats.length !== 1 ? "s" : ""} supported
+        </p>
       </div>
     </div>
   );

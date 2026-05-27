@@ -618,30 +618,41 @@ export default function HomePage() {
             <div className="lg:col-span-3">
               <FormatsSection />
             </div>
-            <div className="lg:col-span-2 rounded-2xl border border-slate-800/70 bg-slate-900/30 p-6 flex flex-col">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-5 h-5 rounded-md bg-green-500/15 border border-green-500/25 flex items-center justify-center">
-                  <svg className="w-2.5 h-2.5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+            <div className="lg:col-span-2 rounded-2xl border border-green-500/20 bg-slate-900/40 overflow-hidden flex flex-col">
+              {/* Top accent bar */}
+              <div className="h-1 w-full bg-gradient-to-r from-green-500 via-emerald-400 to-teal-500" />
+              <div className="p-6 flex flex-col flex-1">
+                {/* Badge */}
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-green-500/30 bg-green-500/10 w-fit mb-5">
+                  <svg className="w-3 h-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
+                  <span className="text-green-400 text-[10px] font-bold uppercase tracking-widest">Privacy First</span>
                 </div>
-                <span className="text-green-400 text-[10px] font-bold uppercase tracking-widest">Privacy First</span>
+                {/* Headline */}
+                <h2 className="text-2xl font-black text-white leading-tight mb-2">
+                  Private by design.<br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-400">Free by default.</span>
+                </h2>
+                <p className="text-slate-500 text-sm leading-relaxed mb-6">No account. No tracking. No data sold. Everything runs in your browser — your files never leave your device.</p>
+                {/* Feature grid */}
+                <div className="grid grid-cols-1 gap-3 mt-auto">
+                  {[
+                    { icon: "⚡", label: "Browser-powered", desc: "All 43 tools run 100% client-side" },
+                    { icon: "🗑️", label: "Auto-deleted", desc: "Server files wiped immediately after conversion" },
+                    { icon: "🔑", label: "Zero accounts", desc: "No login, no email, no sign-up ever" },
+                    { icon: "📜", label: "Local history", desc: "Conversion history stays on your device only" },
+                  ].map(({ icon, label, desc }) => (
+                    <div key={label} className="flex items-center gap-3 p-3 rounded-xl bg-green-500/5 border border-green-500/10">
+                      <span className="text-xl shrink-0">{icon}</span>
+                      <div>
+                        <div className="text-white text-xs font-semibold leading-tight">{label}</div>
+                        <div className="text-slate-500 text-xs leading-snug mt-0.5">{desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <h2 className="text-white text-xl font-bold mb-3 leading-snug">Private by design.<br />Free by default.</h2>
-              <p className="text-slate-500 text-sm leading-relaxed mb-6">No account. No tracking. No data sold. All tools run in your browser — nothing leaves your device unless you convert a document server-side.</p>
-              <ul className="space-y-3 mt-auto">
-                {[
-                  { icon: "⚡", text: "Images, video, audio & all 43 tools run entirely in your browser" },
-                  { icon: "🗑️", text: "Server-side conversions delete your file immediately after" },
-                  { icon: "🔑", text: "No account, login, or email — ever" },
-                  { icon: "📜", text: "Conversion history stored only in your browser" },
-                ].map(({ icon, text }) => (
-                  <li key={text} className="flex items-start gap-3 text-sm text-slate-400">
-                    <span className="flex-shrink-0 mt-0.5 text-base">{icon}</span>
-                    <span>{text}</span>
-                  </li>
-                ))}
-              </ul>
             </div>
           </div>
         </div>
