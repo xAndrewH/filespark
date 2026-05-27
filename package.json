@@ -25,6 +25,7 @@
     "heic2any": "^0.0.4",
     "js-beautify": "^1.15.4",
     "jszip": "^3.10.1",
+    "lucide-react": "^1.16.0",
     "marked": "^18.0.3",
     "next": "16.2.6",
     "pdf-lib": "^1.17.1",

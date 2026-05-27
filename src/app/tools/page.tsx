@@ -1,88 +1,92 @@
 "use client";
 
+import React from "react";
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { Type, FileCode, GitCompare, AlignLeft, Shuffle, Link as LucideLink, Hash, Braces, Search, Table2, CaseSensitive, SpellCheck, Code2, Wand2, Paintbrush, Terminal, Pipette, Palette, Blend, Layers, BoxSelect, SquareDashed, Bookmark, Ruler, Maximize2, Clock, Binary, Timer, Key, Calculator, Coins, Hourglass, Percent, BarChart2, ImagePlus, Minimize2, Scissors, PenTool, FileImage, Camera, FilePlus2, ScanLine, QrCode, Globe, BookOpen, Tag, ArrowLeftRight, Image, ZoomIn, FileMinus2, Replace, Barcode, CalendarDays, Receipt, Wifi, MapPin, Play } from "lucide-react";
 
-const CATEGORIES = [
+type IconComponent = React.ComponentType<{ className?: string }>;
+
+const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href: string; icon: IconComponent; title: string; description: string }[] }[] = [
   {
     id: "text-code",
     name: "Text & Code",
-    icon: "✍️",
+    icon: FileCode,
     tools: [
-      { href: "/tools/word-counter",    icon: "📃", title: "Word Counter",             description: "Count words, characters, sentences, and reading time." },
-      { href: "/tools/markdown",        icon: "✍️", title: "Markdown Editor",          description: "Split-pane editor with live HTML preview." },
-      { href: "/tools/diff",            icon: "🔀",  title: "Text Diff Checker",        description: "Paste two texts and see exactly what changed." },
-      { href: "/tools/lorem",           icon: "¶",  title: "Lorem Ipsum Generator",    description: "Generate paragraphs, sentences, or words of placeholder text." },
-      { href: "/tools/base64",          icon: "🔤", title: "Base64 Encoder / Decoder", description: "Encode plain text to Base64 or decode Base64 strings." },
-      { href: "/tools/url-encode",      icon: "🔗", title: "URL Encoder / Decoder",    description: "Percent-encode URLs or decode encoded query strings." },
-      { href: "/tools/hash",            icon: "#️⃣", title: "Hash Generator",            description: "Generate SHA-1, SHA-256, SHA-384, and SHA-512 hashes." },
-      { href: "/tools/json",            icon: "📋", title: "JSON Formatter",           description: "Validate, format with configurable indentation, and minify JSON." },
-      { href: "/tools/regex",           icon: "🔍", title: "Regex Tester",              description: "Test regular expressions with live match highlighting." },
-      { href: "/tools/csv-json",        icon: "⇄",  title: "CSV ↔ JSON",               description: "Convert between CSV and JSON with a live table preview." },
-      { href: "/tools/case-converter",  icon: "🔠", title: "Case Converter",           description: "Convert text between camelCase, snake_case, kebab-case, and more." },
-      { href: "/tools/grammar-checker", icon: "✏️", title: "Grammar & Spell Checker",  description: "Check grammar, spelling, and style powered by LanguageTool." },
-      { href: "/tools/html-beautifier",  icon: "🌐", title: "HTML Beautifier",           description: "Format and indent HTML following W3C best practices." },
-      { href: "/tools/js-beautifier",    icon: "✨", title: "JavaScript Beautifier",     description: "Format JavaScript and TypeScript following Airbnb / ESLint standards." },
-      { href: "/tools/css-beautifier",   icon: "💅", title: "CSS Beautifier",            description: "Format CSS, SCSS, and Sass with proper spacing and rule separation." },
-      { href: "/tools/python-beautifier",icon: "🐍", title: "Python Beautifier",         description: "Format Python code with PEP 8 compliant 4-space indentation." },
+      { href: "/tools/word-counter",     icon: Type,           title: "Word Counter",             description: "Count words, characters, sentences, and reading time." },
+      { href: "/tools/markdown",         icon: FileCode,       title: "Markdown Editor",          description: "Split-pane editor with live HTML preview." },
+      { href: "/tools/diff",             icon: GitCompare,     title: "Text Diff Checker",        description: "Paste two texts and see exactly what changed." },
+      { href: "/tools/lorem",            icon: AlignLeft,      title: "Lorem Ipsum Generator",    description: "Generate paragraphs, sentences, or words of placeholder text." },
+      { href: "/tools/base64",           icon: Shuffle,        title: "Base64 Encoder / Decoder", description: "Encode plain text to Base64 or decode Base64 strings." },
+      { href: "/tools/url-encode",       icon: LucideLink,     title: "URL Encoder / Decoder",    description: "Percent-encode URLs or decode encoded query strings." },
+      { href: "/tools/hash",             icon: Hash,           title: "Hash Generator",            description: "Generate SHA-1, SHA-256, SHA-384, and SHA-512 hashes." },
+      { href: "/tools/json",             icon: Braces,         title: "JSON Formatter",           description: "Validate, format with configurable indentation, and minify JSON." },
+      { href: "/tools/regex",            icon: Search,         title: "Regex Tester",              description: "Test regular expressions with live match highlighting." },
+      { href: "/tools/csv-json",         icon: Table2,         title: "CSV ↔ JSON",               description: "Convert between CSV and JSON with a live table preview." },
+      { href: "/tools/case-converter",   icon: CaseSensitive,  title: "Case Converter",           description: "Convert text between camelCase, snake_case, kebab-case, and more." },
+      { href: "/tools/grammar-checker",  icon: SpellCheck,     title: "Grammar & Spell Checker",  description: "Check grammar, spelling, and style powered by LanguageTool." },
+      { href: "/tools/html-beautifier",  icon: Code2,          title: "HTML Beautifier",           description: "Format and indent HTML following W3C best practices." },
+      { href: "/tools/js-beautifier",    icon: Wand2,          title: "JavaScript Beautifier",     description: "Format JavaScript and TypeScript following Airbnb / ESLint standards." },
+      { href: "/tools/css-beautifier",   icon: Paintbrush,     title: "CSS Beautifier",            description: "Format CSS, SCSS, and Sass with proper spacing and rule separation." },
+      { href: "/tools/python-beautifier",icon: Terminal,       title: "Python Beautifier",         description: "Format Python code with PEP 8 compliant 4-space indentation." },
     ],
   },
   {
     id: "design-visual",
     name: "Design & Visual",
-    icon: "🎨",
+    icon: Palette,
     tools: [
-      { href: "/tools/color-picker",   icon: "🎯", title: "Color Picker",             description: "Pick a color and get HEX, RGB, HSL, and CMYK values instantly." },
-      { href: "/tools/palette",        icon: "🖌️", title: "Color Palette Generator",  description: "Generate complementary, triadic, and analogous palettes." },
-      { href: "/tools/gradient",       icon: "🌈", title: "CSS Gradient Builder",     description: "Build linear and radial gradients and copy the CSS." },
-      { href: "/tools/glassmorphism",  icon: "🪟", title: "Glassmorphism Generator",  description: "Build glass-effect UI cards with blur and opacity controls." },
-      { href: "/tools/box-shadow",     icon: "🔲", title: "Box Shadow Builder",       description: "Build CSS box shadows with multiple layers and live preview." },
-      { href: "/tools/border-radius",  icon: "🟦", title: "Border Radius Builder",    description: "Shape rounded corners per-side visually and copy the CSS." },
-      { href: "/tools/favicon",        icon: "🔖", title: "Favicon Generator",        description: "Upload any image and get favicon PNGs at all standard sizes." },
+      { href: "/tools/color-picker",    icon: Pipette,      title: "Color Picker",             description: "Pick a color and get HEX, RGB, HSL, and CMYK values instantly." },
+      { href: "/tools/palette",         icon: Palette,      title: "Color Palette Generator",  description: "Generate complementary, triadic, and analogous palettes." },
+      { href: "/tools/gradient",        icon: Blend,        title: "CSS Gradient Builder",     description: "Build linear and radial gradients and copy the CSS." },
+      { href: "/tools/glassmorphism",   icon: Layers,       title: "Glassmorphism Generator",  description: "Build glass-effect UI cards with blur and opacity controls." },
+      { href: "/tools/box-shadow",      icon: BoxSelect,    title: "Box Shadow Builder",       description: "Build CSS box shadows with multiple layers and live preview." },
+      { href: "/tools/border-radius",   icon: SquareDashed, title: "Border Radius Builder",    description: "Shape rounded corners per-side visually and copy the CSS." },
+      { href: "/tools/favicon",         icon: Bookmark,     title: "Favicon Generator",        description: "Upload any image and get favicon PNGs at all standard sizes." },
     ],
   },
   {
     id: "converters",
     name: "Converters & Calculators",
-    icon: "🔢",
+    icon: ArrowLeftRight,
     tools: [
-      { href: "/tools/units",              icon: "📐", title: "Unit Converter",          description: "Convert length, weight, temperature, area, volume, and more." },
-      { href: "/tools/aspect-ratio",       icon: "📏",  title: "Aspect Ratio Calculator", description: "Calculate width or height while locking an aspect ratio." },
-      { href: "/tools/timestamp",          icon: "🕐", title: "Timestamp Converter",     description: "Convert Unix timestamps to human-readable dates and back." },
-      { href: "/tools/base-converter",     icon: "💻", title: "Number Base Converter",   description: "Convert numbers between binary, octal, decimal, and hex." },
-      { href: "/tools/cron",               icon: "⏱️", title: "Cron Expression Builder", description: "Build and validate cron schedules with next-run preview." },
-      { href: "/tools/password",           icon: "🔑", title: "Password Generator",      description: "Cryptographically secure passwords with strength scoring." },
-      { href: "/tools/calculator",              icon: "🧮", title: "Calculator",               description: "Basic and advanced scientific calculator with history." },
-      { href: "/tools/currency-converter",      icon: "💱", title: "Currency Converter",       description: "Live exchange rates for 160+ currencies by country." },
-      { href: "/tools/time-calculator",         icon: "⏳",  title: "Time Calculator",          description: "Calculate durations, add/subtract time, combine intervals." },
-      { href: "/tools/percentage-calculator",   icon: "💯", title: "Percentage Calculator",    description: "Calculate percentages, increases, decreases, and differences." },
-      { href: "/tools/average-calculator",      icon: "📊", title: "Average Calculator",       description: "Mean, median, mode, and range for any set of numbers." },
+      { href: "/tools/units",                   icon: Ruler,          title: "Unit Converter",          description: "Convert length, weight, temperature, area, volume, and more." },
+      { href: "/tools/aspect-ratio",            icon: Maximize2,      title: "Aspect Ratio Calculator", description: "Calculate width or height while locking an aspect ratio." },
+      { href: "/tools/timestamp",               icon: Clock,          title: "Timestamp Converter",     description: "Convert Unix timestamps to human-readable dates and back." },
+      { href: "/tools/base-converter",          icon: Binary,         title: "Number Base Converter",   description: "Convert numbers between binary, octal, decimal, and hex." },
+      { href: "/tools/cron",                    icon: Timer,          title: "Cron Expression Builder", description: "Build and validate cron schedules with next-run preview." },
+      { href: "/tools/password",                icon: Key,            title: "Password Generator",      description: "Cryptographically secure passwords with strength scoring." },
+      { href: "/tools/calculator",              icon: Calculator,     title: "Calculator",               description: "Basic and advanced scientific calculator with history." },
+      { href: "/tools/currency-converter",      icon: Coins,          title: "Currency Converter",       description: "Live exchange rates for 160+ currencies by country." },
+      { href: "/tools/time-calculator",         icon: Hourglass,      title: "Time Calculator",          description: "Calculate durations, add/subtract time, combine intervals." },
+      { href: "/tools/percentage-calculator",   icon: Percent,        title: "Percentage Calculator",    description: "Calculate percentages, increases, decreases, and differences." },
+      { href: "/tools/average-calculator",      icon: BarChart2,      title: "Average Calculator",       description: "Mean, median, mode, and range for any set of numbers." },
     ],
   },
   {
     id: "reference",
     name: "Reference",
-    icon: "📚",
+    icon: BookOpen,
     tools: [
-      { href: "/tools/http-status",         icon: "📶", title: "HTTP Status Codes",      description: "Searchable reference for every HTTP status code." },
-      { href: "/tools/framework-reference", icon: "📖", title: "Framework Reference",    description: "Snippets for Tailwind, Bootstrap, Sass, React, and Next.js." },
-      { href: "/tools/utm-builder",         icon: "🏷️", title: "UTM Builder",            description: "Build UTM-tagged URLs for campaign tracking." },
+      { href: "/tools/http-status",         icon: Globe,     title: "HTTP Status Codes",      description: "Searchable reference for every HTTP status code." },
+      { href: "/tools/framework-reference", icon: BookOpen,  title: "Framework Reference",    description: "Snippets for Tailwind, Bootstrap, Sass, React, and Next.js." },
+      { href: "/tools/utm-builder",         icon: Tag,       title: "UTM Builder",            description: "Build UTM-tagged URLs for campaign tracking." },
     ],
   },
   {
     id: "images-pdfs",
     name: "Images & PDFs",
-    icon: "🖼️",
+    icon: Image,
     tools: [
-      { href: "/tools/image-editor",       icon: "🖊️", title: "Image Editor",           description: "Resize, rotate, flip, and adjust quality for any image." },
-      { href: "/tools/raster-to-svg",      icon: "✒️",  title: "PNG / JPG → SVG",        description: "Vectorize raster images to scalable SVG." },
-      { href: "/tools/image-compressor",   icon: "🗜️", title: "Image Compressor",       description: "Compress JPEG, PNG, and WEBP images in bulk." },
-      { href: "/tools/svg-to-png",         icon: "📸",  title: "SVG to PNG",             description: "Convert SVG files or pasted code to PNG at up to 4× scale." },
-      { href: "/tools/background-remover", icon: "✂️", title: "Background Remover",     description: "AI-powered background removal in your browser." },
-      { href: "/tools/exif",               icon: "📷", title: "EXIF Viewer",             description: "Read camera settings, GPS, and metadata from images." },
-      { href: "/tools/pdf-merge",          icon: "📑", title: "PDF Merge",               description: "Combine multiple PDFs into one, reorder pages before merging." },
-      { href: "/tools/pdf-to-images",      icon: "🖼️", title: "PDF to Images",          description: "Convert each PDF page to a PNG at multiple quality levels." },
-      { href: "/tools/qr",                 icon: "📲", title: "QR Code Generator",      description: "Generate QR codes from any URL or text. Download as PNG." },
+      { href: "/tools/image-editor",       icon: ImagePlus,  title: "Image Editor",           description: "Resize, rotate, flip, and adjust quality for any image." },
+      { href: "/tools/raster-to-svg",      icon: PenTool,    title: "PNG / JPG → SVG",        description: "Vectorize raster images to scalable SVG." },
+      { href: "/tools/image-compressor",   icon: Minimize2,  title: "Image Compressor",       description: "Compress JPEG, PNG, and WEBP images in bulk." },
+      { href: "/tools/svg-to-png",         icon: FileImage,  title: "SVG to PNG",             description: "Convert SVG files or pasted code to PNG at up to 4× scale." },
+      { href: "/tools/background-remover", icon: Scissors,   title: "Background Remover",     description: "AI-powered background removal in your browser." },
+      { href: "/tools/exif",               icon: Camera,     title: "EXIF Viewer",             description: "Read camera settings, GPS, and metadata from images." },
+      { href: "/tools/pdf-merge",          icon: FilePlus2,  title: "PDF Merge",               description: "Combine multiple PDFs into one, reorder pages before merging." },
+      { href: "/tools/pdf-to-images",      icon: ScanLine,   title: "PDF to Images",          description: "Convert each PDF page to a PNG at multiple quality levels." },
+      { href: "/tools/qr",                 icon: QrCode,     title: "QR Code Generator",      description: "Generate QR codes from any URL or text. Download as PNG." },
     ],
   },
 ];
@@ -90,16 +94,16 @@ const CATEGORIES = [
 const ALL_TOOLS = CATEGORIES.flatMap(c => c.tools.map(t => ({ ...t, category: c.name, categoryId: c.id })));
 const TOTAL = ALL_TOOLS.length;
 
-const COMING_SOON = [
-  { icon: "🔍", title: "Upscale Image",              description: "AI-powered image upscaling up to 4× resolution." },
-  { icon: "📑", title: "Reorder / Delete PDF Pages", description: "Drag to reorder or remove pages from a PDF before saving." },
-  { icon: "🔎", title: "Find & Replace",             description: "Find and replace text across one or multiple files." },
-  { icon: "▮",  title: "Barcode Generator",          description: "Generate Code 128, QR, EAN, and UPC barcodes." },
-  { icon: "🎂", title: "Age Calculator",             description: "Calculate exact age in years, months, and days from a birthdate." },
-  { icon: "🧾", title: "Sales Tax Calculator",       description: "Calculate tax amount and total price for any rate." },
-  { icon: "🌐", title: "What's My IP",               description: "See your public IP address, location, and network info." },
-  { icon: "🔍", title: "IP Address Lookup",          description: "Look up geolocation and network details for any IP." },
-  { icon: "▶️", title: "YouTube Thumbnail Downloader", description: "Download thumbnails from any YouTube video in all resolutions." },
+const COMING_SOON: { icon: IconComponent; title: string; description: string }[] = [
+  { icon: ZoomIn,      title: "Upscale Image",              description: "AI-powered image upscaling up to 4× resolution." },
+  { icon: FileMinus2,  title: "Reorder / Delete PDF Pages", description: "Drag to reorder or remove pages from a PDF before saving." },
+  { icon: Replace,     title: "Find & Replace",             description: "Find and replace text across one or multiple files." },
+  { icon: Barcode,     title: "Barcode Generator",          description: "Generate Code 128, QR, EAN, and UPC barcodes." },
+  { icon: CalendarDays,title: "Age Calculator",             description: "Calculate exact age in years, months, and days from a birthdate." },
+  { icon: Receipt,     title: "Sales Tax Calculator",       description: "Calculate tax amount and total price for any rate." },
+  { icon: Wifi,        title: "What's My IP",               description: "See your public IP address, location, and network info." },
+  { icon: MapPin,      title: "IP Address Lookup",          description: "Look up geolocation and network details for any IP." },
+  { icon: Play,        title: "YouTube Thumbnail Downloader", description: "Download thumbnails from any YouTube video in all resolutions." },
 ];
 
 export default function ToolsPage() {
@@ -246,16 +250,16 @@ export default function ToolsPage() {
   );
 }
 
-function ToolCard({ href, icon, title, description, tag }: {
-  href: string; icon: string; title: string; description: string; tag?: string;
+function ToolCard({ href, icon: Icon, title, description, tag }: {
+  href: string; icon: IconComponent; title: string; description: string; tag?: string;
 }) {
   return (
     <Link
       href={href}
       className="group flex items-start gap-3 p-4 rounded-xl bg-slate-900/40 border border-slate-800/60 hover:border-slate-700/80 hover:bg-slate-900/70 transition-all duration-150"
     >
-      <div className="shrink-0 w-9 h-9 rounded-lg bg-slate-800 border border-slate-700/60 flex items-center justify-center text-lg">
-        {icon}
+      <div className="shrink-0 w-9 h-9 rounded-lg bg-slate-800 border border-slate-700/60 flex items-center justify-center">
+        <Icon className="w-5 h-5 text-slate-400 group-hover:text-blue-300 transition-colors" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
@@ -271,11 +275,11 @@ function ToolCard({ href, icon, title, description, tag }: {
   );
 }
 
-function ComingSoonCard({ icon, title, description }: { icon: string; title: string; description: string }) {
+function ComingSoonCard({ icon: Icon, title, description }: { icon: IconComponent; title: string; description: string }) {
   return (
     <div className="flex items-start gap-3 p-4 rounded-xl bg-slate-900/20 border border-slate-800/40 opacity-60 cursor-default select-none">
-      <div className="shrink-0 w-9 h-9 rounded-lg bg-slate-800/60 border border-slate-700/40 flex items-center justify-center text-lg grayscale">
-        {icon}
+      <div className="shrink-0 w-9 h-9 rounded-lg bg-slate-800/60 border border-slate-700/40 flex items-center justify-center">
+        <Icon className="w-5 h-5 text-slate-500" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
