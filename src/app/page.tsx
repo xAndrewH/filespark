@@ -613,12 +613,11 @@ export default function HomePage() {
         </div>
 
         {/* ── FORMATS + PRIVACY ─────────────────────────────────── */}
-        <div className="max-w-5xl mx-auto px-4 py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-            <div className="lg:col-span-3">
-              <FormatsSection />
-            </div>
-            <div className="lg:col-span-2 rounded-2xl border border-green-500/20 bg-slate-900/40 overflow-hidden flex flex-col">
+        <div className="max-w-5xl mx-auto px-4 py-16 space-y-5">
+          <div>
+            <FormatsSection />
+          </div>
+          <div className="rounded-2xl border border-green-500/20 bg-slate-900/40 overflow-hidden flex flex-col">
               {/* Top accent bar */}
               <div className="h-1 w-full bg-gradient-to-r from-green-500 via-emerald-400 to-teal-500" />
               <div className="p-6 flex flex-col flex-1">
@@ -636,7 +635,7 @@ export default function HomePage() {
                 </h2>
                 <p className="text-slate-500 text-sm leading-relaxed mb-6">No account. No tracking. No data sold. Everything runs in your browser — your files never leave your device.</p>
                 {/* Feature grid */}
-                <div className="grid grid-cols-1 gap-3 mt-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-auto">
                   {[
                     { icon: "⚡", label: "Browser-powered", desc: "All 43 tools run 100% client-side" },
                     { icon: "🗑️", label: "Auto-deleted", desc: "Server files wiped immediately after conversion" },
@@ -654,7 +653,6 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-          </div>
         </div>
 
       </main>

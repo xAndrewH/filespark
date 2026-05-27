@@ -105,7 +105,7 @@ export default function FormatsSection({ selectedCategory }: Props) {
           </div>
           {/* Mini stat grid */}
           <div className="hidden sm:grid grid-cols-3 gap-2 shrink-0">
-            {FORMAT_GROUPS.slice(0, 3).map(g => (
+            {FORMAT_GROUPS.map(g => (
               <button key={g.label} onClick={() => setActive(g.label)}
                 className={`text-center px-3 py-2 rounded-xl border text-xs transition-all ${
                   active === g.label
