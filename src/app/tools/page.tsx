@@ -88,11 +88,18 @@ const ALL_TOOLS = CATEGORIES.flatMap(c => c.tools.map(t => ({ ...t, category: c.
 const TOTAL = ALL_TOOLS.length;
 
 const COMING_SOON = [
-  { icon: "🔍", title: "Upscale Image",            description: "AI-powered image upscaling up to 4× resolution." },
+  { icon: "🔍", title: "Upscale Image",              description: "AI-powered image upscaling up to 4× resolution." },
   { icon: "📑", title: "Reorder / Delete PDF Pages", description: "Drag to reorder or remove pages from a PDF before saving." },
   { icon: "🔎", title: "Find & Replace",             description: "Find and replace text across one or multiple files." },
-  { icon: "▮", title: "Barcode Generator",          description: "Generate Code 128, QR, EAN, and UPC barcodes." },
+  { icon: "▮",  title: "Barcode Generator",          description: "Generate Code 128, QR, EAN, and UPC barcodes." },
   { icon: "🎂", title: "Age Calculator",             description: "Calculate exact age in years, months, and days from a birthdate." },
+  { icon: "💯", title: "Percentage Calculator",      description: "Calculate percentages, increases, decreases, and differences." },
+  { icon: "📊", title: "Average Calculator",         description: "Mean, median, mode, and range for any set of numbers." },
+  { icon: "🧾", title: "Sales Tax Calculator",       description: "Calculate tax amount and total price for any rate." },
+  { icon: "🔗", title: "UTM Builder",                description: "Build UTM-tagged URLs for campaign tracking." },
+  { icon: "🌐", title: "What's My IP",               description: "See your public IP address, location, and network info." },
+  { icon: "🔍", title: "IP Address Lookup",          description: "Look up geolocation and network details for any IP." },
+  { icon: "▶️", title: "YouTube Thumbnail Downloader", description: "Download thumbnails from any YouTube video in all resolutions." },
 ];
 
 export default function ToolsPage() {
@@ -224,7 +231,7 @@ export default function ToolsPage() {
               <div className="flex items-center gap-3 mb-4">
                 <h2 className="text-white text-sm font-semibold">Coming Soon</h2>
                 <div className="h-px flex-1 bg-slate-800/60" />
-                <span className="text-slate-600 text-xs">5</span>
+                <span className="text-slate-600 text-xs">{COMING_SOON.length}</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {COMING_SOON.map(({ icon, title, description }) => (
