@@ -420,14 +420,14 @@ export default function HomePage() {
 
           <p className="text-slate-400 text-xl leading-relaxed mb-10 max-w-2xl mx-auto">
             Convert <span className="text-white font-semibold">80+ file formats</span> and access{" "}
-            <span className="text-white font-semibold">43 free browser tools</span> — no upload, no account, nothing stored.
+            <span className="text-white font-semibold">46 free browser tools</span> — no upload, no account, nothing stored.
           </p>
 
           {/* Stat chips */}
           <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
             {[
               { icon: "🔄", value: "80+", label: "formats" },
-              { icon: "⚡", value: "43",  label: "tools" },
+              { icon: "⚡", value: "46",  label: "tools" },
               { icon: "🔒", value: "100%", label: "private" },
               { icon: "💸", value: "Free", label: "forever" },
             ].map(({ icon, value, label }) => (
@@ -578,9 +578,11 @@ export default function HomePage() {
               { href: "/tools/base-converter",     icon: "🔢", title: "Number Base",           desc: "Binary, octal, decimal, hex" },
               { href: "/tools/cron",               icon: "⏱️", title: "Cron Builder",          desc: "Schedule expressions + preview" },
               { href: "/tools/password",           icon: "🔑", title: "Password Generator",    desc: "Cryptographically secure" },
-              { href: "/tools/calculator",         icon: "🧮", title: "Calculator",            desc: "Basic + scientific, with history" },
-              { href: "/tools/currency-converter", icon: "💱", title: "Currency Converter",    desc: "Live rates for 160+ currencies" },
-              { href: "/tools/time-calculator",    icon: "⏱",  title: "Time Calculator",       desc: "Durations, add & subtract time" },
+              { href: "/tools/calculator",              icon: "🧮", title: "Calculator",            desc: "Basic + scientific, with history" },
+              { href: "/tools/currency-converter",      icon: "💱", title: "Currency Converter",    desc: "Live rates for 160+ currencies" },
+              { href: "/tools/time-calculator",         icon: "⏱",  title: "Time Calculator",       desc: "Durations, add & subtract time" },
+              { href: "/tools/percentage-calculator",   icon: "💯", title: "Percentage Calc",       desc: "X% of Y, change, increase & more" },
+              { href: "/tools/average-calculator",      icon: "📊", title: "Average Calculator",    desc: "Mean, median, mode, range & sum" },
             ]} />
 
             {/* ── Images & PDFs ── */}
@@ -600,12 +602,13 @@ export default function HomePage() {
             <ToolCategory label="Reference" icon="📚" href="/tools#reference" tools={[
               { href: "/tools/http-status",         icon: "📡", title: "HTTP Status Codes",    desc: "Searchable reference for every code" },
               { href: "/tools/framework-reference", icon: "📚", title: "Framework Reference",  desc: "Tailwind, Bootstrap, React, Next.js" },
+              { href: "/tools/utm-builder",         icon: "🔗", title: "UTM Builder",          desc: "Build UTM-tagged campaign URLs" },
             ]} />
 
             <div className="mt-10 text-center">
               <Link href="/tools"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition-colors shadow-lg shadow-blue-500/20">
-                Browse all 43 tools
+                Browse all 46 tools
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
               </Link>
             </div>
@@ -637,7 +640,7 @@ export default function HomePage() {
                 {/* Feature grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-auto">
                   {[
-                    { icon: "⚡", label: "Browser-powered", desc: "All 43 tools run 100% client-side" },
+                    { icon: "⚡", label: "Browser-powered", desc: "All 46 tools run 100% client-side" },
                     { icon: "🗑️", label: "Auto-deleted", desc: "Server files wiped immediately after conversion" },
                     { icon: "🔑", label: "Zero accounts", desc: "No login, no email, no sign-up ever" },
                     { icon: "📜", label: "Local history", desc: "Conversion history stays on your device only" },
