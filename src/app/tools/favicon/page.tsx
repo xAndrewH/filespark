@@ -73,7 +73,7 @@ export default function FaviconPage() {
           Tools
         </Link>
         <h1 className="text-3xl font-bold text-white mb-1">Favicon Generator</h1>
-        <p className="text-slate-500 text-sm mb-8">Upload any image and get favicon PNGs at all standard sizes — processed in your browser.</p>
+        <p className="text-slate-500 text-sm mb-8">Upload any image and get favicon PNGs at all standard sizes, processed in your browser.</p>
 
         <div className="space-y-5">
           <div

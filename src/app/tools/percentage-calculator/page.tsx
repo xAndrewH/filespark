@@ -276,7 +276,7 @@ export default function PercentageCalculatorPage() {
 
         <h1 className="text-3xl font-bold text-white mb-1">Percentage Calculator</h1>
         <p className="text-slate-500 text-sm mb-8">
-          Five ways to work with percentages — results update as you type.
+          Five ways to work with percentages. Results update as you type.
         </p>
 
         <div className="flex flex-col gap-4">

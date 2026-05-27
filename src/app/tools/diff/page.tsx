@@ -133,7 +133,7 @@ export default function DiffPage() {
           Tools
         </Link>
         <h1 className="text-3xl font-bold text-white mb-1">Text Diff Checker</h1>
-        <p className="text-slate-500 text-sm mb-8">Paste two blocks of text and see exactly what changed — word by word.</p>
+        <p className="text-slate-500 text-sm mb-8">Paste two blocks of text and see exactly what changed, word by word.</p>
 
         <div className="grid grid-cols-2 gap-4 mb-5">
           {([["Original", left, setLeft], ["Modified", right, setRight]] as const).map(([label, val, set]) => (

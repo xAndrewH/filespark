@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — FileFlow",
+  title: "Privacy Policy | FileFlow",
 };
 
 export default function PrivacyPage() {
@@ -38,7 +38,7 @@ export default function PrivacyPage() {
             </p>
             <p className="mt-3">
               Video, audio, GIF, and image conversions (JPEG, PNG, WEBP, HEIC, and more) happen entirely
-              in your browser — your files are never sent to our servers at all.
+              in your browser. Your files are never sent to our servers at all.
             </p>
           </section>
 

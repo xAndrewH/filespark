@@ -553,7 +553,7 @@ export default function ImageEditorPage() {
         </Link>
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-1">Image Editor</h1>
-          <p className="text-slate-500 text-sm">Resize, crop, rotate, adjust, add markup — all in your browser.</p>
+          <p className="text-slate-500 text-sm">Resize, crop, rotate, adjust, add markup. All in your browser.</p>
         </div>
 
         {!file ? (
@@ -966,7 +966,7 @@ export default function ImageEditorPage() {
               <div className="flex items-center gap-3 text-xs text-slate-600">
                 {orig && <span>{orig.naturalWidth}×{orig.naturalHeight}px original</span>}
                 {previewRef.current && <span>→ {previewRef.current.width}×{previewRef.current.height}px output</span>}
-                {cropMode && <span className="text-blue-400 ml-auto">Crop mode — drag to select</span>}
+                {cropMode && <span className="text-blue-400 ml-auto">Crop mode: drag to select</span>}
                 {activeTab === "markup" && <span className="text-violet-400 ml-auto">Drawing: {markupTool}</span>}
               </div>
             </div>

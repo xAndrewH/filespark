@@ -139,7 +139,7 @@ export default function ToolsPage() {
 
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">Tools</h1>
-          <p className="text-slate-400 text-base">{TOTAL} browser-side utilities — no account, no uploads, no limits.</p>
+          <p className="text-slate-400 text-base">{TOTAL} browser-side utilities. No account, no uploads, no limits.</p>
         </div>
 
         {/* Search */}

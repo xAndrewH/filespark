@@ -73,7 +73,7 @@ export default function ExifPage() {
           Tools
         </Link>
         <h1 className="text-3xl font-bold text-white mb-1">EXIF Viewer</h1>
-        <p className="text-slate-500 text-sm mb-8">Read image metadata — camera settings, GPS, timestamps and more.</p>
+        <p className="text-slate-500 text-sm mb-8">Read image metadata: camera settings, GPS, timestamps and more.</p>
 
         <div className="space-y-5">
           <div

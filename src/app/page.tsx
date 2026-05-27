@@ -420,7 +420,7 @@ export default function HomePage() {
 
           <p className="text-slate-400 text-xl leading-relaxed mb-10 max-w-2xl mx-auto">
             Convert <span className="text-white font-semibold">80+ file formats</span> and access{" "}
-            <span className="text-white font-semibold">46 free browser tools</span> — no upload, no account, nothing stored.
+            <span className="text-white font-semibold">46 free browser tools</span>. No upload, no account, nothing stored.
           </p>
 
           {/* Stat chips */}
@@ -527,7 +527,7 @@ export default function HomePage() {
               <div>
                 <p className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-2">Browser Tools</p>
                 <h2 className="text-4xl font-black text-white leading-tight">
-                  43 tools.<br />
+                  45+ tools.<br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-pink-400">Zero installs.</span>
                 </h2>
                 <p className="text-slate-500 text-sm mt-3 max-w-sm">Every tool runs entirely in your browser. No sign-up, no uploads, no waiting.</p>
@@ -636,7 +636,7 @@ export default function HomePage() {
                   Private by design.<br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-400">Free by default.</span>
                 </h2>
-                <p className="text-slate-500 text-sm leading-relaxed mb-6">No account. No tracking. No data sold. Everything runs in your browser — your files never leave your device.</p>
+                <p className="text-slate-500 text-sm leading-relaxed mb-6">No account. No tracking. No data sold. Everything runs in your browser. Your files never leave your device.</p>
                 {/* Feature grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-auto">
                   {[
@@ -675,7 +675,7 @@ export default function HomePage() {
                   Like what you see?
                 </h2>
                 <p className="text-slate-400 text-sm leading-relaxed max-w-md">
-                  FileFlow is completely free — no ads, no subscriptions, no data harvesting. If it's saved you time, consider buying me a coffee to keep it running and growing.
+                  FileFlow is completely free. No ads, no subscriptions, no data harvesting. If it's saved you time, consider buying me a coffee to keep it running and growing.
                 </p>
                 <div className="flex flex-wrap gap-3 mt-5 justify-center sm:justify-start">
                   {["100% free forever", "No ads ever", "New tools regularly"].map(t => (

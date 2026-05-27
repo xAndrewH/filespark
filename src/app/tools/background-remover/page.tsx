@@ -133,7 +133,7 @@ export default function BackgroundRemoverPage() {
           Tools
         </Link>
         <h1 className="text-3xl font-bold text-white mb-1">Background Remover</h1>
-        <p className="text-slate-500 text-sm mb-8">AI-powered background removal with background replacement — entirely in your browser.</p>
+        <p className="text-slate-500 text-sm mb-8">AI-powered background removal with background replacement, entirely in your browser.</p>
 
         <div className="space-y-4">
           {/* Settings */}
@@ -176,7 +176,7 @@ export default function BackgroundRemoverPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                 </svg>
                 <p className="text-slate-400 text-sm">Drop an image or <span className="text-blue-400">browse</span></p>
-                <p className="text-slate-600 text-xs mt-1">Works best with clear subjects — people, products, objects</p>
+                <p className="text-slate-600 text-xs mt-1">Works best with clear subjects: people, products, objects</p>
               </>
             )}
             <input ref={fileRef} type="file" accept="image/*" className="hidden"

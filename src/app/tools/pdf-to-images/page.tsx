@@ -119,7 +119,7 @@ export default function PdfToImagesPage() {
           Tools
         </Link>
         <h1 className="text-3xl font-bold text-white mb-1">PDF to Images</h1>
-        <p className="text-slate-500 text-sm mb-8">Convert PDF pages to PNG, JPEG, or WEBP — entirely in your browser.</p>
+        <p className="text-slate-500 text-sm mb-8">Convert PDF pages to PNG, JPEG, or WEBP, entirely in your browser.</p>
 
         <div className="space-y-4">
           {/* Settings */}

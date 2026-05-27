@@ -135,7 +135,7 @@ export default function ImageCompressorPage() {
           Tools
         </Link>
         <h1 className="text-3xl font-bold text-white mb-1">Image Compressor</h1>
-        <p className="text-slate-500 text-sm mb-8">Compress and resize images in your browser — no uploads, no limits.</p>
+        <p className="text-slate-500 text-sm mb-8">Compress and resize images in your browser. No uploads, no limits.</p>
 
         <div className="space-y-4">
           {/* Settings */}

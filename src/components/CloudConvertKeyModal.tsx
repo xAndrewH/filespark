@@ -41,7 +41,7 @@ export default function CloudConvertKeyModal({ open, onClose }: Props) {
           <ol className="text-slate-400 space-y-1 list-decimal list-inside">
             <li>Sign up at <span className="text-blue-400">cloudconvert.com</span></li>
             <li>Go to Dashboard → API Keys → Create API Key</li>
-            <li>Paste the key below — it&apos;s stored only in your browser</li>
+            <li>Paste the key below. It&apos;s stored only in your browser</li>
           </ol>
         </div>
 

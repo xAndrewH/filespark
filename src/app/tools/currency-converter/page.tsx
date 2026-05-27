@@ -197,7 +197,7 @@ export default function CurrencyConverterPage() {
           setError("Failed to load exchange rates.");
         }
       })
-      .catch(() => setError("Network error — could not load rates."))
+      .catch(() => setError("Network error: could not load rates."))
       .finally(() => setLoading(false));
   }, []);
 
@@ -280,7 +280,7 @@ export default function CurrencyConverterPage() {
                 <div className="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 text-center">
                   <p className="text-slate-400 text-sm mb-1">{amount} {from} ({fromName}) =</p>
                   <p className="text-white text-3xl font-bold">{result}</p>
-                  <p className="text-slate-400 text-base mt-1">{to} — {toName}</p>
+                  <p className="text-slate-400 text-base mt-1">{to}: {toName}</p>
                   <p className="text-slate-500 text-xs mt-2">
                     1 {from} = {(rates[to] / rates[from]).toLocaleString("en-US", { maximumFractionDigits: 6 })} {to}
                   </p>

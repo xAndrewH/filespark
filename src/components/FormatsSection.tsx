@@ -100,7 +100,7 @@ export default function FormatsSection({ selectedCategory }: Props) {
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">{TOTAL_UNIQUE}+</span> formats
             </h2>
             <p className="text-slate-500 text-sm mt-1.5 leading-relaxed">
-              Across {FORMAT_GROUPS.length} categories — from everyday files to the obscure ones.
+              Across {FORMAT_GROUPS.length} categories, from everyday files to the obscure ones.
             </p>
           </div>
         </div>

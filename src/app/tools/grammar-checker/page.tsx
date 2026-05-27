@@ -167,7 +167,7 @@ export default function GrammarCheckerPage() {
           {checked && matches.length === 0 && (
             <div className="flex items-center gap-3 bg-emerald-950/40 border border-emerald-800/50 rounded-xl p-4">
               <span className="text-emerald-400 text-lg">✓</span>
-              <p className="text-emerald-400 text-sm">No issues found — your text looks great!</p>
+              <p className="text-emerald-400 text-sm">No issues found. Your text looks great!</p>
             </div>
           )}
 

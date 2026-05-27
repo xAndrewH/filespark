@@ -172,7 +172,7 @@ export default function RasterToSvgPage() {
           Tools
         </Link>
         <h1 className="text-3xl font-bold text-white mb-1">PNG / JPG → SVG</h1>
-        <p className="text-slate-500 text-sm mb-8">Vectorize raster images to scalable SVG — color trace, B&amp;W trace, or embed.</p>
+        <p className="text-slate-500 text-sm mb-8">Vectorize raster images to scalable SVG. Color trace, B&amp;W trace, or embed.</p>
 
         <div className="space-y-4">
           {/* Mode + options */}

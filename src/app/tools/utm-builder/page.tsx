@@ -201,7 +201,7 @@ export default function UtmBuilderPage() {
             <label className={labelClass}>
               Campaign Term
               <span className="text-slate-600 ml-1">utm_term</span>
-              <span className="text-slate-600 ml-1">— (optional) Paid search keywords</span>
+              <span className="text-slate-600 ml-1">(optional) Paid search keywords</span>
             </label>
             <input
               type="text"
@@ -217,7 +217,7 @@ export default function UtmBuilderPage() {
             <label className={labelClass}>
               Campaign Content
               <span className="text-slate-600 ml-1">utm_content</span>
-              <span className="text-slate-600 ml-1">— (optional) Differentiate ads or links</span>
+              <span className="text-slate-600 ml-1">(optional) Differentiate ads or links</span>
             </label>
             <input
               type="text"
