@@ -541,68 +541,68 @@ export default function HomePage() {
 
             {/* ── Text & Code ── */}
             <ToolCategory label="Text & Code" icon="✍️" href="/tools#text-code" tools={[
-              { href: "/tools/word-counter",    icon: "📝", title: "Word Counter",          desc: "Words, chars, sentences, reading time" },
+              { href: "/tools/word-counter",    icon: "📃", title: "Word Counter",          desc: "Words, chars, sentences, reading time" },
               { href: "/tools/markdown",        icon: "✍️", title: "Markdown Editor",        desc: "Live HTML preview split-pane editor" },
-              { href: "/tools/diff",            icon: "⟺",  title: "Text Diff",              desc: "Word-level inline diff, split view" },
+              { href: "/tools/diff",            icon: "🔀",  title: "Text Diff",              desc: "Word-level inline diff, split view" },
               { href: "/tools/lorem",           icon: "¶",  title: "Lorem Ipsum",            desc: "Paragraphs, sentences, or words" },
               { href: "/tools/base64",          icon: "🔤", title: "Base64",                 desc: "Encode or decode Base64 strings" },
               { href: "/tools/url-encode",      icon: "🔗", title: "URL Encoder",            desc: "Percent-encode or decode URLs" },
-              { href: "/tools/hash",            icon: "🔐", title: "Hash Generator",         desc: "SHA-1, SHA-256, SHA-384, SHA-512" },
-              { href: "/tools/json",            icon: "{ }", title: "JSON Formatter",        desc: "Validate, format, and minify JSON" },
-              { href: "/tools/regex",           icon: ".*", title: "Regex Tester",           desc: "Live match highlighting" },
+              { href: "/tools/hash",            icon: "#️⃣", title: "Hash Generator",         desc: "SHA-1, SHA-256, SHA-384, SHA-512" },
+              { href: "/tools/json",            icon: "📋", title: "JSON Formatter",        desc: "Validate, format, and minify JSON" },
+              { href: "/tools/regex",           icon: "🔍", title: "Regex Tester",           desc: "Live match highlighting" },
               { href: "/tools/csv-json",        icon: "⇄",  title: "CSV ↔ JSON",             desc: "Convert with live table preview" },
-              { href: "/tools/case-converter",  icon: "Aa", title: "Case Converter",        desc: "camelCase, snake_case, kebab & more" },
+              { href: "/tools/case-converter",  icon: "🔠", title: "Case Converter",        desc: "camelCase, snake_case, kebab & more" },
               { href: "/tools/grammar-checker", icon: "✏️", title: "Grammar Checker",        desc: "Powered by LanguageTool API" },
               { href: "/tools/html-beautifier", icon: "🌐", title: "HTML Beautifier",        desc: "Format HTML with W3C standards" },
               { href: "/tools/js-beautifier",   icon: "✨", title: "JS Beautifier",          desc: "Format JavaScript & TypeScript" },
-              { href: "/tools/css-beautifier",  icon: "🎨", title: "CSS Beautifier",         desc: "Format CSS and SCSS" },
+              { href: "/tools/css-beautifier",  icon: "💅", title: "CSS Beautifier",         desc: "Format CSS and SCSS" },
               { href: "/tools/python-beautifier",icon: "🐍", title: "Python Beautifier",     desc: "PEP 8 compliant formatting" },
             ]} />
 
             {/* ── Design & Visual ── */}
             <ToolCategory label="Design & Visual" icon="🎨" href="/tools#design-visual" tools={[
-              { href: "/tools/color-picker",   icon: "🎨", title: "Color Picker",            desc: "HEX, RGB, HSL, CMYK values" },
+              { href: "/tools/color-picker",   icon: "🎯", title: "Color Picker",            desc: "HEX, RGB, HSL, CMYK values" },
               { href: "/tools/palette",        icon: "🖌️", title: "Palette Generator",        desc: "Complementary, triadic, analogous" },
               { href: "/tools/gradient",       icon: "🌈", title: "CSS Gradient Builder",    desc: "Linear & radial with CSS output" },
               { href: "/tools/glassmorphism",  icon: "🪟", title: "Glassmorphism",           desc: "Glass-effect UI cards" },
               { href: "/tools/box-shadow",     icon: "🔲", title: "Box Shadow Builder",      desc: "Multi-layer shadows, live preview" },
-              { href: "/tools/border-radius",  icon: "⬜", title: "Border Radius",           desc: "Per-side visual builder" },
-              { href: "/tools/favicon",        icon: "⭐", title: "Favicon Generator",       desc: "All standard sizes from any image" },
+              { href: "/tools/border-radius",  icon: "🟦", title: "Border Radius",           desc: "Per-side visual builder" },
+              { href: "/tools/favicon",        icon: "🔖", title: "Favicon Generator",       desc: "All standard sizes from any image" },
             ]} />
 
             {/* ── Converters & Calculators ── */}
             <ToolCategory label="Converters & Calculators" icon="🔢" href="/tools#converters" tools={[
               { href: "/tools/units",              icon: "📐", title: "Unit Converter",        desc: "Length, weight, temp, area & more" },
-              { href: "/tools/aspect-ratio",       icon: "⛶",  title: "Aspect Ratio",          desc: "Lock ratio, solve dimensions" },
+              { href: "/tools/aspect-ratio",       icon: "📏",  title: "Aspect Ratio",          desc: "Lock ratio, solve dimensions" },
               { href: "/tools/timestamp",          icon: "🕐", title: "Timestamp Converter",   desc: "Unix ↔ human-readable dates" },
-              { href: "/tools/base-converter",     icon: "🔢", title: "Number Base",           desc: "Binary, octal, decimal, hex" },
+              { href: "/tools/base-converter",     icon: "💻", title: "Number Base",           desc: "Binary, octal, decimal, hex" },
               { href: "/tools/cron",               icon: "⏱️", title: "Cron Builder",          desc: "Schedule expressions + preview" },
               { href: "/tools/password",           icon: "🔑", title: "Password Generator",    desc: "Cryptographically secure" },
               { href: "/tools/calculator",              icon: "🧮", title: "Calculator",            desc: "Basic + scientific, with history" },
               { href: "/tools/currency-converter",      icon: "💱", title: "Currency Converter",    desc: "Live rates for 160+ currencies" },
-              { href: "/tools/time-calculator",         icon: "⏱",  title: "Time Calculator",       desc: "Durations, add & subtract time" },
+              { href: "/tools/time-calculator",         icon: "⏳",  title: "Time Calculator",       desc: "Durations, add & subtract time" },
               { href: "/tools/percentage-calculator",   icon: "💯", title: "Percentage Calc",       desc: "X% of Y, change, increase & more" },
               { href: "/tools/average-calculator",      icon: "📊", title: "Average Calculator",    desc: "Mean, median, mode, range & sum" },
             ]} />
 
             {/* ── Images & PDFs ── */}
             <ToolCategory label="Images & PDFs" icon="🖼️" href="/tools#images-pdfs" tools={[
-              { href: "/tools/image-editor",       icon: "🖼️", title: "Image Editor",          desc: "Resize, crop, rotate, markup" },
+              { href: "/tools/image-editor",       icon: "🖊️", title: "Image Editor",          desc: "Resize, crop, rotate, markup" },
               { href: "/tools/image-compressor",   icon: "🗜️", title: "Image Compressor",       desc: "Compress JPEG, PNG, WEBP in bulk" },
               { href: "/tools/background-remover", icon: "✂️", title: "Background Remover",    desc: "AI-powered, runs in browser" },
-              { href: "/tools/raster-to-svg",      icon: "✦",  title: "PNG/JPG → SVG",         desc: "Vectorize raster images" },
-              { href: "/tools/svg-to-png",         icon: "✦",  title: "SVG → PNG",             desc: "Up to 4× scale output" },
+              { href: "/tools/raster-to-svg",      icon: "✒️",  title: "PNG/JPG → SVG",         desc: "Vectorize raster images" },
+              { href: "/tools/svg-to-png",         icon: "📸",  title: "SVG → PNG",             desc: "Up to 4× scale output" },
               { href: "/tools/exif",               icon: "📷", title: "EXIF Viewer",            desc: "Camera, GPS & image metadata" },
-              { href: "/tools/pdf-merge",          icon: "📄", title: "PDF Merge",              desc: "Combine & reorder PDFs" },
-              { href: "/tools/pdf-to-images",      icon: "🖨️", title: "PDF to Images",         desc: "Each page to PNG" },
-              { href: "/tools/qr",                 icon: "⬛", title: "QR Generator",          desc: "Any URL or text → QR PNG" },
+              { href: "/tools/pdf-merge",          icon: "📑", title: "PDF Merge",              desc: "Combine & reorder PDFs" },
+              { href: "/tools/pdf-to-images",      icon: "🖼️", title: "PDF to Images",         desc: "Each page to PNG" },
+              { href: "/tools/qr",                 icon: "📲", title: "QR Generator",          desc: "Any URL or text → QR PNG" },
             ]} />
 
             {/* ── Reference ── */}
             <ToolCategory label="Reference" icon="📚" href="/tools#reference" tools={[
-              { href: "/tools/http-status",         icon: "📡", title: "HTTP Status Codes",    desc: "Searchable reference for every code" },
-              { href: "/tools/framework-reference", icon: "📚", title: "Framework Reference",  desc: "Tailwind, Bootstrap, React, Next.js" },
-              { href: "/tools/utm-builder",         icon: "🔗", title: "UTM Builder",          desc: "Build UTM-tagged campaign URLs" },
+              { href: "/tools/http-status",         icon: "📶", title: "HTTP Status Codes",    desc: "Searchable reference for every code" },
+              { href: "/tools/framework-reference", icon: "📖", title: "Framework Reference",  desc: "Tailwind, Bootstrap, React, Next.js" },
+              { href: "/tools/utm-builder",         icon: "🏷️", title: "UTM Builder",          desc: "Build UTM-tagged campaign URLs" },
             ]} />
 
             <div className="mt-10 text-center">
