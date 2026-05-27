@@ -158,6 +158,8 @@ export default function ImageEditorPage() {
   const cropRgnRef = useRef<CropRegion | null>(null);
   const strokesRef = useRef<Stroke[]>([]);
 
+  const [displaySize, setDisplaySize] = useState<{w: number; h: number}>({ w: 0, h: 0 });
+
   const previewRef = useRef<HTMLCanvasElement>(null);
   const markupRef  = useRef<HTMLCanvasElement>(null);
   const inputRef   = useRef<HTMLInputElement>(null);
@@ -239,6 +241,12 @@ export default function ImageEditorPage() {
 
     canvas.width  = outW;
     canvas.height = outH;
+
+    // Compute display size: fit within 900×600 preserving aspect ratio
+    const maxDisplayW = 900;
+    const maxDisplayH = 600;
+    const scale = Math.min(1, maxDisplayW / outW, maxDisplayH / outH);
+    setDisplaySize({ w: Math.round(outW * scale), h: Math.round(outH * scale) });
 
     if (outputFmt === "jpeg") { ctx.fillStyle = edits.bgColor; ctx.fillRect(0, 0, outW, outH); }
     else ctx.clearRect(0, 0, outW, outH);
@@ -376,9 +384,10 @@ export default function ImageEditorPage() {
   const markupDragRef = useRef(false);
 
   const getMarkupPos = (e: React.MouseEvent) => {
+    const mc = markupRef.current;
     const pc = previewRef.current;
-    if (!pc) return null;
-    const rect = pc.getBoundingClientRect();
+    if (!mc || !pc) return null;
+    const rect = mc.getBoundingClientRect();
     return {
       x: (e.clientX - rect.left) * (pc.width  / rect.width),
       y: (e.clientY - rect.top)  * (pc.height / rect.height),
@@ -861,7 +870,7 @@ export default function ImageEditorPage() {
             {/* ── Canvas area ── */}
             <div className="flex flex-col gap-2">
               <div
-                className="bg-slate-900/40 border border-slate-800/60 rounded-2xl p-4 flex items-start justify-center min-h-[400px] overflow-auto"
+                className="bg-slate-900/40 border border-slate-800/60 rounded-2xl p-4 flex items-start justify-center overflow-auto"
                 style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='8' height='8' fill='%231e293b'/%3E%3Crect x='8' y='8' width='8' height='8' fill='%231e293b'/%3E%3C/svg%3E\")" }}
               >
                 <div className="inline-block relative select-none"
@@ -870,12 +879,14 @@ export default function ImageEditorPage() {
                   {/* Image canvas */}
                   <canvas ref={previewRef}
                     onMouseDown={cropMode ? onCropMouseDown : undefined}
-                    className={`block max-w-full rounded-lg shadow-xl ${cropMode ? "cursor-crosshair" : ""}`}
+                    className={`block rounded-lg shadow-xl ${cropMode ? "cursor-crosshair" : ""}`}
+                    style={displaySize.w > 0 ? { width: displaySize.w, height: displaySize.h } : undefined}
                   />
 
                   {/* Markup canvas (transparent overlay) */}
                   <canvas ref={markupRef}
                     className={`absolute inset-0 rounded-lg ${activeTab === "markup" && markupTool !== "eraser" ? "cursor-crosshair" : activeTab === "markup" && markupTool === "eraser" ? "cursor-cell" : "pointer-events-none"}`}
+                    style={displaySize.w > 0 ? { width: displaySize.w, height: displaySize.h } : undefined}
                     onMouseDown={activeTab === "markup" ? (markupTool === "eraser" ? onMarkupClickEraser : onMarkupDown) : undefined}
                     onMouseMove={activeTab === "markup" && markupTool !== "eraser" ? onMarkupMove : undefined}
                     onMouseUp={activeTab === "markup" && markupTool !== "eraser" ? onMarkupUp : undefined}
