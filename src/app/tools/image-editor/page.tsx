@@ -119,6 +119,24 @@ type Tab = "transform" | "adjust" | "filters" | "markup" | "output";
 type CropDragMode = "new" | "move" | "resize-tl" | "resize-tr" | "resize-bl" | "resize-br";
 
 /* ── Component ──────────────────────────────────────────────────────── */
+function Slider({ label, value, min, max, step = 1, unit = "", onChange, onSnap }: {
+  label: string; value: number; min: number; max: number;
+  step?: number; unit?: string; onChange: (v: number) => void; onSnap?: () => void;
+}) {
+  return (
+    <div>
+      <div className="flex justify-between mb-1">
+        <label className="text-xs text-slate-500">{label}</label>
+        <span className="text-xs text-slate-400 font-mono">{value}{unit}</span>
+      </div>
+      <input type="range" min={min} max={max} step={step} value={value}
+        onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); onSnap?.(); }}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full accent-blue-500 cursor-ew-resize" />
+    </div>
+  );
+}
+
 export default function ImageEditorPage() {
   const [file, setFile]       = useState<File | null>(null);
   const [orig, setOrig]       = useState<HTMLImageElement | null>(null);
@@ -514,21 +532,6 @@ export default function ImageEditorPage() {
   };
 
   /* ── Subcomponents ──────────────────────────────────────────────── */
-  const Slider = ({ label, value, min, max, step = 1, unit = "", onChange, onSnap }: {
-    label: string; value: number; min: number; max: number;
-    step?: number; unit?: string; onChange: (v: number) => void; onSnap?: () => void;
-  }) => (
-    <div>
-      <div className="flex justify-between mb-1">
-        <label className="text-xs text-slate-500">{label}</label>
-        <span className="text-xs text-slate-400 font-mono">{value}{unit}</span>
-      </div>
-      <input type="range" min={min} max={max} step={step} value={value}
-        onPointerDown={onSnap}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full accent-blue-500" />
-    </div>
-  );
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "transform", label: "Transform" },

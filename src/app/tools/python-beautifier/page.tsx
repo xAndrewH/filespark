@@ -102,9 +102,8 @@ export default function PythonBeautifierPage() {
               value={input}
               onChange={e => { setInput(e.target.value); setOutput(""); }}
               placeholder="Paste your Python code here, or upload a file…"
-              rows={24}
               spellCheck={false}
-              className="w-full bg-slate-900/60 border border-slate-800/60 rounded-xl px-4 py-4 text-slate-200 text-xs font-mono leading-relaxed resize-none focus:outline-none placeholder:text-slate-600"
+              className="w-full h-[520px] bg-slate-900/60 border border-slate-800/60 rounded-xl px-4 py-4 text-slate-200 text-xs font-mono leading-relaxed resize-none focus:outline-none placeholder:text-slate-600"
             />
           </div>
 
@@ -120,7 +119,7 @@ export default function PythonBeautifierPage() {
                 )}
               </div>
             </div>
-            <pre className="w-full h-[calc(24*1.5rem+2rem)] bg-slate-900/60 border border-slate-800/60 rounded-xl px-4 py-4 text-slate-200 text-xs font-mono leading-relaxed overflow-auto whitespace-pre">
+            <pre className="w-full h-[520px] bg-slate-900/60 border border-slate-800/60 rounded-xl px-4 py-4 text-slate-200 text-xs font-mono leading-relaxed overflow-auto whitespace-pre">
               {output || <span className="text-slate-600">Formatted Python will appear here…</span>}
             </pre>
           </div>

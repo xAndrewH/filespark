@@ -64,48 +64,53 @@ function wordDiff(a: string, b: string): { left: WordToken[]; right: WordToken[]
   return { left, right };
 }
 
-type GroupedLine =
-  | { kind: "same"; line: DiffLine }
-  | { kind: "change"; removed: DiffLine; added: DiffLine }
-  | { kind: "removed"; line: DiffLine }
-  | { kind: "added"; line: DiffLine };
+type SplitRow =
+  | { kind: "same"; text: string; leftNum: number; rightNum: number }
+  | { kind: "change"; leftTokens: WordToken[]; rightTokens: WordToken[]; leftNum: number; rightNum: number }
+  | { kind: "removed"; text: string; leftNum: number }
+  | { kind: "added"; text: string; rightNum: number };
 
-function groupLines(lines: DiffLine[]): GroupedLine[] {
-  const result: GroupedLine[] = [];
+function buildSplitRows(lines: DiffLine[]): SplitRow[] {
+  const result: SplitRow[] = [];
   let i = 0;
   while (i < lines.length) {
-    if (lines[i].type === "same") {
-      result.push({ kind: "same", line: lines[i++] });
-    } else if (lines[i].type === "removed") {
+    const l = lines[i];
+    if (l.type === "same") {
+      result.push({ kind: "same", text: l.text, leftNum: l.leftNum!, rightNum: l.rightNum! });
+      i++;
+    } else if (l.type === "removed") {
       const removedRun: DiffLine[] = [];
       while (i < lines.length && lines[i].type === "removed") removedRun.push(lines[i++]);
       const addedRun: DiffLine[] = [];
       while (i < lines.length && lines[i].type === "added") addedRun.push(lines[i++]);
       const pairCount = Math.min(removedRun.length, addedRun.length);
-      for (let k = 0; k < pairCount; k++)
-        result.push({ kind: "change", removed: removedRun[k], added: addedRun[k] });
+      for (let k = 0; k < pairCount; k++) {
+        const { left, right } = wordDiff(removedRun[k].text, addedRun[k].text);
+        result.push({ kind: "change", leftTokens: left, rightTokens: right, leftNum: removedRun[k].leftNum!, rightNum: addedRun[k].rightNum! });
+      }
       for (let k = pairCount; k < removedRun.length; k++)
-        result.push({ kind: "removed", line: removedRun[k] });
+        result.push({ kind: "removed", text: removedRun[k].text, leftNum: removedRun[k].leftNum! });
       for (let k = pairCount; k < addedRun.length; k++)
-        result.push({ kind: "added", line: addedRun[k] });
+        result.push({ kind: "added", text: addedRun[k].text, rightNum: addedRun[k].rightNum! });
     } else {
-      result.push({ kind: "added", line: lines[i++] });
+      result.push({ kind: "added", text: l.text, rightNum: l.rightNum! });
+      i++;
     }
   }
   return result;
 }
 
-function InlineTokens({ tokens, side }: { tokens: WordToken[]; side: "left" | "right" }) {
+function InlineText({ tokens, side }: { tokens: WordToken[]; side: "left" | "right" }) {
   return (
     <>
       {tokens.map((t, i) => {
         if (/^\s+$/.test(t.text)) return <span key={i}>{t.text}</span>;
-        if (t.type === "same") return <span key={i} className="text-slate-300">{t.text}</span>;
+        if (t.type === "same") return <span key={i}>{t.text}</span>;
         if (side === "left" && t.type === "removed")
-          return <span key={i} className="line-through text-red-300 bg-red-500/25 rounded px-0.5">{t.text}</span>;
+          return <span key={i} className="bg-red-500/40 text-red-200 rounded-sm px-0.5">{t.text}</span>;
         if (side === "right" && t.type === "added")
-          return <span key={i} className="text-green-200 bg-green-500/30 rounded px-0.5">{t.text}</span>;
-        return null;
+          return <span key={i} className="bg-green-500/40 text-green-200 rounded-sm px-0.5">{t.text}</span>;
+        return <span key={i}>{t.text}</span>;
       })}
     </>
   );
@@ -118,7 +123,7 @@ export default function DiffPage() {
   const lines = useMemo(() => (left || right) ? diff(left, right) : [], [left, right]);
   const added = lines.filter(l => l.type === "added").length;
   const removed = lines.filter(l => l.type === "removed").length;
-  const grouped = useMemo(() => groupLines(lines), [lines]);
+  const splitRows = useMemo(() => buildSplitRows(lines), [lines]);
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -139,7 +144,7 @@ export default function DiffPage() {
                 onChange={e => set(e.target.value)}
                 placeholder={`Paste ${label.toLowerCase()} text here…`}
                 spellCheck={false}
-                className="w-full h-52 bg-slate-900/60 border border-slate-800/60 rounded-xl p-4 text-white text-sm font-mono resize-none focus:outline-none focus:border-blue-500/50 placeholder-slate-600"
+                className="w-full h-48 bg-slate-900/60 border border-slate-800/60 rounded-xl p-4 text-white text-sm font-mono resize-none focus:outline-none focus:border-blue-500/50 placeholder-slate-600"
               />
             </div>
           ))}
@@ -147,71 +152,97 @@ export default function DiffPage() {
 
         {lines.length > 0 && (
           <div className="space-y-3">
-            <div className="flex items-center gap-4 text-sm">
-              <span className="text-slate-500">{lines.length} lines</span>
-              {added > 0 && <span className="text-green-400">+{added} added</span>}
-              {removed > 0 && <span className="text-red-400">−{removed} removed</span>}
-              {added === 0 && removed === 0 && <span className="text-slate-400">No differences</span>}
+            <div className="flex items-center gap-5 text-sm">
+              <span className="text-slate-500 text-xs">{lines.filter(l => l.type === "same").length} unchanged</span>
+              {removed > 0 && (
+                <span className="flex items-center gap-1.5 text-xs">
+                  <span className="inline-block w-2.5 h-2.5 rounded-sm bg-red-500/40 border border-red-500/30" />
+                  <span className="text-red-400">{removed} removed</span>
+                </span>
+              )}
+              {added > 0 && (
+                <span className="flex items-center gap-1.5 text-xs">
+                  <span className="inline-block w-2.5 h-2.5 rounded-sm bg-green-500/40 border border-green-500/30" />
+                  <span className="text-green-400">{added} added</span>
+                </span>
+              )}
+              {added === 0 && removed === 0 && <span className="text-slate-400 text-xs">No differences found</span>}
             </div>
 
-            <div className="flex items-center gap-4 text-xs text-slate-600">
-              <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded bg-red-500/25 border border-red-500/30" /> deleted</span>
-              <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded bg-green-500/30 border border-green-500/30" /> inserted</span>
-            </div>
+            {/* Split diff view */}
+            <div className="rounded-xl overflow-hidden border border-slate-800/60">
+              {/* Header */}
+              <div className="grid grid-cols-2 border-b border-slate-800/60">
+                <div className="flex items-center gap-2 px-4 py-2 bg-slate-900/80 border-r border-slate-800/60">
+                  <span className="text-slate-400 text-xs font-medium">Original</span>
+                  {removed > 0 && <span className="text-xs text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded-full">−{removed}</span>}
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 bg-slate-900/80">
+                  <span className="text-slate-400 text-xs font-medium">Modified</span>
+                  {added > 0 && <span className="text-xs text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded-full">+{added}</span>}
+                </div>
+              </div>
 
-            <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl overflow-hidden">
-              <table className="w-full text-xs font-mono">
-                <tbody>
-                  {grouped.map((g, gi) => {
-                    if (g.kind === "same") {
-                      return (
-                        <tr key={gi}>
-                          <td className="text-slate-600 text-right px-3 py-1 select-none w-10 border-r border-slate-800 tabular-nums">{g.line.leftNum ?? ""}</td>
-                          <td className="text-slate-600 text-right px-3 py-1 select-none w-10 border-r border-slate-800 tabular-nums">{g.line.rightNum ?? ""}</td>
-                          <td className="px-3 py-1 w-6 select-none text-slate-700"> </td>
-                          <td className="px-3 py-1 text-slate-400 whitespace-pre-wrap break-all">{g.line.text || " "}</td>
-                        </tr>
-                      );
-                    }
-                    if (g.kind === "removed") {
-                      return (
-                        <tr key={gi} className="bg-red-500/10">
-                          <td className="text-slate-600 text-right px-3 py-1 select-none w-10 border-r border-slate-800 tabular-nums">{g.line.leftNum ?? ""}</td>
-                          <td className="text-slate-600 text-right px-3 py-1 select-none w-10 border-r border-slate-800 tabular-nums"></td>
-                          <td className="px-3 py-1 w-6 select-none font-bold text-red-400">−</td>
-                          <td className="px-3 py-1 text-red-300 whitespace-pre-wrap break-all line-through">{g.line.text || " "}</td>
-                        </tr>
-                      );
-                    }
-                    if (g.kind === "added") {
-                      return (
-                        <tr key={gi} className="bg-green-500/10">
-                          <td className="text-slate-600 text-right px-3 py-1 select-none w-10 border-r border-slate-800 tabular-nums"></td>
-                          <td className="text-slate-600 text-right px-3 py-1 select-none w-10 border-r border-slate-800 tabular-nums">{g.line.rightNum ?? ""}</td>
-                          <td className="px-3 py-1 w-6 select-none font-bold text-green-400">+</td>
-                          <td className="px-3 py-1 text-green-300 whitespace-pre-wrap break-all">{g.line.text || " "}</td>
-                        </tr>
-                      );
-                    }
-                    // change — word-level inline diff
-                    const { left: leftTokens, right: rightTokens } = wordDiff(g.removed.text, g.added.text);
-                    return [
-                      <tr key={`${gi}-r`} className="bg-red-500/10">
-                        <td className="text-slate-600 text-right px-3 py-1 select-none w-10 border-r border-slate-800 tabular-nums">{g.removed.leftNum ?? ""}</td>
-                        <td className="text-slate-600 text-right px-3 py-1 select-none w-10 border-r border-slate-800 tabular-nums"></td>
-                        <td className="px-3 py-1 w-6 select-none font-bold text-red-400">−</td>
-                        <td className="px-3 py-1 whitespace-pre-wrap break-all"><InlineTokens tokens={leftTokens} side="left" /></td>
-                      </tr>,
-                      <tr key={`${gi}-a`} className="bg-green-500/10">
-                        <td className="text-slate-600 text-right px-3 py-1 select-none w-10 border-r border-slate-800 tabular-nums"></td>
-                        <td className="text-slate-600 text-right px-3 py-1 select-none w-10 border-r border-slate-800 tabular-nums">{g.added.rightNum ?? ""}</td>
-                        <td className="px-3 py-1 w-6 select-none font-bold text-green-400">+</td>
-                        <td className="px-3 py-1 whitespace-pre-wrap break-all"><InlineTokens tokens={rightTokens} side="right" /></td>
-                      </tr>,
-                    ];
-                  })}
-                </tbody>
-              </table>
+              {/* Rows */}
+              <div className="text-xs font-mono">
+                {splitRows.map((row, ri) => {
+                  if (row.kind === "same") {
+                    return (
+                      <div key={ri} className="grid grid-cols-2 border-b border-slate-800/30 last:border-0">
+                        <div className="flex border-r border-slate-800/60">
+                          <span className="w-10 text-right px-2 py-1 text-slate-700 select-none tabular-nums shrink-0 border-r border-slate-800/40">{row.leftNum}</span>
+                          <span className="px-3 py-1 text-slate-500 whitespace-pre-wrap break-all">{row.text || " "}</span>
+                        </div>
+                        <div className="flex">
+                          <span className="w-10 text-right px-2 py-1 text-slate-700 select-none tabular-nums shrink-0 border-r border-slate-800/40">{row.rightNum}</span>
+                          <span className="px-3 py-1 text-slate-500 whitespace-pre-wrap break-all">{row.text || " "}</span>
+                        </div>
+                      </div>
+                    );
+                  }
+                  if (row.kind === "change") {
+                    return (
+                      <div key={ri} className="grid grid-cols-2 border-b border-slate-800/30 last:border-0">
+                        <div className="flex bg-red-500/8 border-r border-slate-800/60">
+                          <span className="w-10 text-right px-2 py-1 text-red-700 select-none tabular-nums shrink-0 border-r border-red-900/40 bg-red-500/10">{row.leftNum}</span>
+                          <span className="px-3 py-1 text-slate-300 whitespace-pre-wrap break-all"><InlineText tokens={row.leftTokens} side="left" /></span>
+                        </div>
+                        <div className="flex bg-green-500/8">
+                          <span className="w-10 text-right px-2 py-1 text-green-700 select-none tabular-nums shrink-0 border-r border-green-900/40 bg-green-500/10">{row.rightNum}</span>
+                          <span className="px-3 py-1 text-slate-300 whitespace-pre-wrap break-all"><InlineText tokens={row.rightTokens} side="right" /></span>
+                        </div>
+                      </div>
+                    );
+                  }
+                  if (row.kind === "removed") {
+                    return (
+                      <div key={ri} className="grid grid-cols-2 border-b border-slate-800/30 last:border-0">
+                        <div className="flex bg-red-500/8 border-r border-slate-800/60">
+                          <span className="w-10 text-right px-2 py-1 text-red-700 select-none tabular-nums shrink-0 border-r border-red-900/40 bg-red-500/10">{row.leftNum}</span>
+                          <span className="px-3 py-1 text-red-300 whitespace-pre-wrap break-all">{row.text || " "}</span>
+                        </div>
+                        <div className="flex bg-slate-900/20">
+                          <span className="w-10 shrink-0 border-r border-slate-800/40" />
+                          <span className="px-3 py-1" />
+                        </div>
+                      </div>
+                    );
+                  }
+                  // added
+                  return (
+                    <div key={ri} className="grid grid-cols-2 border-b border-slate-800/30 last:border-0">
+                      <div className="flex bg-slate-900/20 border-r border-slate-800/60">
+                        <span className="w-10 shrink-0 border-r border-slate-800/40" />
+                        <span className="px-3 py-1" />
+                      </div>
+                      <div className="flex bg-green-500/8">
+                        <span className="w-10 text-right px-2 py-1 text-green-700 select-none tabular-nums shrink-0 border-r border-green-900/40 bg-green-500/10">{row.rightNum}</span>
+                        <span className="px-3 py-1 text-green-300 whitespace-pre-wrap break-all">{row.text || " "}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}

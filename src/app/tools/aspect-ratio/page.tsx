@@ -76,8 +76,8 @@ export default function AspectRatioPage() {
 
   const previewW = 280;
   const previewH = rw > 0 && rh > 0 ? Math.round((previewW / rw) * rh) : 157;
-  const clampedH = Math.min(previewH, 200);
-  const clampedW = rh > 0 && rw > 0 ? Math.round((clampedH / rh) * rw) : previewW;
+  const clampedH = Math.min(previewH, 190);
+  const clampedW = rh > 0 && rw > 0 ? Math.min(Math.round((clampedH / rh) * rw), 340) : previewW;
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -101,7 +101,7 @@ export default function AspectRatioPage() {
           </div>
 
           {/* Preview */}
-          <div className="bg-slate-900/60 border border-slate-800/60 rounded-2xl h-52 flex items-center justify-center">
+          <div className="bg-slate-900/60 border border-slate-800/60 rounded-2xl h-52 flex items-center justify-center overflow-hidden">
             <div className="bg-gradient-to-br from-blue-500/30 to-indigo-600/30 border-2 border-blue-500/40 rounded-lg flex items-center justify-center transition-all duration-300"
               style={{ width: clampedW, height: clampedH }}>
               <span className="text-blue-300 text-sm font-mono">{rw}:{rh}</span>

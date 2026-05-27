@@ -80,7 +80,7 @@ export default function FileCard({ item, onConvert, onRemove, onChange, dragHand
   const downloadName = item.resultName ?? replaceExtension(item.name, item.targetFormat);
 
   return (
-    <div className={`relative bg-slate-900/70 border rounded-xl overflow-hidden transition-colors duration-300 ${STATUS_BORDER[item.status] ?? "border-slate-800/60"}`}>
+    <div className={`relative bg-slate-900/70 border rounded-xl transition-colors duration-300 ${STATUS_BORDER[item.status] ?? "border-slate-800/60"}`}>
       {/* Colored left status bar */}
       <div className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl transition-colors duration-300 ${STATUS_BAR[item.status] ?? "bg-slate-700/60"}`} />
 
