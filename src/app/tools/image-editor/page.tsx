@@ -409,7 +409,7 @@ export default function ImageEditorPage() {
   /* ── Markup mouse handlers ──────────────────────────────────────── */
   const markupDragRef = useRef(false);
 
-  const getMarkupPos = (e: React.MouseEvent) => {
+  const getMarkupPos = (e: React.PointerEvent) => {
     const mc = markupRef.current;
     const pc = previewRef.current;
     if (!mc || !pc) return null;
@@ -420,7 +420,7 @@ export default function ImageEditorPage() {
     };
   };
 
-  const onMarkupDown = (e: React.MouseEvent) => {
+  const onMarkupDown = (e: React.PointerEvent) => {
     if (activeTab !== "markup") return;
     const pos = getMarkupPos(e);
     if (!pos) return;
@@ -432,6 +432,7 @@ export default function ImageEditorPage() {
     }
     if (markupTool === "eraser") return;
 
+    e.currentTarget.setPointerCapture(e.pointerId);
     markupDragRef.current = true;
     const stroke: Stroke = {
       id: crypto.randomUUID(), tool: markupTool,
@@ -442,7 +443,7 @@ export default function ImageEditorPage() {
     e.preventDefault();
   };
 
-  const onMarkupMove = (e: React.MouseEvent) => {
+  const onMarkupMove = (e: React.PointerEvent) => {
     if (activeTab !== "markup" || !markupDragRef.current || !curStrokeRef.current) return;
     const pos = getMarkupPos(e);
     if (!pos) return;
@@ -461,7 +462,7 @@ export default function ImageEditorPage() {
     setStrokes((ss) => [...ss, committed]);
   };
 
-  const onMarkupClickEraser = (e: React.MouseEvent) => {
+  const onMarkupClickEraser = (e: React.PointerEvent) => {
     if (markupTool !== "eraser") return;
     const pos = getMarkupPos(e);
     if (!pos) return;
@@ -901,10 +902,10 @@ export default function ImageEditorPage() {
                   {/* Markup canvas (transparent overlay) */}
                   <canvas ref={markupRef}
                     className={`absolute inset-0 rounded-lg ${activeTab === "markup" && markupTool !== "eraser" ? "cursor-crosshair" : activeTab === "markup" && markupTool === "eraser" ? "cursor-cell" : "pointer-events-none"}`}
-                    style={displaySize.w > 0 ? { width: displaySize.w, height: displaySize.h } : undefined}
-                    onMouseDown={activeTab === "markup" ? (markupTool === "eraser" ? onMarkupClickEraser : onMarkupDown) : undefined}
-                    onMouseMove={activeTab === "markup" && markupTool !== "eraser" ? onMarkupMove : undefined}
-                    onMouseUp={activeTab === "markup" && markupTool !== "eraser" ? onMarkupUp : undefined}
+                    style={displaySize.w > 0 ? { width: displaySize.w, height: displaySize.h, touchAction: "none" } : { touchAction: "none" }}
+                    onPointerDown={activeTab === "markup" ? (markupTool === "eraser" ? onMarkupClickEraser : onMarkupDown) : undefined}
+                    onPointerMove={activeTab === "markup" && markupTool !== "eraser" ? onMarkupMove : undefined}
+                    onPointerUp={activeTab === "markup" && markupTool !== "eraser" ? onMarkupUp : undefined}
                   />
 
                   {/* Crop selection overlay */}
