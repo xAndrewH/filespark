@@ -3,8 +3,38 @@
 import { useState } from "react";
 import Link from "next/link";
 
-const SOURCE_CHIPS = ["google", "facebook", "instagram", "twitter", "linkedin", "newsletter", "email"];
-const MEDIUM_CHIPS = ["cpc", "email", "social", "organic", "referral", "banner", "affiliate"];
+const SOURCE_CHIPS = [
+  "google",
+  "facebook",
+  "instagram",
+  "linkedin",
+  "tiktok",
+  "bing",
+  "youtube",
+  "pinterest",
+  "reddit",
+  "snapchat",
+  "x.com",
+  "taboola",
+  "newsletter",
+  "qr",
+];
+
+const MEDIUM_CHIPS = [
+  "cpc",
+  "paid_social",
+  "cpm",
+  "cpv",
+  "display",
+  "video",
+  "email",
+  "sms",
+  "organic",
+  "social",
+  "referral",
+  "affiliate",
+  "print",
+];
 
 function encodeParam(value: string): string {
   return value.trim().replace(/\s+/g, "+").replace(/[^A-Za-z0-9_.~+\-]/g, (c) => encodeURIComponent(c));
