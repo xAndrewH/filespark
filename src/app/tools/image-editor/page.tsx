@@ -473,10 +473,14 @@ export default function ImageEditorPage() {
   const commitText = () => {
     if (!pendingText || !textInput.trim()) { setPendingText(null); return; }
     pushSnap();
+    // Scale fontSize from display pixels to canvas pixels so WYSIWYG is preserved
+    const canvasScale = previewRef.current && displaySize.w > 0
+      ? previewRef.current.width / displaySize.w
+      : 1;
     setStrokes((ss) => [...ss, {
       id: crypto.randomUUID(), tool: "text", color: markupColor,
       lineWidth: 1, pts: [[pendingText.x, pendingText.y]],
-      text: textInput, fontSize: markupFontSize,
+      text: textInput, fontSize: markupFontSize * canvasScale,
     }]);
     setPendingText(null);
     setTextInput("");
@@ -963,7 +967,7 @@ export default function ImageEditorPage() {
                         onBlur={() => { if (textInput.trim()) commitText(); else setPendingText(null); }}
                         placeholder="Type, then Enter…"
                         className="bg-black/70 text-white border border-blue-400 rounded px-2 py-1 text-sm focus:outline-none min-w-32"
-                        style={{ fontSize: Math.max(12, markupFontSize / zoom), color: markupColor }}
+                        style={{ fontSize: Math.max(10, markupFontSize), color: markupColor }}
                       />
                     </div>
                   )}
