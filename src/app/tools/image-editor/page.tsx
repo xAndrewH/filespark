@@ -165,6 +165,7 @@ export default function ImageEditorPage() {
   const [markupFontSize, setMarkupFontSize] = useState(24);
   const [pendingText, setPendingText] = useState<{x:number;y:number}|null>(null);
   const [textInput, setTextInput]     = useState("");
+  const textInputRef = useRef<HTMLInputElement>(null);
 
   // Undo
   type Snap = { edits: Edits; cropRgn: CropRegion | null; strokes: Stroke[] };
@@ -186,6 +187,13 @@ export default function ImageEditorPage() {
   useEffect(() => { editsRef.current   = edits;   }, [edits]);
   useEffect(() => { cropRgnRef.current = cropRgn; }, [cropRgn]);
   useEffect(() => { strokesRef.current = strokes; }, [strokes]);
+
+  /* ── Focus text input after click event sequence completes ──────── */
+  useEffect(() => {
+    if (!pendingText) return;
+    const t = setTimeout(() => textInputRef.current?.focus(), 20);
+    return () => clearTimeout(t);
+  }, [pendingText]);
 
   /* ── History helpers ───────────────────────────────────────────── */
   const pushSnap = useCallback(() => {
@@ -948,14 +956,14 @@ export default function ImageEditorPage() {
                       top:  `${(pendingText.y / previewRef.current.height) * 100}%`,
                     }}>
                       <input
-                        autoFocus
+                        ref={textInputRef}
                         value={textInput}
                         onChange={(e) => setTextInput(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === "Enter") commitText(); if (e.key === "Escape") { setPendingText(null); } }}
-                        onBlur={commitText}
-                        placeholder="Type text…"
-                        className="bg-black/60 text-white border border-blue-400 rounded px-2 py-1 text-sm focus:outline-none min-w-24"
-                        style={{ fontSize: markupFontSize / zoom, color: markupColor }}
+                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commitText(); } if (e.key === "Escape") { setPendingText(null); } }}
+                        onBlur={() => { if (textInput.trim()) commitText(); else setPendingText(null); }}
+                        placeholder="Type, then Enter…"
+                        className="bg-black/70 text-white border border-blue-400 rounded px-2 py-1 text-sm focus:outline-none min-w-32"
+                        style={{ fontSize: Math.max(12, markupFontSize / zoom), color: markupColor }}
                       />
                     </div>
                   )}

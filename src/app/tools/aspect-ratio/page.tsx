@@ -113,10 +113,10 @@ export default function AspectRatioPage() {
             <p className="text-white text-sm font-medium mb-3">Ratio</p>
             <div className="flex items-center gap-3">
               <input type="number" value={rw} onChange={e => handleRw(e.target.value)} min={0.1} step={0.1}
-                className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-lg font-mono text-center focus:outline-none focus:border-blue-500" />
-              <span className="text-slate-400 text-xl font-bold">:</span>
+                className="flex-1 min-w-0 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-lg font-mono text-center focus:outline-none focus:border-blue-500" />
+              <span className="text-slate-400 text-xl font-bold shrink-0">:</span>
               <input type="number" value={rh} onChange={e => handleRh(e.target.value)} min={0.1} step={0.1}
-                className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-lg font-mono text-center focus:outline-none focus:border-blue-500" />
+                className="flex-1 min-w-0 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-lg font-mono text-center focus:outline-none focus:border-blue-500" />
             </div>
           </div>
 

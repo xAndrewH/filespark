@@ -119,6 +119,7 @@ function InlineText({ tokens, side }: { tokens: WordToken[]; side: "left" | "rig
 export default function DiffPage() {
   const [left, setLeft] = useState("");
   const [right, setRight] = useState("");
+  const [viewMode, setViewMode] = useState<"split" | "inline">("split");
 
   const lines = useMemo(() => (left || right) ? diff(left, right) : [], [left, right]);
   const added = lines.filter(l => l.type === "added").length;
@@ -152,7 +153,7 @@ export default function DiffPage() {
 
         {lines.length > 0 && (
           <div className="space-y-3">
-            <div className="flex items-center gap-5 text-sm">
+            <div className="flex items-center gap-5 text-sm flex-wrap">
               <span className="text-slate-500 text-xs">{lines.filter(l => l.type === "same").length} unchanged</span>
               {removed > 0 && (
                 <span className="flex items-center gap-1.5 text-xs">
@@ -167,83 +168,137 @@ export default function DiffPage() {
                 </span>
               )}
               {added === 0 && removed === 0 && <span className="text-slate-400 text-xs">No differences found</span>}
+              <div className="ml-auto flex gap-1">
+                {(["split", "inline"] as const).map(m => (
+                  <button key={m} onClick={() => setViewMode(m)}
+                    className={`px-3 py-1 rounded-lg text-xs capitalize transition-colors ${viewMode === m ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-400 hover:text-white"}`}>
+                    {m}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Split diff view */}
-            <div className="rounded-xl overflow-hidden border border-slate-800/60">
-              {/* Header */}
-              <div className="grid grid-cols-2 border-b border-slate-800/60">
-                <div className="flex items-center gap-2 px-4 py-2 bg-slate-900/80 border-r border-slate-800/60">
-                  <span className="text-slate-400 text-xs font-medium">Original</span>
-                  {removed > 0 && <span className="text-xs text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded-full">−{removed}</span>}
+            {viewMode === "split" ? (
+              /* Split diff view */
+              <div className="rounded-xl overflow-hidden border border-slate-800/60">
+                <div className="grid grid-cols-2 border-b border-slate-800/60">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-slate-900/80 border-r border-slate-800/60">
+                    <span className="text-slate-400 text-xs font-medium">Original</span>
+                    {removed > 0 && <span className="text-xs text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded-full">−{removed}</span>}
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-slate-900/80">
+                    <span className="text-slate-400 text-xs font-medium">Modified</span>
+                    {added > 0 && <span className="text-xs text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded-full">+{added}</span>}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-slate-900/80">
-                  <span className="text-slate-400 text-xs font-medium">Modified</span>
-                  {added > 0 && <span className="text-xs text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded-full">+{added}</span>}
-                </div>
-              </div>
-
-              {/* Rows */}
-              <div className="text-xs font-mono">
-                {splitRows.map((row, ri) => {
-                  if (row.kind === "same") {
+                <div className="text-xs font-mono">
+                  {splitRows.map((row, ri) => {
+                    if (row.kind === "same") {
+                      return (
+                        <div key={ri} className="grid grid-cols-2 border-b border-slate-800/30 last:border-0">
+                          <div className="flex border-r border-slate-800/60">
+                            <span className="w-10 text-right px-2 py-1 text-slate-700 select-none tabular-nums shrink-0 border-r border-slate-800/40">{row.leftNum}</span>
+                            <span className="px-3 py-1 text-slate-500 whitespace-pre-wrap break-all">{row.text || " "}</span>
+                          </div>
+                          <div className="flex">
+                            <span className="w-10 text-right px-2 py-1 text-slate-700 select-none tabular-nums shrink-0 border-r border-slate-800/40">{row.rightNum}</span>
+                            <span className="px-3 py-1 text-slate-500 whitespace-pre-wrap break-all">{row.text || " "}</span>
+                          </div>
+                        </div>
+                      );
+                    }
+                    if (row.kind === "change") {
+                      return (
+                        <div key={ri} className="grid grid-cols-2 border-b border-slate-800/30 last:border-0">
+                          <div className="flex bg-red-500/8 border-r border-slate-800/60">
+                            <span className="w-10 text-right px-2 py-1 text-red-700 select-none tabular-nums shrink-0 border-r border-red-900/40 bg-red-500/10">{row.leftNum}</span>
+                            <span className="px-3 py-1 text-slate-300 whitespace-pre-wrap break-all"><InlineText tokens={row.leftTokens} side="left" /></span>
+                          </div>
+                          <div className="flex bg-green-500/8">
+                            <span className="w-10 text-right px-2 py-1 text-green-700 select-none tabular-nums shrink-0 border-r border-green-900/40 bg-green-500/10">{row.rightNum}</span>
+                            <span className="px-3 py-1 text-slate-300 whitespace-pre-wrap break-all"><InlineText tokens={row.rightTokens} side="right" /></span>
+                          </div>
+                        </div>
+                      );
+                    }
+                    if (row.kind === "removed") {
+                      return (
+                        <div key={ri} className="grid grid-cols-2 border-b border-slate-800/30 last:border-0">
+                          <div className="flex bg-red-500/8 border-r border-slate-800/60">
+                            <span className="w-10 text-right px-2 py-1 text-red-700 select-none tabular-nums shrink-0 border-r border-red-900/40 bg-red-500/10">{row.leftNum}</span>
+                            <span className="px-3 py-1 text-red-300 whitespace-pre-wrap break-all">{row.text || " "}</span>
+                          </div>
+                          <div className="flex bg-slate-900/20">
+                            <span className="w-10 shrink-0 border-r border-slate-800/40" />
+                            <span className="px-3 py-1" />
+                          </div>
+                        </div>
+                      );
+                    }
                     return (
                       <div key={ri} className="grid grid-cols-2 border-b border-slate-800/30 last:border-0">
-                        <div className="flex border-r border-slate-800/60">
-                          <span className="w-10 text-right px-2 py-1 text-slate-700 select-none tabular-nums shrink-0 border-r border-slate-800/40">{row.leftNum}</span>
-                          <span className="px-3 py-1 text-slate-500 whitespace-pre-wrap break-all">{row.text || " "}</span>
-                        </div>
-                        <div className="flex">
-                          <span className="w-10 text-right px-2 py-1 text-slate-700 select-none tabular-nums shrink-0 border-r border-slate-800/40">{row.rightNum}</span>
-                          <span className="px-3 py-1 text-slate-500 whitespace-pre-wrap break-all">{row.text || " "}</span>
-                        </div>
-                      </div>
-                    );
-                  }
-                  if (row.kind === "change") {
-                    return (
-                      <div key={ri} className="grid grid-cols-2 border-b border-slate-800/30 last:border-0">
-                        <div className="flex bg-red-500/8 border-r border-slate-800/60">
-                          <span className="w-10 text-right px-2 py-1 text-red-700 select-none tabular-nums shrink-0 border-r border-red-900/40 bg-red-500/10">{row.leftNum}</span>
-                          <span className="px-3 py-1 text-slate-300 whitespace-pre-wrap break-all"><InlineText tokens={row.leftTokens} side="left" /></span>
-                        </div>
-                        <div className="flex bg-green-500/8">
-                          <span className="w-10 text-right px-2 py-1 text-green-700 select-none tabular-nums shrink-0 border-r border-green-900/40 bg-green-500/10">{row.rightNum}</span>
-                          <span className="px-3 py-1 text-slate-300 whitespace-pre-wrap break-all"><InlineText tokens={row.rightTokens} side="right" /></span>
-                        </div>
-                      </div>
-                    );
-                  }
-                  if (row.kind === "removed") {
-                    return (
-                      <div key={ri} className="grid grid-cols-2 border-b border-slate-800/30 last:border-0">
-                        <div className="flex bg-red-500/8 border-r border-slate-800/60">
-                          <span className="w-10 text-right px-2 py-1 text-red-700 select-none tabular-nums shrink-0 border-r border-red-900/40 bg-red-500/10">{row.leftNum}</span>
-                          <span className="px-3 py-1 text-red-300 whitespace-pre-wrap break-all">{row.text || " "}</span>
-                        </div>
-                        <div className="flex bg-slate-900/20">
+                        <div className="flex bg-slate-900/20 border-r border-slate-800/60">
                           <span className="w-10 shrink-0 border-r border-slate-800/40" />
                           <span className="px-3 py-1" />
                         </div>
+                        <div className="flex bg-green-500/8">
+                          <span className="w-10 text-right px-2 py-1 text-green-700 select-none tabular-nums shrink-0 border-r border-green-900/40 bg-green-500/10">{row.rightNum}</span>
+                          <span className="px-3 py-1 text-green-300 whitespace-pre-wrap break-all">{row.text || " "}</span>
+                        </div>
                       </div>
                     );
-                  }
-                  // added
-                  return (
-                    <div key={ri} className="grid grid-cols-2 border-b border-slate-800/30 last:border-0">
-                      <div className="flex bg-slate-900/20 border-r border-slate-800/60">
-                        <span className="w-10 shrink-0 border-r border-slate-800/40" />
-                        <span className="px-3 py-1" />
-                      </div>
-                      <div className="flex bg-green-500/8">
-                        <span className="w-10 text-right px-2 py-1 text-green-700 select-none tabular-nums shrink-0 border-r border-green-900/40 bg-green-500/10">{row.rightNum}</span>
-                        <span className="px-3 py-1 text-green-300 whitespace-pre-wrap break-all">{row.text || " "}</span>
-                      </div>
-                    </div>
-                  );
-                })}
+                  })}
+                </div>
               </div>
-            </div>
+            ) : (
+              /* Inline diff view */
+              <div className="rounded-xl overflow-hidden border border-slate-800/60">
+                <div className="flex items-center gap-3 px-4 py-2 bg-slate-900/80 border-b border-slate-800/60">
+                  <span className="text-slate-400 text-xs font-medium">Inline comparison</span>
+                  <span className="text-xs text-red-400 font-mono">− Original</span>
+                  <span className="text-xs text-green-400 font-mono">+ Modified</span>
+                </div>
+                <div className="text-xs font-mono">
+                  {splitRows.map((row, ri) => {
+                    if (row.kind === "same") return (
+                      <div key={ri} className="flex border-b border-slate-800/20 last:border-0">
+                        <span className="w-8 text-right px-2 py-1 text-slate-700 select-none tabular-nums shrink-0 border-r border-slate-800/40">{row.leftNum}</span>
+                        <span className="w-5 text-center py-1 text-slate-700 select-none shrink-0 border-r border-slate-800/40"> </span>
+                        <span className="px-3 py-1 text-slate-500 whitespace-pre-wrap break-all flex-1">{row.text || " "}</span>
+                      </div>
+                    );
+                    if (row.kind === "change") return (
+                      <div key={ri}>
+                        <div className="flex bg-red-500/8 border-b border-red-900/20">
+                          <span className="w-8 text-right px-2 py-1 text-red-700 select-none tabular-nums shrink-0 border-r border-red-900/30 bg-red-500/10">{row.leftNum}</span>
+                          <span className="w-5 text-center py-1 text-red-600 select-none shrink-0 border-r border-red-900/30 bg-red-500/10">−</span>
+                          <span className="px-3 py-1 text-slate-300 whitespace-pre-wrap break-all flex-1"><InlineText tokens={row.leftTokens} side="left" /></span>
+                        </div>
+                        <div className="flex bg-green-500/8 border-b border-green-900/20">
+                          <span className="w-8 text-right px-2 py-1 text-green-700 select-none tabular-nums shrink-0 border-r border-green-900/30 bg-green-500/10">{row.rightNum}</span>
+                          <span className="w-5 text-center py-1 text-green-600 select-none shrink-0 border-r border-green-900/30 bg-green-500/10">+</span>
+                          <span className="px-3 py-1 text-slate-300 whitespace-pre-wrap break-all flex-1"><InlineText tokens={row.rightTokens} side="right" /></span>
+                        </div>
+                      </div>
+                    );
+                    if (row.kind === "removed") return (
+                      <div key={ri} className="flex bg-red-500/8 border-b border-red-900/20 last:border-0">
+                        <span className="w-8 text-right px-2 py-1 text-red-700 select-none tabular-nums shrink-0 border-r border-red-900/30 bg-red-500/10">{row.leftNum}</span>
+                        <span className="w-5 text-center py-1 text-red-600 select-none shrink-0 border-r border-red-900/30 bg-red-500/10">−</span>
+                        <span className="px-3 py-1 text-red-300 whitespace-pre-wrap break-all flex-1">{row.text || " "}</span>
+                      </div>
+                    );
+                    return (
+                      <div key={ri} className="flex bg-green-500/8 border-b border-green-900/20 last:border-0">
+                        <span className="w-8 text-right px-2 py-1 text-green-700 select-none tabular-nums shrink-0 border-r border-green-900/30 bg-green-500/10">{row.rightNum}</span>
+                        <span className="w-5 text-center py-1 text-green-600 select-none shrink-0 border-r border-green-900/30 bg-green-500/10">+</span>
+                        <span className="px-3 py-1 text-green-300 whitespace-pre-wrap break-all flex-1">{row.text || " "}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

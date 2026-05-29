@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 
 type Unit = { label: string; factor: number };
-type Category = { name: string; base: string; units: Unit[] };
+type Category = { name: string; base: string; units: Unit[]; special?: string };
 
 const CATEGORIES: Category[] = [
   {
@@ -91,7 +91,70 @@ const CATEGORIES: Category[] = [
       { label: "Terabyte (TB)", factor: 1099511627776 },
     ],
   },
+  {
+    name: "Energy", base: "J",
+    units: [
+      { label: "Joule (J)", factor: 1 },
+      { label: "Kilojoule (kJ)", factor: 1000 },
+      { label: "Calorie (cal)", factor: 4.184 },
+      { label: "Kilocalorie (kcal)", factor: 4184 },
+      { label: "Watt-hour (Wh)", factor: 3600 },
+      { label: "Kilowatt-hour (kWh)", factor: 3600000 },
+      { label: "BTU", factor: 1055.06 },
+      { label: "Electronvolt (eV)", factor: 1.60218e-19 },
+    ],
+  },
+  {
+    name: "Pressure", base: "Pa",
+    units: [
+      { label: "Pascal (Pa)", factor: 1 },
+      { label: "Kilopascal (kPa)", factor: 1000 },
+      { label: "Megapascal (MPa)", factor: 1000000 },
+      { label: "Bar", factor: 100000 },
+      { label: "Millibar (mbar)", factor: 100 },
+      { label: "PSI", factor: 6894.76 },
+      { label: "Atmosphere (atm)", factor: 101325 },
+      { label: "mmHg / Torr", factor: 133.322 },
+    ],
+  },
+  {
+    name: "Angle", base: "°",
+    units: [
+      { label: "Degree (°)", factor: 1 },
+      { label: "Radian (rad)", factor: 180 / Math.PI },
+      { label: "Gradian (grad)", factor: 0.9 },
+      { label: "Arcminute (')", factor: 1 / 60 },
+      { label: "Arcsecond (\")", factor: 1 / 3600 },
+      { label: "Turn / Revolution", factor: 360 },
+    ],
+  },
+  {
+    name: "Fuel", base: "L/100km", special: "fuel",
+    units: [
+      { label: "L/100km", factor: 1 },
+      { label: "km/L", factor: 1 },
+      { label: "MPG (US)", factor: 1 },
+      { label: "MPG (UK)", factor: 1 },
+    ],
+  },
 ];
+
+function convertFuel(value: number, from: string, to: string): number {
+  const toL100: Record<string, (v: number) => number> = {
+    "L/100km": v => v,
+    "km/L": v => 100 / v,
+    "MPG (US)": v => 235.214 / v,
+    "MPG (UK)": v => 282.481 / v,
+  };
+  const fromL100: Record<string, (v: number) => number> = {
+    "L/100km": v => v,
+    "km/L": v => 100 / v,
+    "MPG (US)": v => 235.214 / v,
+    "MPG (UK)": v => 282.481 / v,
+  };
+  const base = (toL100[from] ?? (v => v))(value);
+  return (fromL100[to] ?? (v => v))(base);
+}
 
 function convertTemp(value: number, from: string, to: string): number {
   const toC: Record<string, (v: number) => number> = {
@@ -124,6 +187,8 @@ export default function UnitsPage() {
     let converted: number;
     if (cat.name === "Temperature") {
       converted = convertTemp(num, from.label, to.label);
+    } else if (cat.special === "fuel") {
+      converted = convertFuel(num, from.label, to.label);
     } else {
       converted = (num * from.factor) / to.factor;
     }

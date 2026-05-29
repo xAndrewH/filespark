@@ -12,38 +12,58 @@ interface Match {
   rule: { category: { name: string }; id: string };
 }
 
+const LANGUAGES = [
+  { code: "en-US", label: "English (US)" },
+  { code: "en-GB", label: "English (UK)" },
+  { code: "en-AU", label: "English (AU)" },
+  { code: "de-DE", label: "German" },
+  { code: "fr",    label: "French" },
+  { code: "es",    label: "Spanish" },
+  { code: "pt-BR", label: "Portuguese (BR)" },
+  { code: "nl",    label: "Dutch" },
+  { code: "it",    label: "Italian" },
+  { code: "pl",    label: "Polish" },
+];
+
 export default function GrammarCheckerPage() {
   const [text, setText] = useState("");
+  const [language, setLanguage] = useState("en-US");
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(false);
   const [checked, setChecked] = useState(false);
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
+  const [error, setError] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const check = useCallback(async (t?: string) => {
+  const check = useCallback(async (t?: string, lang?: string) => {
     const src = t ?? text;
+    const lng = lang ?? language;
     if (!src.trim()) return;
     setLoading(true);
     setChecked(false);
     setMatches([]);
     setActiveIdx(null);
+    setError("");
     try {
-      const body = new URLSearchParams({ text: src, language: "en-US" });
+      const body = new URLSearchParams({ text: src, language: lng });
       const res = await fetch("https://api.languagetool.org/v2/check", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: body.toString(),
       });
+      if (!res.ok) throw new Error(`API error ${res.status}`);
       const data = await res.json();
       setMatches(data.matches ?? []);
       setChecked(true);
-    } catch {
+    } catch (e) {
       setMatches([]);
       setChecked(true);
+      setError("Could not reach LanguageTool. Check your connection or try again.");
+      void e;
     } finally {
       setLoading(false);
     }
-  }, [text]);
+  }, [text, language]);
 
   const applyFix = useCallback((match: Match, replacement: string) => {
     const newText = text.slice(0, match.offset) + replacement + text.slice(match.offset + match.length);
@@ -108,11 +128,11 @@ export default function GrammarCheckerPage() {
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (text.trim().split(/\s+/).filter(Boolean).length >= 5) {
-      debounceRef.current = setTimeout(() => check(text), 1800);
+      debounceRef.current = setTimeout(() => check(text, language), 1500);
     }
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [text]);
+  }, [text, language]);
 
   const highlighted = renderHighlighted();
   const fixableCount = matches.filter(m => m.replacements.length > 0).length;
@@ -128,17 +148,29 @@ export default function GrammarCheckerPage() {
         <p className="text-slate-500 text-sm mb-8">Check grammar, spelling, and style powered by LanguageTool.</p>
 
         <div className="space-y-4">
+          {/* Language selector */}
+          <div className="flex items-center gap-3">
+            <label className="text-slate-400 text-xs shrink-0">Language:</label>
+            <select value={language}
+              onChange={e => { setLanguage(e.target.value); setChecked(false); setMatches([]); }}
+              className="bg-slate-900/60 border border-slate-800/60 text-slate-300 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500/50">
+              {LANGUAGES.map(l => (
+                <option key={l.code} value={l.code}>{l.label}</option>
+              ))}
+            </select>
+          </div>
+
           <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl overflow-hidden">
             <textarea
               value={text}
-              onChange={e => { setText(e.target.value); setChecked(false); setMatches([]); setActiveIdx(null); }}
+              onChange={e => { setText(e.target.value); setChecked(false); setMatches([]); setActiveIdx(null); setError(""); }}
               placeholder="Paste or type your text here to check for grammar and spelling mistakes…"
               rows={8}
               className="w-full bg-transparent px-4 py-4 text-slate-200 text-sm leading-relaxed resize-none focus:outline-none placeholder:text-slate-600"
             />
             <div className="flex items-center justify-between px-4 py-3 border-t border-slate-800/60">
               <div className="flex items-center gap-2">
-                <span className="text-slate-600 text-xs">{text.trim().split(/\s+/).filter(Boolean).length} words</span>
+                <span className="text-slate-600 text-xs">{text.trim().split(/\s+/).filter(Boolean).length} words · {text.length} chars</span>
                 {loading && <span className="text-slate-500 text-xs animate-pulse">Checking…</span>}
               </div>
               <div className="flex items-center gap-2">
@@ -155,6 +187,12 @@ export default function GrammarCheckerPage() {
               </div>
             </div>
           </div>
+
+          {error && (
+            <div className="flex items-center gap-2 text-red-400 text-xs bg-red-400/5 border border-red-400/20 rounded-xl px-4 py-2">
+              <span>⚠</span><span>{error}</span>
+            </div>
+          )}
 
           {/* Highlighted preview */}
           {highlighted && (

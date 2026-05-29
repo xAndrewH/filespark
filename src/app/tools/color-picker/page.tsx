@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import Link from "next/link";
 
 function hexToRgb(hex: string) {
@@ -68,6 +68,12 @@ export default function ColorPickerPage() {
   const [palette, setPalette] = useState<string[]>([]);
   const [history, setHistory] = useState<string[]>([]);
 
+  // Image pick state
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [hoverColor, setHoverColor] = useState<string | null>(null);
+  const imgCanvasRef = useRef<HTMLCanvasElement>(null);
+  const imgFileRef = useRef<HTMLInputElement>(null);
+
   const setColor = useCallback((c: string) => {
     setColorRaw(c);
     setHexInput(c);
@@ -82,8 +88,6 @@ export default function ColorPickerPage() {
   const cmyk = rgbToCmyk(rgb.r, rgb.g, rgb.b);
 
   const lum      = relativeLuminance(rgb.r, rgb.g, rgb.b);
-  const vsWhite  = contrastRatio(lum, 1);
-  const vsBlack  = contrastRatio(lum, 0);
 
   const copy = useCallback((text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -101,6 +105,45 @@ export default function ColorPickerPage() {
     { label: "HSL",  value: `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)` },
     { label: "CMYK", value: `cmyk(${cmyk.c}%, ${cmyk.m}%, ${cmyk.y}%, ${cmyk.k}%)` },
   ];
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = imgCanvasRef.current;
+      if (!canvas) return;
+      const maxW = 420, maxH = 260;
+      const scale = Math.min(1, maxW / img.naturalWidth, maxH / img.naturalHeight);
+      canvas.width  = Math.round(img.naturalWidth  * scale);
+      canvas.height = Math.round(img.naturalHeight * scale);
+      canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      setImgLoaded(true);
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+    e.target.value = "";
+  };
+
+  const getPixelColor = (e: React.MouseEvent<HTMLCanvasElement>): string | null => {
+    const canvas = imgCanvasRef.current;
+    if (!canvas) return null;
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.round((e.clientX - rect.left) * (canvas.width  / rect.width));
+    const y = Math.round((e.clientY - rect.top)  * (canvas.height / rect.height));
+    const [r, g, b] = canvas.getContext("2d")!.getImageData(x, y, 1, 1).data;
+    return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+  };
+
+  const onCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const c = getPixelColor(e);
+    if (c) setColor(c);
+  };
+
+  const onCanvasMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    setHoverColor(getPixelColor(e));
+  };
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -140,7 +183,7 @@ export default function ColorPickerPage() {
                   </button>
                   <button onClick={() => copy(color.toUpperCase(), "HEX")}
                     className={`flex-1 py-1.5 text-xs rounded-lg transition-colors ${copied === "HEX" ? "bg-green-600 text-white" : "bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300"}`}>
-                    {copied === "HEX" ? "✓ Copied" : "Copy HEX"}
+                    {copied === "HEX" ? "Copied" : "Copy HEX"}
                   </button>
                 </div>
               </div>
@@ -156,6 +199,43 @@ export default function ColorPickerPage() {
             </div>
           </div>
 
+          {/* Image picker */}
+          <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-white text-sm font-medium">Pick from image</p>
+              <div className="flex items-center gap-2">
+                {hoverColor && imgLoaded && (
+                  <span className="flex items-center gap-1.5 text-xs font-mono text-slate-400">
+                    <span className="w-4 h-4 rounded border border-white/10" style={{ background: hoverColor }} />
+                    {hoverColor.toUpperCase()}
+                  </span>
+                )}
+                <button onClick={() => imgFileRef.current?.click()}
+                  className="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-lg transition-colors">
+                  {imgLoaded ? "Change image" : "Upload image"}
+                </button>
+                <input ref={imgFileRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+              </div>
+            </div>
+            {imgLoaded ? (
+              <div className="relative rounded-lg overflow-hidden border border-slate-700/60 cursor-crosshair">
+                <canvas
+                  ref={imgCanvasRef}
+                  className="block w-full"
+                  onClick={onCanvasClick}
+                  onMouseMove={onCanvasMove}
+                  onMouseLeave={() => setHoverColor(null)}
+                />
+              </div>
+            ) : (
+              <button onClick={() => imgFileRef.current?.click()}
+                className="w-full h-24 border-2 border-dashed border-slate-700 rounded-lg text-slate-600 text-xs hover:border-slate-600 hover:text-slate-400 transition-colors flex items-center justify-center gap-2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                Click to upload an image, then click any pixel to pick its color
+              </button>
+            )}
+          </div>
+
           {/* Format values */}
           <div className="space-y-2">
             {formats.map(({ label, value }) => (
@@ -164,7 +244,7 @@ export default function ColorPickerPage() {
                 <code className="flex-1 text-white text-sm font-mono">{value}</code>
                 <button onClick={() => copy(value, label)}
                   className={`px-3 py-1 rounded-lg text-xs transition-colors shrink-0 ${copied === label ? "bg-green-600 text-white" : "bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300"}`}>
-                  {copied === label ? "✓" : "Copy"}
+                  {copied === label ? "Copied" : "Copy"}
                 </button>
               </div>
             ))}
@@ -229,7 +309,7 @@ export default function ColorPickerPage() {
               </div>
               <button onClick={() => copy(palette.join(", "), "palette")}
                 className="mt-3 text-xs text-slate-500 hover:text-slate-300 transition-colors">
-                {copied === "palette" ? "✓ Copied all HEX values" : "Copy all as CSV"}
+                {copied === "palette" ? "Copied all HEX values" : "Copy all as CSV"}
               </button>
             </div>
           )}
