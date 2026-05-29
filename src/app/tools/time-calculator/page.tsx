@@ -125,7 +125,7 @@ export default function TimeCalculatorPage() {
 
         {tab === "between" && (
           <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-5 space-y-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-slate-400 text-xs mb-1.5 block">Start time</label>
                 <input type="time" value={t1} onChange={e => setT1(e.target.value)}

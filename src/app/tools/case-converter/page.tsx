@@ -188,7 +188,7 @@ export default function CaseConverterPage() {
           </div>
 
           {/* Case buttons */}
-          <div className="flex flex-wrap gap-2 px-4 py-4 border-t border-slate-800/60 bg-slate-900/40">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 px-4 py-4 border-t border-slate-800/60 bg-slate-900/40">
             {CASES.map(c => (
               <button
                 key={c.id}

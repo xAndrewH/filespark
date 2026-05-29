@@ -161,7 +161,7 @@ ${styles.replace(/\.md-preview /g, "")}
       </div>
 
       {/* Panes */}
-      <div className={`flex-1 grid ${view === "split" ? "grid-cols-2" : "grid-cols-1"} divide-x divide-slate-800/60 min-h-0`}
+      <div className={`flex-1 grid ${view === "split" ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"} divide-y sm:divide-y-0 divide-x-0 sm:divide-x divide-slate-800/60 min-h-0`}
         style={{ height: "calc(100vh - 57px)" }}>
         {(view === "split" || view === "editor") && (
           <div className="flex flex-col">
