@@ -3,7 +3,8 @@
 import React, { useState, useMemo, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { Type, FileCode, GitCompare, AlignLeft, Shuffle, Link as LucideLink, Hash, Braces, Search, Table2, CaseSensitive, SpellCheck, Code2, Wand2, Paintbrush, Terminal, Pipette, Palette, Blend, Layers, BoxSelect, SquareDashed, Bookmark, Ruler, Maximize2, Clock, Binary, Timer, Key, Calculator, Coins, Hourglass, Percent, BarChart2, ImagePlus, Minimize2, Scissors, PenTool, FileImage, Camera, FilePlus2, ScanLine, QrCode, Globe, BookOpen, Tag, ArrowLeftRight, Image, ZoomIn, FileMinus2, Replace, Barcode, CalendarDays, Receipt, Wifi, MapPin, Play } from "lucide-react";
+import { Type, FileCode, GitCompare, AlignLeft, Shuffle, Link as LucideLink, Hash, Braces, Search, Table2, CaseSensitive, SpellCheck, Code2, Wand2, Paintbrush, Terminal, Pipette, Palette, Blend, Layers, BoxSelect, SquareDashed, Bookmark, Ruler, Maximize2, Clock, Binary, Timer, Key, Calculator, Coins, Hourglass, Percent, BarChart2, ImagePlus, Minimize2, Scissors, PenTool, FileImage, Camera, FilePlus2, ScanLine, QrCode, Globe, BookOpen, Tag, ArrowLeftRight, Image, ZoomIn, FileMinus2, Replace, Barcode, CalendarDays, Receipt, Wifi, MapPin, Play, Heart, ShieldCheck, FileJson2, Share2, Contrast, Fingerprint, Database } from "lucide-react";
+import { useToolHistory } from "@/hooks/useToolHistory";
 
 type IconComponent = React.ComponentType<{ className?: string }>;
 
@@ -95,15 +96,21 @@ const ALL_TOOLS = CATEGORIES.flatMap(c => c.tools.map(t => ({ ...t, category: c.
 const TOTAL = ALL_TOOLS.length;
 
 const COMING_SOON: { icon: IconComponent; title: string; description: string }[] = [
-  { icon: ZoomIn,      title: "Upscale Image",              description: "AI-powered image upscaling up to 4× resolution." },
-  { icon: FileMinus2,  title: "Reorder / Delete PDF Pages", description: "Drag to reorder or remove pages from a PDF before saving." },
-  { icon: Replace,     title: "Find & Replace",             description: "Find and replace text across one or multiple files." },
-  { icon: Barcode,     title: "Barcode Generator",          description: "Generate Code 128, QR, EAN, and UPC barcodes." },
-  { icon: CalendarDays,title: "Age Calculator",             description: "Calculate exact age in years, months, and days from a birthdate." },
-  { icon: Receipt,     title: "Sales Tax Calculator",       description: "Calculate tax amount and total price for any rate." },
-  { icon: Wifi,        title: "What's My IP",               description: "See your public IP address, location, and network info." },
-  { icon: MapPin,      title: "IP Address Lookup",          description: "Look up geolocation and network details for any IP." },
-  { icon: Play,        title: "YouTube Thumbnail Downloader", description: "Download thumbnails from any YouTube video in all resolutions." },
+  { icon: ZoomIn,       title: "Upscale Image",               description: "AI-powered image upscaling up to 4× resolution." },
+  { icon: FileMinus2,   title: "Reorder / Delete PDF Pages",  description: "Drag to reorder or remove pages from a PDF before saving." },
+  { icon: Replace,      title: "Find & Replace",              description: "Find and replace text across one or multiple files." },
+  { icon: Barcode,      title: "Barcode Generator",           description: "Generate Code 128, QR, EAN, and UPC barcodes." },
+  { icon: CalendarDays, title: "Age Calculator",              description: "Calculate exact age in years, months, and days from a birthdate." },
+  { icon: Receipt,      title: "Sales Tax Calculator",        description: "Calculate tax amount and total price for any rate." },
+  { icon: Wifi,         title: "What's My IP",                description: "See your public IP address, location, and network info." },
+  { icon: MapPin,       title: "IP Address Lookup",           description: "Look up geolocation and network details for any IP." },
+  { icon: Play,         title: "YouTube Thumbnail Downloader",description: "Download thumbnails from any YouTube video in all resolutions." },
+  { icon: ShieldCheck,  title: "JWT Decoder",                 description: "Decode and inspect JWT headers, payloads, and expiry at a glance." },
+  { icon: FileJson2,    title: "JSON → TypeScript",           description: "Paste JSON and get a typed TypeScript interface or Zod schema instantly." },
+  { icon: Share2,       title: "OG Meta Tag Generator",       description: "Fill in title, description, and image — get the full Open Graph head block." },
+  { icon: Contrast,     title: "Color Contrast Checker",      description: "Check foreground/background pairs against WCAG AA and AAA ratios." },
+  { icon: Fingerprint,  title: "UUID / ULID Generator",       description: "Generate cryptographically random UUIDs and ULIDs in bulk." },
+  { icon: Database,     title: "SQL Formatter",               description: "Format and beautify SQL queries with configurable indentation." },
 ];
 
 export default function ToolsPage() {
@@ -118,6 +125,7 @@ function ToolsPageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const { favorites, recents, toggleFavorite, recordVisit } = useToolHistory();
 
   const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
   const [activeCategory, setActiveCategory] = useState<string | null>(() => searchParams.get("cat") ?? null);
@@ -144,6 +152,11 @@ function ToolsPageInner() {
   const saveScroll = useCallback(() => {
     sessionStorage.setItem("tools-scroll", String(window.scrollY));
   }, []);
+
+  const handleNavigate = useCallback((href: string, title: string) => {
+    saveScroll();
+    recordVisit(href, title);
+  }, [saveScroll, recordVisit]);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -190,14 +203,16 @@ function ToolsPageInner() {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder={`Search ${TOTAL} tools…`}
-            className="w-full bg-slate-900/60 border border-slate-800/60 rounded-2xl pl-11 pr-10 py-3 text-slate-200 text-sm focus:outline-none focus:border-blue-500/60 placeholder:text-slate-600 transition-colors"
+            className="w-full bg-slate-900/60 border border-slate-800/60 rounded-2xl pl-11 pr-24 py-3 text-slate-200 text-sm focus:outline-none focus:border-blue-500/60 placeholder:text-slate-600 transition-colors"
           />
-          {query && (
+          {query ? (
             <button onClick={() => setQuery("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
+          ) : (
+            <kbd className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 text-xs bg-slate-800/80 px-1.5 py-0.5 rounded border border-slate-700 font-mono pointer-events-none">⌘K</kbd>
           )}
         </div>
 
@@ -240,7 +255,10 @@ function ToolsPageInner() {
             <p className="text-slate-500 text-xs mb-4">{filtered.length} result{filtered.length !== 1 ? "s" : ""}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {filtered.map(({ href, icon, title, description, category }) => (
-                <ToolCard key={href} href={href} icon={icon} title={title} description={description} tag={category} onNavigate={saveScroll} />
+                <ToolCard key={href} href={href} icon={icon} title={title} description={description} tag={category}
+                  isFavorite={favorites.includes(href)}
+                  onFavorite={e => { e.preventDefault(); e.stopPropagation(); toggleFavorite(href); }}
+                  onNavigate={() => handleNavigate(href, title)} />
               ))}
             </div>
           </div>
@@ -249,6 +267,54 @@ function ToolsPageInner() {
         {/* Default - grouped by category */}
         {!isSearching && (
           <div className="space-y-10">
+
+            {/* Favorites */}
+            {favorites.length > 0 && (
+              <section className="scroll-mt-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <Heart className="w-3.5 h-3.5 text-pink-400 fill-pink-400" />
+                  <h2 className="text-white text-sm font-semibold">Favorites</h2>
+                  <div className="h-px flex-1 bg-slate-800/60" />
+                  <span className="text-slate-600 text-xs">{favorites.length}</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {favorites.map(href => {
+                    const tool = ALL_TOOLS.find(t => t.href === href);
+                    if (!tool) return null;
+                    return (
+                      <ToolCard key={href} href={tool.href} icon={tool.icon} title={tool.title} description={tool.description}
+                        isFavorite
+                        onFavorite={e => { e.preventDefault(); e.stopPropagation(); toggleFavorite(href); }}
+                        onNavigate={() => handleNavigate(href, tool.title)} />
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* Recently used */}
+            {recents.length > 0 && (
+              <section className="scroll-mt-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <h2 className="text-white text-sm font-semibold">Recently Used</h2>
+                  <div className="h-px flex-1 bg-slate-800/60" />
+                  <span className="text-slate-600 text-xs">{recents.length}</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {recents.map(({ href, title }) => {
+                    const tool = ALL_TOOLS.find(t => t.href === href);
+                    if (!tool) return null;
+                    return (
+                      <ToolCard key={href} href={tool.href} icon={tool.icon} title={tool.title} description={tool.description}
+                        isFavorite={favorites.includes(href)}
+                        onFavorite={e => { e.preventDefault(); e.stopPropagation(); toggleFavorite(href); }}
+                        onNavigate={() => handleNavigate(href, title)} />
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
             {groupedFiltered.map(({ id, name, tools }) => (
               <section key={id} id={id} className="scroll-mt-8">
                 <div className="flex items-center gap-3 mb-4">
@@ -258,7 +324,10 @@ function ToolsPageInner() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {tools.map(({ href, icon, title, description }) => (
-                    <ToolCard key={href} href={href} icon={icon} title={title} description={description} onNavigate={saveScroll} />
+                    <ToolCard key={href} href={href} icon={icon} title={title} description={description}
+                      isFavorite={favorites.includes(href)}
+                      onFavorite={e => { e.preventDefault(); e.stopPropagation(); toggleFavorite(href); }}
+                      onNavigate={() => handleNavigate(href, title)} />
                   ))}
                 </div>
               </section>
@@ -284,8 +353,9 @@ function ToolsPageInner() {
   );
 }
 
-function ToolCard({ href, icon: Icon, title, description, tag, onNavigate }: {
-  href: string; icon: IconComponent; title: string; description: string; tag?: string; onNavigate: () => void;
+function ToolCard({ href, icon: Icon, title, description, tag, onNavigate, isFavorite, onFavorite }: {
+  href: string; icon: IconComponent; title: string; description: string; tag?: string;
+  onNavigate: () => void; isFavorite?: boolean; onFavorite?: (e: React.MouseEvent) => void;
 }) {
   return (
     <Link
@@ -299,9 +369,20 @@ function ToolCard({ href, icon: Icon, title, description, tag, onNavigate }: {
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <h3 className="text-white font-medium text-sm group-hover:text-blue-300 transition-colors leading-snug">{title}</h3>
-          <svg className="w-3 h-3 text-slate-600 group-hover:text-blue-400 shrink-0 mt-0.5 transition-colors group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M17 7H7M17 7v10" />
-          </svg>
+          <div className="flex items-center gap-1 shrink-0">
+            {onFavorite && (
+              <button
+                onClick={onFavorite}
+                title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                className={`w-5 h-5 flex items-center justify-center rounded transition-all ${isFavorite ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+              >
+                <Heart className={`w-3.5 h-3.5 transition-colors ${isFavorite ? "text-pink-400 fill-pink-400" : "text-slate-500 hover:text-pink-400"}`} />
+              </button>
+            )}
+            <svg className="w-3 h-3 text-slate-600 group-hover:text-blue-400 mt-0.5 transition-colors group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M17 7H7M17 7v10" />
+            </svg>
+          </div>
         </div>
         <p className="text-slate-500 text-xs leading-relaxed mt-0.5 line-clamp-2">{description}</p>
         {tag && <span className="inline-block mt-1.5 text-[10px] text-slate-600 bg-slate-800/60 px-1.5 py-0.5 rounded-md">{tag}</span>}

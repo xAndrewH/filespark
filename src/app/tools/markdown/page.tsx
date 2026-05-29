@@ -30,6 +30,7 @@ function hello() {
 `);
   const [copied, setCopied] = useState(false);
   const [view, setView] = useState<"split" | "preview" | "editor">("split");
+  const [showExport, setShowExport] = useState(false);
   const [renderedHtml, setRenderedHtml] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -50,6 +51,64 @@ function hello() {
     navigator.clipboard.writeText(renderedHtml);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
+  };
+
+  const exportHtml = () => {
+    const styles = document.querySelector("style[data-md]")?.textContent ?? "";
+    const doc = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Document</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1.5rem; background: #fff; color: #1e293b; line-height: 1.6; }
+${styles
+  .replace(/\.md-preview /g, "")
+  .replace(/#fff/g, "#1e293b")
+  .replace(/color: #cbd5e1/g, "color: #334155")
+  .replace(/color: #e2e8f0/g, "color: #1e293b")
+  .replace(/color: #fff/g, "color: #0f172a")
+  .replace(/background: #0f172a/g, "background: #f8fafc")
+  .replace(/background: #1e293b/g, "background: #f1f5f9")
+  .replace(/border: 1px solid #334155/g, "border: 1px solid #cbd5e1")
+  .replace(/color: #94a3b8/g, "color: #64748b")
+  .replace(/border-left: 3px solid #475569/g, "border-left: 3px solid #94a3b8")}
+</style>
+</head>
+<body>
+${renderedHtml}
+</body>
+</html>`;
+    const blob = new Blob([doc], { type: "text/html" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "document.html";
+    a.click();
+    URL.revokeObjectURL(a.href);
+    setShowExport(false);
+  };
+
+  const exportPdf = () => {
+    const styles = document.querySelector("style[data-md]")?.textContent ?? "";
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Document</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1.5rem; background: #fff; color: #1e293b; line-height: 1.6; }
+${styles.replace(/\.md-preview /g, "")}
+@media print { body { margin: 0; max-width: 100%; } }
+</style>
+</head>
+<body>${renderedHtml}</body>
+</html>`);
+    win.document.close();
+    win.onload = () => { win.print(); };
+    setShowExport(false);
   };
 
   const wordCount = markdown.trim() ? markdown.trim().split(/\s+/).length : 0;
@@ -76,6 +135,28 @@ function hello() {
             className="ml-2 px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors">
             {copied ? "Copied HTML!" : "Copy HTML"}
           </button>
+          <div className="relative ml-1">
+            <button onClick={() => setShowExport(o => !o)}
+              className="px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors flex items-center gap-1">
+              Export
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            {showExport && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setShowExport(false)} />
+                <div className="absolute right-0 top-full mt-1 z-20 bg-slate-900 border border-slate-700/60 rounded-xl shadow-xl overflow-hidden w-40">
+                  <button onClick={exportHtml}
+                    className="w-full px-4 py-2.5 text-left text-slate-300 hover:bg-slate-800 text-xs transition-colors">
+                    Export as HTML
+                  </button>
+                  <button onClick={exportPdf}
+                    className="w-full px-4 py-2.5 text-left text-slate-300 hover:bg-slate-800 text-xs transition-colors border-t border-slate-800/60">
+                    Export as PDF
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -100,7 +181,7 @@ function hello() {
             <div className="px-4 py-2 border-b border-slate-800/40">
               <span className="text-slate-500 text-xs">Preview</span>
             </div>
-            <style>{`
+            <style data-md>{`
               .md-preview h1 { font-size: 1.875rem; font-weight: 700; color: #fff; margin: 1.25rem 0 0.75rem; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; }
               .md-preview h2 { font-size: 1.5rem; font-weight: 600; color: #fff; margin: 1.25rem 0 0.5rem; border-bottom: 1px solid #1e293b; padding-bottom: 0.35rem; }
               .md-preview h3 { font-size: 1.25rem; font-weight: 600; color: #e2e8f0; margin: 1rem 0 0.4rem; }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import { RelatedTools } from "@/components/RelatedTools";
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 const ERROR_LEVELS = ["L", "M", "Q", "H"] as const;
@@ -289,6 +290,12 @@ export default function QrPage() {
   const logoFileRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Bulk mode
+  const [bulkMode, setBulkMode]     = useState(false);
+  const [bulkUrls, setBulkUrls]     = useState("");
+  const [bulkResults, setBulkResults] = useState<{ url: string; dataUrl: string }[]>([]);
+  const [bulkLoading, setBulkLoading] = useState(false);
+
   const setField = <T extends ContentType>(type: T, patch: Partial<FormState[T]>) =>
     setForm(f => ({ ...f, [type]: { ...f[type], ...patch } }));
 
@@ -330,6 +337,37 @@ export default function QrPage() {
     e.target.value = "";
   };
 
+  const generateBulk = useCallback(async () => {
+    const urls = bulkUrls.split("\n").map(u => u.trim()).filter(Boolean).slice(0, 20);
+    if (urls.length === 0) return;
+    setBulkLoading(true);
+    setBulkResults([]);
+    const results: { url: string; dataUrl: string }[] = [];
+    for (const url of urls) {
+      const du = await renderQR({ text: url, outputSize, fgColor, bgColor, errorLevel, dotStyle, eyeOuter, eyeInner, frameStyle, frameColor, frameText, logoDataUrl, logoEmoji });
+      if (du) results.push({ url, dataUrl: du });
+    }
+    setBulkResults(results);
+    setBulkLoading(false);
+  }, [bulkUrls, outputSize, fgColor, bgColor, errorLevel, dotStyle, eyeOuter, eyeInner, frameStyle, frameColor, frameText, logoDataUrl, logoEmoji]);
+
+  const downloadBulkZip = useCallback(async () => {
+    if (bulkResults.length === 0) return;
+    const JSZip = (await import("jszip")).default;
+    const zip = new JSZip();
+    bulkResults.forEach(({ url, dataUrl: du }, i) => {
+      const base64 = du.split(",")[1];
+      const slug = url.replace(/https?:\/\//, "").replace(/[^a-zA-Z0-9.-]/g, "_").slice(0, 40) || `qr_${i + 1}`;
+      zip.file(`${String(i + 1).padStart(2, "0")}_${slug}.png`, base64, { base64: true });
+    });
+    const blob = await zip.generateAsync({ type: "blob" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "qrcodes.zip";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }, [bulkResults]);
+
   const hasScanText = ["scan-bottom","scan-rounded-bottom","scan-top"].includes(frameStyle);
 
   const DOT_OPTIONS: { id: DotStyle; label: string }[] = [
@@ -351,12 +389,69 @@ export default function QrPage() {
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
           Tools
         </Link>
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-1">QR Code Generator</h1>
-          <p className="text-slate-500 text-sm">Generate QR codes for URLs, contacts, Wi-Fi, and more. Customize shape, frame, and logo.</p>
+        <div className="flex items-start justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-1">QR Code Generator</h1>
+            <p className="text-slate-500 text-sm">Generate QR codes for URLs, contacts, Wi-Fi, and more. Customize shape, frame, and logo.</p>
+          </div>
+          <div className="flex gap-1 bg-slate-900/60 border border-slate-800/60 rounded-xl p-1 mt-1">
+            {(["Single", "Bulk"] as const).map(m => (
+              <button key={m} onClick={() => setBulkMode(m === "Bulk")}
+                className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-colors ${(m === "Bulk") === bulkMode ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"}`}>
+                {m}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6">
+        {/* Bulk mode */}
+        {bulkMode && (
+          <div className="space-y-5">
+            <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-5">
+              <label className="text-slate-400 text-xs mb-2 block">URLs — one per line (max 20). Uses your current design settings.</label>
+              <textarea
+                value={bulkUrls}
+                onChange={e => setBulkUrls(e.target.value)}
+                rows={8}
+                placeholder={"https://example.com\nhttps://example.com/page2\nhttps://example.com/page3"}
+                className="w-full bg-slate-800/60 border border-slate-700/50 rounded-lg px-3 py-2.5 text-white text-sm font-mono focus:outline-none focus:border-blue-500/60 placeholder:text-slate-600 resize-none"
+              />
+              <div className="flex items-center justify-between mt-3">
+                <span className="text-slate-600 text-xs">{bulkUrls.split("\n").map(u => u.trim()).filter(Boolean).length} / 20 URLs</span>
+                <button onClick={generateBulk} disabled={bulkLoading || !bulkUrls.trim()}
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-sm font-semibold rounded-lg transition-colors">
+                  {bulkLoading ? "Generating…" : "Generate all"}
+                </button>
+              </div>
+            </div>
+
+            {bulkResults.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-slate-400 text-sm font-medium">{bulkResults.length} QR codes generated</p>
+                  <button onClick={downloadBulkZip}
+                    className="flex items-center gap-2 px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-sm font-semibold rounded-lg transition-colors">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    Download ZIP
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {bulkResults.map(({ url, dataUrl: du }, i) => (
+                    <div key={i} className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-3 flex flex-col items-center gap-2">
+                      <img src={du} alt={`QR ${i + 1}`} className="w-full rounded-lg" />
+                      <p className="text-slate-500 text-[10px] truncate w-full text-center">{url}</p>
+                      <a href={du} download={`qr_${i + 1}.png`}
+                        className="text-xs text-blue-400 hover:text-blue-300 transition-colors">↓ PNG</a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Single mode */}
+        {!bulkMode && <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6">
           {/* Left: content + design */}
           <div className="space-y-5">
             {/* Step 1: Content */}
@@ -625,7 +720,9 @@ export default function QrPage() {
               )}
             </div>
           </div>
-        </div>
+        </div>}
+
+        <RelatedTools current="/tools/qr" />
       </div>
     </div>
   );

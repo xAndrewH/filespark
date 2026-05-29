@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import Footer from "@/components/Footer";
+import { CommandPalette } from "@/components/CommandPalette";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full bg-slate-950 text-slate-100 antialiased">
         {children}
         <Footer />
+        <CommandPalette />
       </body>
     </html>
   );
