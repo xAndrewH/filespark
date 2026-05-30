@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { Type, FileCode, GitCompare, AlignLeft, Shuffle, Link as LucideLink, Hash, Braces, Search, Table2, CaseSensitive, SpellCheck, Code2, Wand2, Paintbrush, Terminal, Pipette, Palette, Blend, Layers, BoxSelect, SquareDashed, Bookmark, Ruler, Maximize2, Clock, Binary, Timer, Key, Calculator, Coins, Hourglass, Percent, BarChart2, ImagePlus, Minimize2, Scissors, PenTool, FileImage, Camera, FilePlus2, ScanLine, QrCode, Globe, BookOpen, Tag, ArrowLeftRight, Image, ZoomIn, FileMinus2, Replace, Barcode, CalendarDays, Receipt, Wifi, MapPin, Play, Heart, ShieldCheck, FileJson2, Share2, Contrast, Fingerprint, Database } from "lucide-react";
+import { Type, FileCode, GitCompare, AlignLeft, Shuffle, Link as LucideLink, Hash, Braces, Search, Table2, CaseSensitive, SpellCheck, Code2, Wand2, Paintbrush, Terminal, Pipette, Palette, Blend, Layers, BoxSelect, SquareDashed, Bookmark, Ruler, Maximize2, Clock, Binary, Timer, Key, Calculator, Coins, Hourglass, Percent, BarChart2, ImagePlus, Minimize2, Scissors, PenTool, FileImage, Camera, FilePlus2, ScanLine, QrCode, Globe, BookOpen, Tag, ArrowLeftRight, Image, ZoomIn, FileMinus2, Replace, Barcode, CalendarDays, Receipt, Wifi, MapPin, Play, Heart, ShieldCheck, FileJson2, Share2, Contrast, Fingerprint, Database, FileCode2, Lock, Zap, Network, Bot, Map, FileText, Columns, FlaskConical, MessageSquare, Mail, Smartphone, TrendingUp, Star, DollarSign, Users, Gauge, Server, CheckCheck, Sigma, Languages, MousePointer2, PackageMinus, Activity, Megaphone, LayoutTemplate, Newspaper, TestTube2, BookMarked, Code, Cpu, Radio, Rss, PenLine, ListChecks, Webhook, FileSearch, TableProperties, SlidersHorizontal, FileDiff, Workflow, ClipboardCheck, LineChart, PieChart, AreaChart } from "lucide-react";
 import { useToolHistory } from "@/hooks/useToolHistory";
 
 type IconComponent = React.ComponentType<{ className?: string }>;
@@ -101,16 +101,79 @@ const ALL_TOOLS = CATEGORIES.flatMap(c => c.tools.map(t => ({ ...t, category: c.
 const TOTAL = ALL_TOOLS.length;
 
 const COMING_SOON: { icon: IconComponent; title: string; description: string }[] = [
-  { icon: ZoomIn,       title: "Upscale Image",               description: "AI-powered image upscaling up to 4× resolution." },
-  { icon: FileMinus2,   title: "Reorder / Delete PDF Pages",  description: "Drag to reorder or remove pages from a PDF before saving." },
-  { icon: Replace,      title: "Find & Replace",              description: "Find and replace text across one or multiple files." },
-  { icon: Barcode,      title: "Barcode Generator",           description: "Generate Code 128, QR, EAN, and UPC barcodes." },
-  { icon: MapPin,       title: "IP Address Lookup",           description: "Look up geolocation and network details for any IP." },
-  { icon: Play,         title: "YouTube Thumbnail Downloader",description: "Download thumbnails from any YouTube video in all resolutions." },
-  { icon: ShieldCheck,  title: "JWT Decoder",                 description: "Decode and inspect JWT headers, payloads, and expiry at a glance." },
-  { icon: FileJson2,    title: "JSON → TypeScript",           description: "Paste JSON and get a typed TypeScript interface or Zod schema instantly." },
-  { icon: Fingerprint,  title: "UUID / ULID Generator",       description: "Generate cryptographically random UUIDs and ULIDs in bulk." },
-  { icon: Database,     title: "SQL Formatter",               description: "Format and beautify SQL queries with configurable indentation." },
+  // Developer — Data & Formats
+  { icon: FileCode2,       title: "YAML ↔ JSON",                  description: "Convert between YAML and JSON with schema validation." },
+  { icon: Code,            title: "XML Formatter",                 description: "Format, indent, and validate XML documents." },
+  { icon: CheckCheck,      title: "JSON Schema Validator",         description: "Validate any JSON payload against a JSON Schema." },
+  { icon: FileDiff,        title: "JSON Diff",                     description: "Compare two JSON objects and highlight added, removed, and changed keys." },
+  { icon: FileJson2,       title: "JSON → TypeScript",             description: "Paste JSON and get a typed TypeScript interface or Zod schema instantly." },
+  { icon: TableProperties, title: "TOML ↔ JSON",                   description: "Convert between TOML config files and JSON." },
+  { icon: Database,        title: "SQL Formatter",                 description: "Format and beautify SQL queries with configurable indentation." },
+  { icon: Terminal,        title: ".ENV Formatter",                description: "Sort, deduplicate, and convert .env files to JSON or YAML." },
+  // Developer — Security & Network
+  { icon: ShieldCheck,     title: "JWT Decoder",                   description: "Decode and inspect JWT headers, payloads, and expiry at a glance." },
+  { icon: Fingerprint,     title: "UUID / ULID Generator",         description: "Generate cryptographically random UUIDs and ULIDs in bulk." },
+  { icon: Lock,            title: "SSL Certificate Checker",       description: "Enter a domain and see cert expiry, issuer, and chain details." },
+  { icon: Server,          title: "DNS Lookup",                    description: "Query A, CNAME, MX, NS, and TXT records for any domain." },
+  { icon: Network,         title: "IP Subnet Calculator",          description: "CIDR notation → usable hosts, broadcast address, and IP range." },
+  { icon: MapPin,          title: "IP Address Lookup",             description: "Look up geolocation and network details for any IP." },
+  { icon: Webhook,         title: "Webhook Tester",                description: "Generate a unique endpoint and inspect incoming POST payloads live." },
+  { icon: Activity,        title: "HTTP Header Analyzer",          description: "Paste or fetch a URL and inspect all response headers." },
+  // Developer — CSS & Frontend
+  { icon: PackageMinus,    title: "CSS Minifier",                  description: "Strip whitespace and comments from CSS to reduce file size." },
+  { icon: Minimize2,       title: "JS Minifier",                   description: "Minify JavaScript and TypeScript for production builds." },
+  { icon: MousePointer2,   title: "CSS Specificity Calculator",    description: "Paste a CSS selector and instantly see its specificity score." },
+  { icon: SlidersHorizontal, title: "Tailwind Class Sorter",       description: "Sort Tailwind class strings per Prettier Tailwind plugin order." },
+  { icon: LayoutTemplate,  title: "CSS Grid Generator",            description: "Visual grid builder — set rows, columns, and gaps, then copy the CSS." },
+  { icon: Layers,          title: "CSS Animation Builder",         description: "Build keyframe animations visually and export the CSS." },
+  // Developer — Coding Utilities
+  { icon: Bot,             title: "Robots.txt Generator",          description: "Build allow/disallow rules and preview your robots.txt file." },
+  { icon: Map,             title: "Sitemap Generator",             description: "Paste a list of URLs and generate a valid sitemap.xml." },
+  { icon: FileText,        title: "HTML → Markdown",               description: "Convert pasted HTML into clean Markdown." },
+  { icon: Sigma,           title: "Chmod Calculator",              description: "Click a permissions grid and get the octal code and symbolic notation." },
+  { icon: Cpu,             title: "Cron Humanizer",                description: "Paste a cron expression and get a plain-English description." },
+  { icon: FileSearch,      title: "Regex Cheat Sheet",             description: "Interactive reference for regex syntax with live examples." },
+  { icon: Code2,           title: "Code to Image",                 description: "Turn a code snippet into a shareable, styled PNG." },
+  { icon: ImagePlus,       title: "Placeholder Image Generator",   description: "Generate placeholder images at any size with custom colors and text." },
+  { icon: Workflow,        title: "ASCII Art Generator",           description: "Convert text or images into ASCII art." },
+  { icon: Columns,         title: "Markdown Table Generator",      description: "Build Markdown tables visually and copy the formatted output." },
+  // Images & Media
+  { icon: ZoomIn,          title: "Upscale Image",                 description: "AI-powered image upscaling up to 4× resolution." },
+  { icon: FileMinus2,      title: "Reorder / Delete PDF Pages",    description: "Drag to reorder or remove pages from a PDF before saving." },
+  { icon: Barcode,         title: "Barcode Generator",             description: "Generate Code 128, QR, EAN, and UPC barcodes." },
+  { icon: Play,            title: "YouTube Thumbnail Downloader",  description: "Download thumbnails from any YouTube video in all resolutions." },
+  { icon: Replace,         title: "Find & Replace",                description: "Find and replace text across one or multiple files." },
+  // Marketing — Ad & Campaign Math
+  { icon: TrendingUp,      title: "ROAS Calculator",               description: "Enter ad spend and revenue to calculate return on ad spend." },
+  { icon: BarChart2,       title: "CPM / CPC / CTR Calculator",    description: "Enter any two of spend, impressions, or clicks to calculate the third." },
+  { icon: FlaskConical,    title: "A/B Test Calculator",           description: "Enter visitors and conversions for two variants to check statistical significance." },
+  { icon: Percent,         title: "Conversion Rate Calculator",    description: "Clicks → conversions → CPA, CVR, and breakeven CPC." },
+  { icon: DollarSign,      title: "ROI Calculator",                description: "Calculate return on investment, net profit, and payback period." },
+  { icon: Users,           title: "Customer LTV Calculator",       description: "Estimate customer lifetime value from AOV, purchase frequency, and lifespan." },
+  { icon: LineChart,       title: "Break-Even Calculator",         description: "Fixed costs, variable costs, and price → break-even units and revenue." },
+  // Marketing — Content & Copy
+  { icon: MessageSquare,   title: "Social Media Character Counter", description: "Live character counter with per-platform limits for X, LinkedIn, Instagram, and more." },
+  { icon: Mail,            title: "Email Subject Line Previewer",  description: "Preview how your subject and preheader look in Gmail and Apple Mail." },
+  { icon: BookOpen,        title: "Readability Score Checker",     description: "Paste text and get Flesch-Kincaid grade level and reading ease score." },
+  { icon: Hash,            title: "Keyword Density Analyzer",      description: "Paste content and see top keywords with their frequency and density percentage." },
+  { icon: Megaphone,       title: "Headline Analyzer",             description: "Score your headline on clarity, sentiment, power words, and length." },
+  { icon: Mail,            title: "Email Signature Generator",     description: "Fill in your details and generate a formatted HTML email signature." },
+  { icon: Star,            title: "NPS Calculator",                description: "Enter promoters, passives, and detractors to calculate your Net Promoter Score." },
+  { icon: PenLine,         title: "Invoice Generator",             description: "Fill in line items and download a clean, printable PDF invoice." },
+  // Marketing — SEO & Web
+  { icon: Globe,           title: "Meta Tag Analyzer",             description: "Enter a URL and see all OG, Twitter Card, and SEO meta tags it serves." },
+  { icon: ListChecks,      title: "Schema Markup Generator",       description: "Choose a type (Article, FAQ, Product) and get the JSON-LD snippet." },
+  { icon: Smartphone,      title: "Social Image Resizer",          description: "Upload one image and export crops for OG, Twitter, LinkedIn, and Instagram." },
+  { icon: Gauge,           title: "Page Speed Estimator",          description: "Check Core Web Vitals and performance tips for any public URL." },
+  { icon: Rss,             title: "RSS Feed Reader",               description: "Paste an RSS or Atom feed URL and browse entries in a clean reader." },
+  { icon: Newspaper,       title: "Press Release Formatter",       description: "Paste your press release and format it to AP Style with boilerplate." },
+  { icon: ClipboardCheck,  title: "Landing Page Checklist",        description: "Score your landing page against 30+ conversion best-practice criteria." },
+  { icon: Languages,       title: "Hreflang Tag Generator",        description: "Specify language/region pairs and get the full set of hreflang link tags." },
+  { icon: PieChart,        title: "Traffic Source Attribution",    description: "Enter channel traffic numbers and see your acquisition mix as a chart." },
+  { icon: TestTube2,       title: "UTM Campaign Planner",          description: "Plan and document multiple campaign UTM structures in a shareable sheet." },
+  { icon: Radio,           title: "Podcast Show Notes Generator",  description: "Paste a transcript excerpt and generate formatted show notes." },
+  { icon: BookMarked,      title: "Content Calendar Template",     description: "Generate a weekly/monthly content calendar you can export to CSV." },
+  { icon: AreaChart,       title: "Funnel Conversion Calculator",  description: "Enter stage-by-stage conversion rates and see where your funnel leaks." },
 ];
 
 export default function ToolsPage() {
