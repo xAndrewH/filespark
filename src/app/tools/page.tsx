@@ -44,6 +44,7 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/box-shadow",      icon: BoxSelect,    title: "Box Shadow Builder",       description: "Build CSS box shadows with multiple layers and live preview." },
       { href: "/tools/border-radius",   icon: SquareDashed, title: "Border Radius Builder",    description: "Shape rounded corners per-side visually and copy the CSS." },
       { href: "/tools/favicon",         icon: Bookmark,     title: "Favicon Generator",        description: "Upload any image and get favicon PNGs at all standard sizes." },
+      { href: "/tools/color-contrast",  icon: Contrast,     title: "Color Contrast Checker",   description: "Check foreground/background pairs against WCAG AA and AAA ratios." },
     ],
   },
   {
@@ -62,6 +63,8 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/time-calculator",         icon: Hourglass,      title: "Time Calculator",          description: "Calculate durations, add/subtract time, combine intervals." },
       { href: "/tools/percentage-calculator",   icon: Percent,        title: "Percentage Calculator",    description: "Calculate percentages, increases, decreases, and differences." },
       { href: "/tools/average-calculator",      icon: BarChart2,      title: "Average Calculator",       description: "Mean, median, mode, and range for any set of numbers." },
+      { href: "/tools/age-calculator",          icon: CalendarDays,   title: "Age Calculator",           description: "Calculate exact age in years, months, and days from a birthdate." },
+      { href: "/tools/sales-tax",               icon: Receipt,        title: "Sales Tax Calculator",     description: "Calculate tax amount and total price for any rate." },
     ],
   },
   {
@@ -72,6 +75,8 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/http-status",         icon: Globe,     title: "HTTP Status Codes",      description: "Searchable reference for every HTTP status code." },
       { href: "/tools/framework-reference", icon: BookOpen,  title: "Framework Reference",    description: "Snippets for Tailwind, Bootstrap, Sass, React, and Next.js." },
       { href: "/tools/utm-builder",         icon: Tag,       title: "UTM Builder",            description: "Build UTM-tagged URLs for campaign tracking." },
+      { href: "/tools/my-ip",               icon: Wifi,      title: "What's My IP",           description: "See your public IP address, location, and network info." },
+      { href: "/tools/og-meta",             icon: Share2,    title: "OG Meta Tag Generator",  description: "Fill in title, description, and image — get the full Open Graph head block." },
     ],
   },
   {
@@ -100,15 +105,10 @@ const COMING_SOON: { icon: IconComponent; title: string; description: string }[]
   { icon: FileMinus2,   title: "Reorder / Delete PDF Pages",  description: "Drag to reorder or remove pages from a PDF before saving." },
   { icon: Replace,      title: "Find & Replace",              description: "Find and replace text across one or multiple files." },
   { icon: Barcode,      title: "Barcode Generator",           description: "Generate Code 128, QR, EAN, and UPC barcodes." },
-  { icon: CalendarDays, title: "Age Calculator",              description: "Calculate exact age in years, months, and days from a birthdate." },
-  { icon: Receipt,      title: "Sales Tax Calculator",        description: "Calculate tax amount and total price for any rate." },
-  { icon: Wifi,         title: "What's My IP",                description: "See your public IP address, location, and network info." },
   { icon: MapPin,       title: "IP Address Lookup",           description: "Look up geolocation and network details for any IP." },
   { icon: Play,         title: "YouTube Thumbnail Downloader",description: "Download thumbnails from any YouTube video in all resolutions." },
   { icon: ShieldCheck,  title: "JWT Decoder",                 description: "Decode and inspect JWT headers, payloads, and expiry at a glance." },
   { icon: FileJson2,    title: "JSON → TypeScript",           description: "Paste JSON and get a typed TypeScript interface or Zod schema instantly." },
-  { icon: Share2,       title: "OG Meta Tag Generator",       description: "Fill in title, description, and image — get the full Open Graph head block." },
-  { icon: Contrast,     title: "Color Contrast Checker",      description: "Check foreground/background pairs against WCAG AA and AAA ratios." },
   { icon: Fingerprint,  title: "UUID / ULID Generator",       description: "Generate cryptographically random UUIDs and ULIDs in bulk." },
   { icon: Database,     title: "SQL Formatter",               description: "Format and beautify SQL queries with configurable indentation." },
 ];
