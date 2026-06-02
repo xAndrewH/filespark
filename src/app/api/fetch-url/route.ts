@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   let upstream: Response;
   try {
     upstream = await fetch(url, {
-      headers: { "User-Agent": "Filespark/1.0 (file converter)" },
+      headers: { "User-Agent": "FileSpark/1.0 (file converter)" },
       redirect: "follow",
     });
   } catch {

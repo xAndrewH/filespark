@@ -672,12 +672,12 @@ export default function HomePage() {
               </div>
               {/* Center: text */}
               <div className="flex-1 text-center sm:text-left">
-                <p className="text-xs font-bold text-yellow-400 uppercase tracking-widest mb-2">Support Filespark</p>
+                <p className="text-xs font-bold text-yellow-400 uppercase tracking-widest mb-2">Support FileSpark</p>
                 <h2 className="text-2xl font-black text-white mb-2">
                   Like what you see?
                 </h2>
                 <p className="text-slate-400 text-sm leading-relaxed max-w-md">
-                  Filespark is free to start with no account required. If it's saved you time, consider buying me a coffee — it helps keep the lights on and new tools coming.
+                  FileSpark is free to start with no account required. If it's saved you time, consider buying me a coffee — it helps keep the lights on and new tools coming.
                 </p>
                 <div className="flex flex-wrap gap-3 mt-5 justify-center sm:justify-start">
                   {["No account required", "No data harvesting", "New tools regularly"].map(t => (

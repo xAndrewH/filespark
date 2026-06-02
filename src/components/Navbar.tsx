@@ -20,7 +20,7 @@ export default function Navbar({ historyCount, onHistoryClick, onKeyClick }: Pro
               <circle cx="8" cy="8" r="2" fill="currentColor" stroke="none" />
             </svg>
           </div>
-          <span className="font-bold text-white text-[17px] tracking-tight">Filespark</span>
+          <span className="font-bold text-white text-[17px] tracking-tight">FileSpark</span>
           <span className="hidden md:flex items-center gap-1 text-slate-600 text-sm font-normal">
             <span className="mx-1">·</span>
             Free File Converter
