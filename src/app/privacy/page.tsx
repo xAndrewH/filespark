@@ -34,7 +34,8 @@ export default function PrivacyPage() {
             <p>
               Files you upload for conversion are processed solely for the purpose of converting them.
               They are <strong className="text-slate-200">never stored, logged, shared, or sold</strong>.
-              Server-side conversions delete the file immediately after the converted result is returned to you.
+              Server-side conversions process files in memory and discard them immediately after the converted
+              result is returned to you.
             </p>
             <p className="mt-3">
               Video, audio, GIF, and image conversions (JPEG, PNG, WEBP, HEIC, and more) happen entirely
@@ -54,8 +55,25 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-white font-semibold text-base mb-2">Cookies &amp; Tracking</h2>
             <p>
-              We do not use tracking cookies, advertising cookies, or third-party analytics. No personal
-              data is collected, processed, or transmitted to any third party.
+              FileSpark does not use cookies of any kind — no tracking cookies, advertising cookies, session cookies,
+              or third-party analytics cookies. We do not use Google Analytics, Meta Pixel, or any other tracking
+              service. No personal data is collected, processed, or transmitted to any advertising or analytics
+              third party.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-white font-semibold text-base mb-2">Third-Party API (CloudConvert)</h2>
+            <p>
+              Document and eBook conversions optionally use{" "}
+              <a href="https://cloudconvert.com" className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">CloudConvert</a>.
+              If you choose to use this feature, you provide your own CloudConvert API key and your files are sent
+              directly to CloudConvert&apos;s servers under their{" "}
+              <a href="https://cloudconvert.com/privacy" className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">
+                Privacy Policy
+              </a>.
+              FileSpark never sees or stores your CloudConvert API key on our servers — it is saved only in your
+              browser&apos;s <code className="text-slate-300 bg-slate-800 px-1 py-0.5 rounded text-xs">localStorage</code>.
             </p>
           </section>
 
@@ -63,12 +81,35 @@ export default function PrivacyPage() {
             <h2 className="text-white font-semibold text-base mb-2">Hosting</h2>
             <p>
               FileSpark is hosted on <a href="https://vercel.com" className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">Vercel</a>.
-              Vercel may log standard server request metadata (IP address, timestamp, HTTP method) for
-              security and reliability purposes. Refer to{" "}
+              Vercel may log standard server request metadata (IP address, timestamp, HTTP method, user agent) for
+              security and reliability purposes. This data is handled under{" "}
               <a href="https://vercel.com/legal/privacy-policy" className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">
                 Vercel&apos;s Privacy Policy
-              </a>{" "}
-              for details.
+              </a>.
+              FileSpark does not access or store these server logs.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-white font-semibold text-base mb-2">GDPR (European Users)</h2>
+            <p>
+              If you are located in the European Economic Area (EEA), you have certain rights under the General
+              Data Protection Regulation (GDPR). Because FileSpark does not collect, store, or process any personal
+              data, there is no personal data to access, correct, or delete. The only data that exists is stored
+              locally in your browser and is fully under your control.
+            </p>
+            <p className="mt-3">
+              If you have questions about your rights or our data practices, contact us at{" "}
+              <a href="mailto:privacy@filespark.app" className="text-blue-400 hover:underline">privacy@filespark.app</a>.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-white font-semibold text-base mb-2">CCPA (California Users)</h2>
+            <p>
+              If you are a California resident, the California Consumer Privacy Act (CCPA) gives you the right
+              to know what personal information is collected about you and to request its deletion. FileSpark does
+              not collect, sell, or share any personal information. We do not sell personal data to third parties.
             </p>
           </section>
 
@@ -76,7 +117,8 @@ export default function PrivacyPage() {
             <h2 className="text-white font-semibold text-base mb-2">Children&apos;s Privacy</h2>
             <p>
               FileSpark is not directed at children under 13. We do not knowingly collect any information
-              from children.
+              from children under 13. If you believe a child has provided personal information, contact us
+              and we will take steps to remove it.
             </p>
           </section>
 
@@ -84,7 +126,15 @@ export default function PrivacyPage() {
             <h2 className="text-white font-semibold text-base mb-2">Changes to This Policy</h2>
             <p>
               We may update this policy from time to time. Continued use of FileSpark after changes
-              constitutes acceptance of the updated policy.
+              constitutes acceptance of the updated policy. We encourage you to review this page periodically.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-white font-semibold text-base mb-2">Contact</h2>
+            <p>
+              For privacy-related questions, contact us at{" "}
+              <a href="mailto:privacy@filespark.app" className="text-blue-400 hover:underline">privacy@filespark.app</a>.
             </p>
           </section>
 

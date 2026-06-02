@@ -7,8 +7,9 @@ export default function Footer() {
         <span>© {new Date().getFullYear()} FileSpark. Free to use, no account required.</span>
         <div className="flex items-center gap-4">
           <Link href="/tools" className="hover:text-slate-400 transition-colors">Tools</Link>
-          <Link href="/privacy" className="hover:text-slate-400 transition-colors">Privacy Policy</Link>
-          <Link href="/terms" className="hover:text-slate-400 transition-colors">Terms of Use</Link>
+          <Link href="/privacy" className="hover:text-slate-400 transition-colors">Privacy</Link>
+          <Link href="/terms" className="hover:text-slate-400 transition-colors">Terms</Link>
+          <Link href="/dmca" className="hover:text-slate-400 transition-colors">DMCA</Link>
         </div>
       </div>
     </footer>
