@@ -316,8 +316,9 @@ export default function HomePage() {
         if (!getCloudConvertKey()) {
           updateFile(item.id, {
             status: "error",
-            error: "A CloudConvert API key is required for document and eBook conversions. Click the 🔑 key icon in the toolbar to add your free key (25 free conversions/day).",
+            error: "A CloudConvert API key is required for document and eBook conversions. You get 25 free conversions/day.",
           });
+          setKeyModalOpen(true);
           return;
         }
         const { convertWithCloudConvert } = await import("@/lib/cloudconvert-client");
@@ -508,7 +509,7 @@ export default function HomePage() {
                 <SortableContext items={files.map((f) => f.id)} strategy={verticalListSortingStrategy}>
                   <div className="space-y-2.5">
                     {files.map((item) => (
-                      <SortableFileCard key={item.id} item={item} onConvert={convertFile} onRemove={removeFile} onChange={updateFile} />
+                      <SortableFileCard key={item.id} item={item} onConvert={convertFile} onRemove={removeFile} onChange={updateFile} onOpenKeyModal={() => setKeyModalOpen(true)} />
                     ))}
                   </div>
                 </SortableContext>
