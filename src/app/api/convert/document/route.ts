@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     const inputExt = file.name.split(".").pop()?.toLowerCase() ?? "docx";
     const uid = randomUUID();
-    const baseName = `fileflow_${uid}`;
+    const baseName = `filespark_${uid}`;
     inputPath = join(tmpdir(), `${baseName}.${inputExt}`);
 
     await writeFile(inputPath, Buffer.from(await file.arrayBuffer()));
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     // Locate the output file — LibreOffice uses the input basename
     outputPath = join(tmpdir(), `${baseName}.${format}`);
 
-    // For PDF → JPG, LibreOffice may add a page number suffix (e.g., fileflow_xxx0.jpg)
+    // For PDF → JPG, LibreOffice may add a page number suffix (e.g., filespark_xxx0.jpg)
     let finalOutputPath = outputPath;
     if (!await fileExists(outputPath) && ["jpg", "jpeg", "png"].includes(format)) {
       finalOutputPath = join(tmpdir(), `${baseName}0.${format}`);

@@ -1,4 +1,4 @@
-const STORAGE_KEY = "fileflow_history";
+const STORAGE_KEY = "filespark_history";
 const MAX_ENTRIES = 200;
 
 export interface HistoryEntry {

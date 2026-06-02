@@ -8,9 +8,9 @@ import "./globals.css";
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
 
 export const metadata: Metadata = {
-  title: "FileFlow: Free Online File Converter",
+  title: "Filespark — File Converter & Browser Tools",
   description:
-    "Convert and compress video, audio, images, PDFs, and documents online for free. Supports 80+ formats. No signup required.",
+    "Convert 80+ file formats and use 50+ free browser tools for developers and marketers. No account, no installs, nothing stored.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

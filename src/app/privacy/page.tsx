@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | FileFlow",
+  title: "Privacy Policy | Filespark",
 };
 
 export default function PrivacyPage() {
@@ -13,7 +13,7 @@ export default function PrivacyPage() {
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
-          Back to FileFlow
+          Back to Filespark
         </Link>
 
         <h1 className="text-3xl font-bold text-white mb-2">Privacy Policy</h1>
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-white font-semibold text-base mb-2">Overview</h2>
             <p>
-              FileFlow is a free file conversion tool. We are committed to protecting your privacy.
+              Filespark is a file conversion and browser tools platform. We are committed to protecting your privacy.
               This policy explains what data (if any) we collect and how we handle your files.
             </p>
           </section>
@@ -45,7 +45,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-white font-semibold text-base mb-2">Conversion History</h2>
             <p>
-              FileFlow stores a history of your past conversions (file names, sizes, formats) locally in your
+              Filespark stores a history of your past conversions (file names, sizes, formats) locally in your
               browser&apos;s <code className="text-slate-300 bg-slate-800 px-1 py-0.5 rounded text-xs">localStorage</code>.
               This data never leaves your device. You can clear it at any time from the History panel.
             </p>
@@ -62,7 +62,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-white font-semibold text-base mb-2">Hosting</h2>
             <p>
-              FileFlow is hosted on <a href="https://vercel.com" className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">Vercel</a>.
+              Filespark is hosted on <a href="https://vercel.com" className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">Vercel</a>.
               Vercel may log standard server request metadata (IP address, timestamp, HTTP method) for
               security and reliability purposes. Refer to{" "}
               <a href="https://vercel.com/legal/privacy-policy" className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">
@@ -75,7 +75,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-white font-semibold text-base mb-2">Children&apos;s Privacy</h2>
             <p>
-              FileFlow is not directed at children under 13. We do not knowingly collect any information
+              Filespark is not directed at children under 13. We do not knowingly collect any information
               from children.
             </p>
           </section>
@@ -83,7 +83,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-white font-semibold text-base mb-2">Changes to This Policy</h2>
             <p>
-              We may update this policy from time to time. Continued use of FileFlow after changes
+              We may update this policy from time to time. Continued use of Filespark after changes
               constitutes acceptance of the updated policy.
             </p>
           </section>

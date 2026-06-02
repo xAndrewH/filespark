@@ -375,7 +375,7 @@ export default function HomePage() {
       const content = await zip.generateAsync({ type: "blob" });
       const link    = document.createElement("a");
       link.href     = URL.createObjectURL(content);
-      link.download = "fileflow-converted.zip";
+      link.download = "filespark-converted.zip";
       link.click();
       URL.revokeObjectURL(link.href);
     } finally {
@@ -410,7 +410,7 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto px-4 pt-20 pb-12 text-center">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-7 tracking-wide">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-            100% free · No account · No file size limits
+            No account · No file size limits · Free to start
           </div>
 
           <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tight text-white leading-[1.02] mb-6">
@@ -431,7 +431,7 @@ export default function HomePage() {
               { icon: "🔄", value: "80+", label: "formats" },
               { icon: "⚡", value: "50+", label: "tools" },
               { icon: "🔒", value: "100%", label: "private" },
-              { icon: "💸", value: "Free", label: "forever" },
+              { icon: "💸", value: "Free", label: "to start" },
             ].map(({ icon, value, label }) => (
               <div key={label} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900/70 border border-slate-800/80">
                 <span className="text-base">{icon}</span>
@@ -636,7 +636,7 @@ export default function HomePage() {
                 {/* Headline */}
                 <h2 className="text-2xl font-black text-white leading-tight mb-2">
                   Private by design.<br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-400">Free by default.</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-400">Open by design.</span>
                 </h2>
                 <p className="text-slate-500 text-sm leading-relaxed mb-6">No account. No tracking. No data sold. Everything runs in your browser. Your files never leave your device.</p>
                 {/* Feature grid */}
@@ -672,15 +672,15 @@ export default function HomePage() {
               </div>
               {/* Center: text */}
               <div className="flex-1 text-center sm:text-left">
-                <p className="text-xs font-bold text-yellow-400 uppercase tracking-widest mb-2">Support FileFlow</p>
+                <p className="text-xs font-bold text-yellow-400 uppercase tracking-widest mb-2">Support Filespark</p>
                 <h2 className="text-2xl font-black text-white mb-2">
                   Like what you see?
                 </h2>
                 <p className="text-slate-400 text-sm leading-relaxed max-w-md">
-                  FileFlow is completely free. No ads, no subscriptions, no data harvesting. If it's saved you time, consider buying me a coffee to keep it running and growing.
+                  Filespark is free to start with no account required. If it's saved you time, consider buying me a coffee — it helps keep the lights on and new tools coming.
                 </p>
                 <div className="flex flex-wrap gap-3 mt-5 justify-center sm:justify-start">
-                  {["100% free forever", "No ads ever", "New tools regularly"].map(t => (
+                  {["No account required", "No data harvesting", "New tools regularly"].map(t => (
                     <span key={t} className="flex items-center gap-1.5 text-xs text-slate-400">
                       <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 shrink-0" />
                       {t}
