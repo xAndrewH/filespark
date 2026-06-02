@@ -40,6 +40,7 @@ interface Props {
 
 export default function HistoryDrawer({ open, onClose, version, sessionDownloads }: Props) {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
+  const [confirmClear, setConfirmClear] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
 
   // Reload from localStorage whenever drawer opens or a new conversion finishes
@@ -73,6 +74,7 @@ export default function HistoryDrawer({ open, onClose, version, sessionDownloads
   const handleClear = () => {
     clearHistory();
     setEntries([]);
+    setConfirmClear(false);
   };
 
   const groups = groupByDate(entries);
@@ -109,7 +111,7 @@ export default function HistoryDrawer({ open, onClose, version, sessionDownloads
           <div className="flex items-center gap-2">
             {entries.length > 0 && (
               <button
-                onClick={handleClear}
+                onClick={() => setConfirmClear(true)}
                 className="text-xs text-slate-500 hover:text-red-400 transition-colors"
               >
                 Clear all
@@ -164,6 +166,37 @@ export default function HistoryDrawer({ open, onClose, version, sessionDownloads
           </p>
         </div>
       </div>
+
+      {/* Clear all confirmation modal */}
+      {confirmClear && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-none">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 mx-5 shadow-xl w-full max-w-sm">
+            <div className="w-11 h-11 rounded-full bg-red-500/15 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+            <h3 className="text-white font-semibold text-base text-center mb-1">Clear all history?</h3>
+            <p className="text-slate-400 text-sm text-center mb-6">
+              This will permanently delete all {entries.length} conversion{entries.length !== 1 ? "s" : ""} from your history. This cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmClear(false)}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleClear}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-semibold transition-colors"
+              >
+                Clear all
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
