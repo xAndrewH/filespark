@@ -2,7 +2,7 @@
 
 import { useMemo, useEffect, useState } from "react";
 import type { FileItem, Category } from "@/types";
-import { OUTPUT_FORMATS } from "@/lib/formats";
+import { getCompatibleOutputs } from "@/lib/formats";
 import { formatBytes, replaceExtension } from "@/lib/utils";
 import SearchableSelect from "./SearchableSelect";
 
@@ -66,10 +66,11 @@ interface Props {
 }
 
 export default function FileCard({ item, onConvert, onRemove, onChange, dragHandleProps }: Props) {
-  const allOutputs = OUTPUT_FORMATS[item.category];
-  const outputFormats = useMemo(() => allOutputs.filter(
-    (f) => f !== item.extension && f !== (item.extension === "jpg" ? "jpeg" : item.extension)
-  ), [allOutputs, item.extension]);
+  const outputFormats = useMemo(() => {
+    const compatible = getCompatibleOutputs(item.category, item.extension);
+    const norm = item.extension === "jpg" ? "jpeg" : item.extension === "jpeg" ? "jpg" : item.extension;
+    return compatible.filter((f) => f !== item.extension && f !== norm);
+  }, [item.category, item.extension]);
 
   const canCompress = ["image", "video", "audio"].includes(item.category);
   const isProcessing = item.status === "converting" || item.status === "loading-ffmpeg";
