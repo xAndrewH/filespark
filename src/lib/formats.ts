@@ -41,7 +41,8 @@ export const ALL_INPUT_EXTS = [...new Set(Object.values(INPUT_FORMATS).flat())];
 
 // Formats Sharp can't handle — route to ImageMagick instead
 const IMAGEMAGICK_INPUT_EXTS  = new Set(["psd", "eps", "ai", "xcf", "tga", "dds", "pcx", "cr2", "nef", "arw", "dng"]);
-const IMAGEMAGICK_OUTPUT_EXTS = new Set(["ico", "tga", "eps"]);
+// bmp: Sharp doesn't support it; pdf/svg/gif: canvas can't encode them
+const IMAGEMAGICK_OUTPUT_EXTS = new Set(["ico", "tga", "eps", "bmp", "pdf", "svg", "gif"]);
 
 export function needsImageMagick(inputExt: string, targetFormat: string): boolean {
   return IMAGEMAGICK_INPUT_EXTS.has(inputExt.toLowerCase()) || IMAGEMAGICK_OUTPUT_EXTS.has(targetFormat.toLowerCase());
