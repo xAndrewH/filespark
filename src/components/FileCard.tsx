@@ -248,8 +248,8 @@ export default function FileCard({ item, onConvert, onRemove, onChange, dragHand
 
             {/* Error */}
             {isError && (
-              <div className="mt-3 flex items-center gap-3 flex-wrap">
-                <span className="text-red-400 text-xs truncate max-w-xs">✗ {item.error ?? "Unknown error"}</span>
+              <div className="mt-3 flex flex-wrap items-start gap-3">
+                <span className="text-red-400 text-xs break-words min-w-0 flex-1">✗ {item.error ?? "Unknown error"}</span>
                 <button
                   onClick={() => onChange(item.id, { status: "idle", progress: 0, error: undefined })}
                   className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors shrink-0"
