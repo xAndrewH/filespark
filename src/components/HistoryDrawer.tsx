@@ -92,7 +92,7 @@ export default function HistoryDrawer({ open, onClose, version, sessionDownloads
       {/* Drawer */}
       <div
         ref={drawerRef}
-        className={`fixed top-0 right-0 h-full w-full sm:w-96 bg-slate-950 border-l border-slate-800 z-50 flex flex-col relative
+        className={`fixed top-0 right-0 h-full w-full sm:w-96 bg-slate-950 border-l border-slate-800 z-50 flex flex-col
           transition-transform duration-300 ease-in-out ${open ? "translate-x-0" : "translate-x-full"}`}
       >
         {/* Header */}
