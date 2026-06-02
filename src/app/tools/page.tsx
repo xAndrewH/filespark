@@ -45,6 +45,8 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/border-radius",   icon: SquareDashed, title: "Border Radius Builder",    description: "Shape rounded corners per-side visually and copy the CSS." },
       { href: "/tools/favicon",         icon: Bookmark,     title: "Favicon Generator",        description: "Upload any image and get favicon PNGs at all standard sizes." },
       { href: "/tools/color-contrast",  icon: Contrast,     title: "Color Contrast Checker",   description: "Check foreground/background pairs against WCAG AA and AAA ratios." },
+      { href: "/tools/css-grid",         icon: LayoutTemplate, title: "CSS Grid Builder",         description: "Visual grid builder — set rows, columns, and gaps, then copy the CSS." },
+      { href: "/tools/landing-page-template", icon: Newspaper, title: "Landing Page Generator",  description: "Fill in hero, features, and footer to get a complete styled HTML page." },
     ],
   },
   {
@@ -65,6 +67,7 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/average-calculator",      icon: BarChart2,      title: "Average Calculator",       description: "Mean, median, mode, and range for any set of numbers." },
       { href: "/tools/age-calculator",          icon: CalendarDays,   title: "Age Calculator",           description: "Calculate exact age in years, months, and days from a birthdate." },
       { href: "/tools/sales-tax",               icon: Receipt,        title: "Sales Tax Calculator",     description: "Calculate tax amount and total price for any rate." },
+      { href: "/tools/conversion-rate",         icon: Percent,        title: "Conversion Rate Calculator", description: "Calculate conversion rates, revenue impact, and A/B test significance." },
     ],
   },
   {
@@ -77,6 +80,9 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/utm-builder",         icon: Tag,       title: "UTM Builder",            description: "Build UTM-tagged URLs for campaign tracking." },
       { href: "/tools/my-ip",               icon: Wifi,      title: "What's My IP",           description: "See your public IP address, location, and network info." },
       { href: "/tools/og-meta",             icon: Share2,    title: "OG Meta Tag Generator",  description: "Fill in title, description, and image — get the full Open Graph head block." },
+      { href: "/tools/sitemap-generator",   icon: Map,       title: "Sitemap Generator",      description: "Paste a list of URLs and generate a valid sitemap.xml with per-URL overrides." },
+      { href: "/tools/ssl-checker",         icon: Lock,      title: "SSL Certificate Checker", description: "Enter a domain and see cert expiry, issuer, SANs, and fingerprint." },
+      { href: "/tools/regex-cheatsheet",    icon: FileSearch, title: "Regex Cheat Sheet",      description: "Searchable reference for regex syntax — anchors, quantifiers, groups, and common patterns." },
     ],
   },
   {
@@ -113,7 +119,6 @@ const COMING_SOON: { icon: IconComponent; title: string; description: string }[]
   // Developer — Security & Network
   { icon: ShieldCheck,     title: "JWT Decoder",                   description: "Decode and inspect JWT headers, payloads, and expiry at a glance." },
   { icon: Fingerprint,     title: "UUID / ULID Generator",         description: "Generate cryptographically random UUIDs and ULIDs in bulk." },
-  { icon: Lock,            title: "SSL Certificate Checker",       description: "Enter a domain and see cert expiry, issuer, and chain details." },
   { icon: Server,          title: "DNS Lookup",                    description: "Query A, CNAME, MX, NS, and TXT records for any domain." },
   { icon: Network,         title: "IP Subnet Calculator",          description: "CIDR notation → usable hosts, broadcast address, and IP range." },
   { icon: MapPin,          title: "IP Address Lookup",             description: "Look up geolocation and network details for any IP." },
@@ -124,15 +129,12 @@ const COMING_SOON: { icon: IconComponent; title: string; description: string }[]
   { icon: Minimize2,       title: "JS Minifier",                   description: "Minify JavaScript and TypeScript for production builds." },
   { icon: MousePointer2,   title: "CSS Specificity Calculator",    description: "Paste a CSS selector and instantly see its specificity score." },
   { icon: SlidersHorizontal, title: "Tailwind Class Sorter",       description: "Sort Tailwind class strings per Prettier Tailwind plugin order." },
-  { icon: LayoutTemplate,  title: "CSS Grid Generator",            description: "Visual grid builder — set rows, columns, and gaps, then copy the CSS." },
   { icon: Layers,          title: "CSS Animation Builder",         description: "Build keyframe animations visually and export the CSS." },
   // Developer — Coding Utilities
   { icon: Bot,             title: "Robots.txt Generator",          description: "Build allow/disallow rules and preview your robots.txt file." },
-  { icon: Map,             title: "Sitemap Generator",             description: "Paste a list of URLs and generate a valid sitemap.xml." },
   { icon: FileText,        title: "HTML → Markdown",               description: "Convert pasted HTML into clean Markdown." },
   { icon: Sigma,           title: "Chmod Calculator",              description: "Click a permissions grid and get the octal code and symbolic notation." },
   { icon: Cpu,             title: "Cron Humanizer",                description: "Paste a cron expression and get a plain-English description." },
-  { icon: FileSearch,      title: "Regex Cheat Sheet",             description: "Interactive reference for regex syntax with live examples." },
   { icon: Code2,           title: "Code to Image",                 description: "Turn a code snippet into a shareable, styled PNG." },
   { icon: ImagePlus,       title: "Placeholder Image Generator",   description: "Generate placeholder images at any size with custom colors and text." },
   { icon: Workflow,        title: "ASCII Art Generator",           description: "Convert text or images into ASCII art." },
@@ -147,7 +149,6 @@ const COMING_SOON: { icon: IconComponent; title: string; description: string }[]
   { icon: TrendingUp,      title: "ROAS Calculator",               description: "Enter ad spend and revenue to calculate return on ad spend." },
   { icon: BarChart2,       title: "CPM / CPC / CTR Calculator",    description: "Enter any two of spend, impressions, or clicks to calculate the third." },
   { icon: FlaskConical,    title: "A/B Test Calculator",           description: "Enter visitors and conversions for two variants to check statistical significance." },
-  { icon: Percent,         title: "Conversion Rate Calculator",    description: "Clicks → conversions → CPA, CVR, and breakeven CPC." },
   { icon: DollarSign,      title: "ROI Calculator",                description: "Calculate return on investment, net profit, and payback period." },
   { icon: Users,           title: "Customer LTV Calculator",       description: "Estimate customer lifetime value from AOV, purchase frequency, and lifespan." },
   { icon: LineChart,       title: "Break-Even Calculator",         description: "Fixed costs, variable costs, and price → break-even units and revenue." },
