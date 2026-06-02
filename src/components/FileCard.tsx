@@ -62,10 +62,11 @@ interface Props {
   onConvert: (item: FileItem) => void;
   onRemove: (id: string) => void;
   onChange: (id: string, updates: Partial<FileItem>) => void;
+  onOpenKeyModal?: () => void;
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
-export default function FileCard({ item, onConvert, onRemove, onChange, dragHandleProps }: Props) {
+export default function FileCard({ item, onConvert, onRemove, onChange, onOpenKeyModal, dragHandleProps }: Props) {
   const outputFormats = useMemo(() => {
     const compatible = getCompatibleOutputs(item.category, item.extension);
     const norm = item.extension === "jpg" ? "jpeg" : item.extension === "jpeg" ? "jpg" : item.extension;
@@ -250,12 +251,22 @@ export default function FileCard({ item, onConvert, onRemove, onChange, dragHand
             {isError && (
               <div className="mt-3 flex flex-wrap items-start gap-3">
                 <span className="text-red-400 text-xs break-words min-w-0 flex-1">✗ {item.error ?? "Unknown error"}</span>
-                <button
-                  onClick={() => onChange(item.id, { status: "idle", progress: 0, error: undefined })}
-                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors shrink-0"
-                >
-                  Retry
-                </button>
+                <div className="flex items-center gap-2 shrink-0">
+                  {onOpenKeyModal && item.error?.includes("CloudConvert") && (
+                    <button
+                      onClick={onOpenKeyModal}
+                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition-colors"
+                    >
+                      Add API Key
+                    </button>
+                  )}
+                  <button
+                    onClick={() => onChange(item.id, { status: "idle", progress: 0, error: undefined })}
+                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors"
+                  >
+                    Retry
+                  </button>
+                </div>
               </div>
             )}
           </div>
