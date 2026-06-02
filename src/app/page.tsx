@@ -255,10 +255,11 @@ export default function HomePage() {
 
     const isFFmpeg        = ["video", "audio", "gif"].includes(category);
     const isImgClient     = category === "image" && !imageNeedsServer(extension, outputFmt) && !needsImageMagick(extension, outputFmt);
-    const isImgMagick     = category === "image" && needsImageMagick(extension, outputFmt);
+    const isImgMagick     = (category === "image" && needsImageMagick(extension, outputFmt)) ||
+                            (category === "pdf" && ["jpg", "png", "webp"].includes(outputFmt));
     const isFontClient    = category === "font";
     const isPdfClient     = category === "pdf" && outputFmt === "pdf";
-    const isArchiveClient = category === "archive" && !archiveNeedsServer(extension, outputFmt);
+    const isArchiveClient = category === "archive";
     const needsCC         = category === "document" || category === "ebook" ||
                             (category === "pdf" && ["docx", "epub"].includes(outputFmt));
 
@@ -326,9 +327,9 @@ export default function HomePage() {
         return;
       }
 
-      // ── Server fallback (AVIF, TIFF, BMP via Sharp) ─────────
+      // ── Server fallback (AVIF, TIFF via Sharp) ──────────────
       updateFile(item.id, { progress: 20 });
-      const endpoint = category === "image" && outputFmt === "pdf" ? "/api/convert/pdf" : "/api/convert/image";
+      const endpoint = "/api/convert/image";
       const fd = new FormData();
       fd.append("file", item.file); fd.append("format", outputFmt);
       fd.append("quality", String(item.quality)); fd.append("mode", item.mode);
