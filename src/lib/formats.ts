@@ -55,8 +55,48 @@ export function detectCategory(filename: string): Category | null {
   return null;
 }
 
+// Returns only the output formats that are actually supported for a given input extension.
+export function getCompatibleOutputs(category: Category, inputExt: string): string[] {
+  const ext = inputExt.toLowerCase();
+
+  if (category === "pdf") {
+    // Images dropped into the PDF converter can only produce a PDF
+    return ext === "pdf" ? ["jpg", "png", "docx", "epub"] : ["pdf"];
+  }
+
+  if (category === "image") {
+    // RAW / exotic inputs: ImageMagick handles these but output is limited to common rasters
+    if (["cr2", "nef", "arw", "dng", "psd", "xcf", "dds", "pcx"].includes(ext)) {
+      return ["jpg", "png", "webp", "tiff", "bmp"];
+    }
+    if (["eps", "ai"].includes(ext)) {
+      return ["jpg", "png", "webp", "tiff", "pdf"];
+    }
+    if (ext === "svg") {
+      // SVG → raster works; raster → SVG is not meaningful
+      return ["jpg", "png", "webp", "avif", "gif", "tiff", "bmp", "pdf"];
+    }
+    if (["tga", "ico"].includes(ext)) {
+      return ["jpg", "png", "webp", "bmp", "tiff"];
+    }
+  }
+
+  if (category === "document") {
+    // Spreadsheets and presentations don't convert well to docx
+    if (["xlsx", "xls", "ods", "csv"].includes(ext)) return ["pdf", "txt"];
+    if (["pptx", "ppt", "odp"].includes(ext))         return ["pdf"];
+  }
+
+  if (category === "archive") {
+    // RAR is read-only — can extract but can't create RAR; bz2/xz only repack to common formats
+    return ["zip", "tar", "gz", "7z"];
+  }
+
+  return OUTPUT_FORMATS[category];
+}
+
 export function getDefaultOutput(category: Category, inputExt: string): string {
-  const outs = OUTPUT_FORMATS[category];
+  const outs = getCompatibleOutputs(category, inputExt);
   const norm = inputExt === "jpg" ? "jpeg" : inputExt === "jpeg" ? "jpg" : inputExt;
   const filtered = outs.filter((f) => f !== inputExt && f !== norm);
   return filtered[0] ?? outs[0];
