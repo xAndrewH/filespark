@@ -13,14 +13,6 @@ export interface SslCheckResult {
   isExpiringSoon: boolean;
 }
 
-function parseDN(dn: string): Record<string, string> {
-  const result: Record<string, string> = {};
-  dn.split(/,\s*/).forEach(part => {
-    const [key, ...rest] = part.split("=");
-    if (key && rest.length) result[key.trim()] = rest.join("=").trim();
-  });
-  return result;
-}
 
 export async function POST(req: NextRequest) {
   let hostname: string;
@@ -59,43 +51,31 @@ export async function POST(req: NextRequest) {
             return;
           }
 
-          const subjectDN = parseDN(cert.subject as unknown as string ?? "");
-          const issuerDN = parseDN(cert.issuer as unknown as string ?? "");
-
-          // getPeerCertificate returns objects, not strings
+          // cert.subject and cert.issuer are already objects like { CN: '...', O: '...' }
           const subjectObj = cert.subject as unknown as Record<string, string>;
-          const issuerObj = cert.issuer as unknown as Record<string, string>;
+          const issuerObj  = cert.issuer  as unknown as Record<string, string>;
 
           const validFrom = cert.valid_from ?? "";
-          const validTo = cert.valid_to ?? "";
+          const validTo   = cert.valid_to   ?? "";
 
-          const now = Date.now();
-          const expiry = new Date(validTo).getTime();
-          const daysUntil = Math.floor((expiry - now) / (1000 * 60 * 60 * 24));
-          const isExpired = daysUntil < 0;
+          const now      = Date.now();
+          const expiry   = new Date(validTo).getTime();
+          const daysUntil     = Math.floor((expiry - now) / (1000 * 60 * 60 * 24));
+          const isExpired     = daysUntil < 0;
           const isExpiringSoon = !isExpired && daysUntil < 30;
 
-          // Subject Alternative Names
           const sanRaw = (cert as unknown as { subjectaltname?: string }).subjectaltname ?? "";
           const sans = sanRaw
             ? sanRaw.split(",").map(s => s.replace(/^DNS:/, "").trim()).filter(Boolean)
             : [];
 
-          const fp256 = cert.fingerprint256 ?? cert.fingerprint ?? "";
-
           const result: SslCheckResult = {
-            subject: {
-              CN: subjectObj.CN ?? subjectDN.CN,
-              O: subjectObj.O ?? subjectDN.O,
-            },
-            issuer: {
-              CN: issuerObj.CN ?? issuerDN.CN,
-              O: issuerObj.O ?? issuerDN.O,
-            },
+            subject: { CN: subjectObj.CN, O: subjectObj.O },
+            issuer:  { CN: issuerObj.CN,  O: issuerObj.O  },
             validFrom,
             validTo,
             daysUntil,
-            fingerprint256: fp256,
+            fingerprint256: cert.fingerprint256 ?? cert.fingerprint ?? "",
             sans,
             isExpired,
             isExpiringSoon,
