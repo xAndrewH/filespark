@@ -20,14 +20,6 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { PDFDocument } from "pdf-lib";
-import * as pdfjs from "pdfjs-dist";
-
-if (typeof window !== "undefined") {
-  pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    "pdfjs-dist/build/pdf.worker.min.mjs",
-    import.meta.url
-  ).toString();
-}
 
 interface PageItem {
   id: string;
@@ -126,6 +118,8 @@ export default function PdfPagesPage() {
       const buffer = await file.arrayBuffer();
       setOriginalPdf(buffer);
 
+      const pdfjs = await import("pdfjs-dist");
+      pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
       const pdf = await pdfjs.getDocument({ data: buffer.slice(0) }).promise;
       const count = pdf.numPages;
       const items: PageItem[] = [];
