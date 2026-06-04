@@ -46,7 +46,7 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/favicon",         icon: Bookmark,     title: "Favicon Generator",        description: "Upload any image and get favicon PNGs at all standard sizes." },
       { href: "/tools/color-contrast",  icon: Contrast,     title: "Color Contrast Checker",   description: "Check foreground/background pairs against WCAG AA and AAA ratios." },
       { href: "/tools/css-grid",         icon: LayoutTemplate, title: "CSS Grid Builder",         description: "Visual grid builder — set rows, columns, and gaps, then copy the CSS." },
-      { href: "/tools/landing-page-template", icon: Newspaper, title: "Landing Page Generator",  description: "Fill in hero, features, and footer to get a complete styled HTML page." },
+      { href: "/tools/landing-page-template", icon: Newspaper, title: "Landing Page Checklist",  description: "45-item checklist to audit your landing page against conversion best practices." },
     ],
   },
   {
@@ -168,7 +168,6 @@ const COMING_SOON: { icon: IconComponent; title: string; description: string }[]
   { icon: Gauge,           title: "Page Speed Estimator",          description: "Check Core Web Vitals and performance tips for any public URL." },
   { icon: Rss,             title: "RSS Feed Reader",               description: "Paste an RSS or Atom feed URL and browse entries in a clean reader." },
   { icon: Newspaper,       title: "Press Release Formatter",       description: "Paste your press release and format it to AP Style with boilerplate." },
-  { icon: ClipboardCheck,  title: "Landing Page Checklist",        description: "Score your landing page against 30+ conversion best-practice criteria." },
   { icon: Languages,       title: "Hreflang Tag Generator",        description: "Specify language/region pairs and get the full set of hreflang link tags." },
   { icon: PieChart,        title: "Traffic Source Attribution",    description: "Enter channel traffic numbers and see your acquisition mix as a chart." },
   { icon: TestTube2,       title: "UTM Campaign Planner",          description: "Plan and document multiple campaign UTM structures in a shareable sheet." },
