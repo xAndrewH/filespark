@@ -33,54 +33,37 @@ import FormatsSection from "@/components/FormatsSection";
 import HistoryDrawer from "@/components/HistoryDrawer";
 import CloudConvertKeyModal from "@/components/CloudConvertKeyModal";
 
-/* ── Rotating conversion examples ───────────────────────────── */
 const EXAMPLES = [
-  { from: "PDF",  to: "DOCX", fromColor: "from-red-500/20",     toColor: "from-blue-500/20"    },
-  { from: "MP4",  to: "MP3",  fromColor: "from-violet-500/20",  toColor: "from-green-500/20"   },
-  { from: "HEIC", to: "JPG",  fromColor: "from-amber-500/20",   toColor: "from-sky-500/20"     },
-  { from: "PNG",  to: "WEBP", fromColor: "from-emerald-500/20", toColor: "from-pink-500/20"    },
-  { from: "EPUB", to: "MOBI", fromColor: "from-cyan-500/20",    toColor: "from-orange-500/20"  },
-  { from: "MP3",  to: "WAV",  fromColor: "from-slate-500/20",   toColor: "from-indigo-500/20"  },
+  { from: "PDF",  to: "DOCX" },
+  { from: "MP4",  to: "MP3"  },
+  { from: "HEIC", to: "JPG"  },
+  { from: "PNG",  to: "WEBP" },
+  { from: "EPUB", to: "MOBI" },
+  { from: "MP3",  to: "WAV"  },
 ];
 
-const FORMAT_EMOJI: Record<string, string> = {
-  PDF: "📄", DOCX: "📝", MP4: "🎬", MP3: "🎵", HEIC: "🖼️",
-  JPG: "🖼️", PNG: "🖼️", WEBP: "🖼️", EPUB: "📚", MOBI: "📚",
-  ZIP: "📦", WAV: "🎵",
-};
-
-function ConversionPreview() {
+/* ── Compact animated conversion pill ───────────────────────── */
+function InlineConversionPill() {
   const [idx, setIdx]         = useState(0);
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     const id = setInterval(() => {
       setVisible(false);
-      setTimeout(() => { setIdx((i) => (i + 1) % EXAMPLES.length); setVisible(true); }, 280);
-    }, 3000);
+      setTimeout(() => { setIdx((i) => (i + 1) % EXAMPLES.length); setVisible(true); }, 200);
+    }, 2500);
     return () => clearInterval(id);
   }, []);
 
   const ex = EXAMPLES[idx];
   return (
-    <div className={`flex items-center gap-4 transition-opacity duration-280 ${visible ? "opacity-100" : "opacity-0"}`}>
-      <div className={`w-28 h-28 sm:w-32 sm:h-32 rounded-2xl bg-gradient-to-br ${ex.fromColor} to-slate-900/80 border border-slate-700/60 flex flex-col items-center justify-center gap-2 shadow-xl`}>
-        <span className="text-3xl">{FORMAT_EMOJI[ex.from] ?? "📁"}</span>
-        <span className="text-white font-bold text-sm tracking-widest">{ex.from}</span>
-      </div>
-      <div className="flex flex-col items-center gap-1">
-        <div className="w-8 h-8 rounded-full bg-slate-800/80 border border-slate-700/60 flex items-center justify-center">
-          <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-          </svg>
-        </div>
-        <span className="text-slate-600 text-[9px] font-bold tracking-widest uppercase">TO</span>
-      </div>
-      <div className={`w-28 h-28 sm:w-32 sm:h-32 rounded-2xl bg-gradient-to-br ${ex.toColor} to-slate-900/80 border border-slate-700/60 flex flex-col items-center justify-center gap-2 shadow-xl`}>
-        <span className="text-3xl">{FORMAT_EMOJI[ex.to] ?? "📁"}</span>
-        <span className="text-white font-bold text-sm tracking-widest">{ex.to}</span>
-      </div>
-    </div>
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-xs font-semibold transition-opacity duration-200 ${visible ? "opacity-100" : "opacity-0"}`}>
+      <span className="text-slate-300">{ex.from}</span>
+      <svg className="w-3 h-3 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+      </svg>
+      <span className="text-blue-400">{ex.to}</span>
+    </span>
   );
 }
 
@@ -458,98 +441,33 @@ export default function HomePage() {
       <main className="relative z-10">
 
         {/* ── HERO ─────────────────────────────────────────────── */}
-        <div className="max-w-5xl mx-auto px-4 pt-20 pb-12 text-center">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-7 tracking-wide">
+        <div className="max-w-5xl mx-auto px-4 pt-16 pb-8 text-center">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-6 tracking-wide">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
             No account · No file size limits · Free to start
           </div>
 
-          <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tight text-white leading-[1.02] mb-6">
+          <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tight text-white leading-[1.02] mb-5">
             Convert files.<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-violet-400 to-pink-400">
               Use tools.
             </span>
           </h1>
 
-          <p className="text-slate-400 text-xl leading-relaxed mb-10 max-w-2xl mx-auto">
+          <p className="text-slate-400 text-xl leading-relaxed mb-5 max-w-2xl mx-auto">
             Convert <span className="text-white font-semibold">80+ file formats</span> and access{" "}
             <span className="text-white font-semibold">50+ free browser tools</span>. No upload, no account, nothing stored.
           </p>
 
-          {/* Stat chips */}
-          <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
-            {[
-              { icon: "🔄", value: "80+", label: "formats" },
-              { icon: "⚡", value: "50+", label: "tools" },
-              { icon: "🔒", value: "100%", label: "private" },
-              { icon: "💸", value: "Free", label: "to start" },
-            ].map(({ icon, value, label }) => (
-              <div key={label} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900/70 border border-slate-800/80">
-                <span className="text-base">{icon}</span>
-                <span className="text-white font-bold text-sm">{value}</span>
-                <span className="text-slate-500 text-sm">{label}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Rotating conversion preview */}
-          <div className="flex justify-center mb-4">
-            <ConversionPreview />
+          <div className="flex items-center justify-center gap-2 text-slate-500 text-sm mb-2">
+            <span>Try converting</span>
+            <InlineConversionPill />
           </div>
         </div>
 
-        {/* ── HOW IT WORKS ─────────────────────────────────────── */}
-        <div className="max-w-5xl mx-auto px-4 pb-10">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[
-              {
-                num: "1",
-                icon: (
-                  <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.32 5.75 5.75 0 011.503 11.096" />
-                  </svg>
-                ),
-                title: "Drop your file",
-                desc: "Drag & drop or click to browse — any file type works",
-              },
-              {
-                num: "2",
-                icon: (
-                  <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-                  </svg>
-                ),
-                title: "Choose a format",
-                desc: "Pick from 80+ supported formats across images, video, audio, and more",
-              },
-              {
-                num: "3",
-                icon: (
-                  <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                  </svg>
-                ),
-                title: "Download instantly",
-                desc: "Converted in your browser — nothing stored, no waiting",
-              },
-            ].map(({ num, icon, title, desc }) => (
-              <div key={num} className="flex items-start gap-3.5 p-4 rounded-xl bg-slate-900/50 border border-slate-800/60">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-blue-500/15 border border-blue-500/25 flex items-center justify-center text-blue-400 font-bold text-sm">
-                  {num}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    {icon}
-                    <p className="text-white font-semibold text-sm">{title}</p>
-                  </div>
-                  <p className="text-slate-500 text-xs leading-relaxed">{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Format pair chips */}
-          <div className="flex flex-wrap gap-2 mt-5">
+        {/* ── FORMAT CHIPS ─────────────────────────────────────── */}
+        <div className="max-w-5xl mx-auto px-4 pb-6">
+          <div className="flex flex-wrap gap-2 justify-center">
             {FORMAT_PAIRS.map(({ from, to }) => {
               const key = `${from}-${to}`;
               const isActive = activePair === key;
@@ -661,6 +579,46 @@ export default function HomePage() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* ── HOW IT WORKS ─────────────────────────────────────── */}
+        <div className="max-w-5xl mx-auto px-4 pb-12">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest text-center mb-5">How it works</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {([
+              {
+                num: "1",
+                icon: <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.32 5.75 5.75 0 011.503 11.096" /></svg>,
+                title: "Drop your file",
+                desc: "Drag & drop or click to browse — any file type works",
+              },
+              {
+                num: "2",
+                icon: <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" /></svg>,
+                title: "Choose a format",
+                desc: "Pick from 80+ supported formats across images, video, audio, and more",
+              },
+              {
+                num: "3",
+                icon: <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>,
+                title: "Download instantly",
+                desc: "Converted in your browser — nothing stored, no waiting",
+              },
+            ] as { num: string; icon: React.ReactNode; title: string; desc: string }[]).map(({ num, icon, title, desc }) => (
+              <div key={num} className="flex items-start gap-3.5 p-4 rounded-xl bg-slate-900/50 border border-slate-800/60">
+                <div className="shrink-0 w-7 h-7 rounded-full bg-blue-500/15 border border-blue-500/25 flex items-center justify-center text-blue-400 font-bold text-xs">
+                  {num}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    {icon}
+                    <p className="text-white font-semibold text-sm">{title}</p>
+                  </div>
+                  <p className="text-slate-500 text-xs leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* ── TOOLS SECTION ────────────────────────────────────── */}
