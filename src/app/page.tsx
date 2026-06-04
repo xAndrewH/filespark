@@ -172,6 +172,7 @@ export default function HomePage() {
   const [keyModalOpen, setKeyModalOpen] = useState(false);
   const [activePair, setActivePair]     = useState<string | null>(null);
   const [pageMode, setPageMode]         = useState<"convert" | "compress">("convert");
+  const [globalQuality, setGlobalQuality] = useState(80);
   const sessionDownloads                = useRef<Map<string, { url: string; filename: string }>>(new Map());
   const converterRef                    = useRef<HTMLDivElement>(null);
 
@@ -205,6 +206,13 @@ export default function HomePage() {
     setPageMode(mode);
     setFiles(prev => prev.map(f =>
       f.status === "idle" || f.status === "error" ? { ...f, mode } : f
+    ));
+  }, []);
+
+  const batchSetQuality = useCallback((quality: number) => {
+    setGlobalQuality(quality);
+    setFiles(prev => prev.map(f =>
+      (f.status === "idle" || f.status === "error") && f.mode === "compress" ? { ...f, quality } : f
     ));
   }, []);
 
@@ -284,7 +292,7 @@ export default function HomePage() {
     const resultName = item.mode === "compress"
       ? replaceExtension(item.name, outputFmt).replace(`.${outputFmt}`, `_compressed.${outputFmt}`)
       : replaceExtension(item.name, outputFmt);
-    updateFile(item.id, { status: "done", progress: 100, resultUrl, resultName });
+    updateFile(item.id, { status: "done", progress: 100, resultUrl, resultName, resultSize: blob.size });
     saveToHistory(item, blob.size, resultUrl, resultName);
   }, [updateFile, saveToHistory]);
 
@@ -657,6 +665,28 @@ export default function HomePage() {
                       style={{ width: `${Math.round((doneCount / totalCount) * 100)}%` }}
                     />
                   </div>
+                </div>
+              )}
+
+              {/* Global quality bar — compress mode with 2+ idle files */}
+              {pageMode === "compress" && idleCount >= 2 && !isConverting && (
+                <div className="mb-3 flex items-center gap-2.5 px-3 py-2.5 bg-slate-900/70 border border-violet-500/20 rounded-xl">
+                  <svg className="w-3.5 h-3.5 text-violet-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707" />
+                  </svg>
+                  <span className="text-slate-400 text-xs shrink-0">All {idleCount} files</span>
+                  <input
+                    type="range"
+                    min={1}
+                    max={100}
+                    value={globalQuality}
+                    onChange={e => batchSetQuality(Number(e.target.value))}
+                    className="flex-1 accent-violet-500"
+                  />
+                  <span className="text-white text-xs font-mono w-8 text-right shrink-0">{globalQuality}%</span>
+                  <span className="text-violet-400 text-xs shrink-0 w-24 text-right">
+                    ≈{Math.round((1 - globalQuality / 100) * 100)}% smaller
+                  </span>
                 </div>
               )}
 
