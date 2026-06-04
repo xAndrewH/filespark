@@ -3,7 +3,7 @@
 import React from "react";
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
-import { Type, FileCode, GitCompare, AlignLeft, Shuffle, Link as LucideLink, Hash, Braces, Search, Table2, CaseSensitive, SpellCheck, Code2, Wand2, Paintbrush, Terminal, Pipette, Palette, Blend, Layers, BoxSelect, SquareDashed, Bookmark, Ruler, Maximize2, Clock, Binary, Timer, Key, Calculator, Coins, Hourglass, Percent, BarChart2, ImagePlus, Minimize2, Scissors, PenTool, FileImage, Camera, FilePlus2, ScanLine, QrCode, Globe, BookOpen, Tag, FileText, Shapes, Image, Library, ArrowLeftRight, PackageMinus, Server, Gauge, FileMinus2, Lock, Map } from "lucide-react";
+import { Type, FileCode, GitCompare, AlignLeft, Shuffle, Link as LucideLink, Hash, Braces, Search, Table2, CaseSensitive, SpellCheck, Code2, Wand2, Paintbrush, Terminal, Pipette, Palette, Blend, Layers, BoxSelect, SquareDashed, Bookmark, Ruler, Maximize2, Clock, Binary, Timer, Key, Calculator, Coins, Hourglass, Percent, BarChart2, ImagePlus, Minimize2, Scissors, PenTool, FileImage, Camera, FilePlus2, ScanLine, QrCode, Globe, BookOpen, Tag, FileText, Shapes, Image, Library, ArrowLeftRight, PackageMinus, Server, Gauge, FileMinus2, Lock, Map as MapIcon } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -874,7 +874,7 @@ export default function HomePage() {
               { href: "/tools/utm-builder",         icon: Tag,        title: "UTM Builder",          desc: "Build UTM-tagged campaign URLs" },
               { href: "/tools/ssl-checker",         icon: Lock,       title: "SSL Checker",          desc: "Cert expiry, issuer, SANs & fingerprint" },
               { href: "/tools/dns-lookup",          icon: Server,     title: "DNS Lookup",           desc: "A, AAAA, MX, NS, TXT & SOA records" },
-              { href: "/tools/sitemap-generator",   icon: Map,        title: "Sitemap Generator",    desc: "Build or fetch a sitemap.xml" },
+              { href: "/tools/sitemap-generator",   icon: MapIcon,    title: "Sitemap Generator",    desc: "Build or fetch a sitemap.xml" },
               { href: "/tools/page-speed",          icon: Gauge,      title: "Page Speed Estimator", desc: "TTFB, load time & performance tips" },
             ]} />
 
