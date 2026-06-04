@@ -10,7 +10,7 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
 export const metadata: Metadata = {
   title: "FileSpark — File Converter & Browser Tools",
   description:
-    "Convert 80+ file formats and use 50+ free browser tools for developers and marketers. No account, no installs, nothing stored.",
+    "Convert and compress 80+ file formats. Use 60+ free browser tools for developers and marketers. No account, no installs, nothing stored.",
   metadataBase: new URL("https://filespark.app"),
   openGraph: {
     siteName: "FileSpark",
