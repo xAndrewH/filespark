@@ -198,6 +198,13 @@ export default function SitemapGeneratorPage() {
     URL.revokeObjectURL(a.href);
   };
 
+  const downloadUrls = () => {
+    const blob = new Blob([validUrls.join("\n")], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "urls.txt"; a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
   const selOv = selectedUrl ? (overrides[selectedUrl] ?? {}) : {};
 
   return (
@@ -338,11 +345,15 @@ export default function SitemapGeneratorPage() {
               <div className="flex gap-2">
                 <button onClick={copy}
                   className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition-colors">
-                  {copied ? "Copied!" : "Copy"}
+                  {copied ? "Copied!" : "Copy XML"}
                 </button>
-                <button onClick={download}
-                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs font-medium text-white transition-colors">
-                  Download
+                <button onClick={downloadUrls} disabled={validUrls.length === 0}
+                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 border border-slate-700 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition-colors">
+                  URLs (.txt)
+                </button>
+                <button onClick={download} disabled={validUrls.length === 0}
+                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 rounded-lg text-xs font-medium text-white transition-colors">
+                  XML
                 </button>
               </div>
             </div>
