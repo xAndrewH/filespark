@@ -7,6 +7,7 @@ export interface SslCheckResult {
   validFrom: string;
   validTo: string;
   daysUntil: number;
+  totalDays: number;
   fingerprint256: string;
   sans: string[];
   isExpired: boolean;
@@ -58,10 +59,15 @@ export async function POST(req: NextRequest) {
           const validFrom = cert.valid_from ?? "";
           const validTo   = cert.valid_to   ?? "";
 
-          const now      = Date.now();
-          const expiry   = new Date(validTo).getTime();
-          const daysUntil     = Math.floor((expiry - now) / (1000 * 60 * 60 * 24));
-          const isExpired     = daysUntil < 0;
+          // Node.js TLS dates: "Jun  7 12:00:00 2025 GMT" — collapse double spaces before parsing
+          const parseDate = (s: string) => new Date(s.replace(/\s+/g, " ").trim());
+
+          const now        = Date.now();
+          const expiry     = parseDate(validTo).getTime();
+          const issuedAt   = parseDate(validFrom).getTime();
+          const daysUntil  = Math.floor((expiry - now) / (1000 * 60 * 60 * 24));
+          const totalDays  = Math.max(1, Math.ceil((expiry - issuedAt) / (1000 * 60 * 60 * 24)));
+          const isExpired      = daysUntil < 0;
           const isExpiringSoon = !isExpired && daysUntil < 30;
 
           const sanRaw = (cert as unknown as { subjectaltname?: string }).subjectaltname ?? "";
@@ -75,6 +81,7 @@ export async function POST(req: NextRequest) {
             validFrom,
             validTo,
             daysUntil,
+            totalDays,
             fingerprint256: cert.fingerprint256 ?? cert.fingerprint ?? "",
             sans,
             isExpired,
