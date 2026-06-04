@@ -1,48 +1,91 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export interface PsiMetric {
+  id: string;
+  title: string;
+  displayValue: string;
+  score: number | null;
+  numericValue?: number;
+}
+
+export interface PsiAudit {
+  id: string;
+  title: string;
+  description: string;
+  displayValue?: string;
+  score: number | null;
+  savingsMs?: number;
+  savingsBytes?: number;
+}
+
+export interface FieldMetric {
+  value: number;
+  category: "FAST" | "AVERAGE" | "SLOW";
+}
+
 export interface PageSpeedResult {
   url: string;
   finalUrl: string;
-  statusCode: number;
-  loadTimeMs: number;
-  ttfbMs: number;
-  contentSizeBytes: number;
-  transferSizeBytes: number;
-  resourceCounts: {
-    scripts: number;
-    stylesheets: number;
-    images: number;
-    fonts: number;
-    total: number;
+  strategy: "mobile" | "desktop";
+  fetchTime: string;
+  performanceScore: number;
+  metrics: {
+    fcp: PsiMetric;
+    si: PsiMetric;
+    lcp: PsiMetric;
+    tbt: PsiMetric;
+    cls: PsiMetric;
+    tti: PsiMetric;
+    ttfb?: PsiMetric;
   };
-  scores: {
-    performance: number;
-    sizeScore: number;
-    requestScore: number;
-    ttfbScore: number;
+  opportunities: PsiAudit[];
+  diagnostics: PsiAudit[];
+  fieldData?: {
+    fcp?: FieldMetric;
+    lcp?: FieldMetric;
+    cls?: FieldMetric;
+    fid?: FieldMetric;
+    inp?: FieldMetric;
+    overallCategory?: string;
   };
-  issues: string[];
-  suggestions: string[];
-  headers: { [key: string]: string };
 }
 
-function scorePerf(loadMs: number, ttfbMs: number, sizeKb: number, requests: number): number {
-  let score = 100;
-  if (loadMs > 3000) score -= 20;
-  else if (loadMs > 1500) score -= 10;
-  if (ttfbMs > 600) score -= 20;
-  else if (ttfbMs > 200) score -= 10;
-  if (sizeKb > 500) score -= 15;
-  else if (sizeKb > 150) score -= 7;
-  if (requests > 80) score -= 15;
-  else if (requests > 40) score -= 7;
-  return Math.max(0, score);
+function extractMetric(audits: Record<string, unknown>, key: string): PsiMetric {
+  const a = audits[key] as Record<string, unknown> | undefined;
+  if (!a) return { id: key, title: key, displayValue: "N/A", score: null };
+  return {
+    id: key,
+    title: (a.title as string) ?? key,
+    displayValue: (a.displayValue as string) ?? "N/A",
+    score: typeof a.score === "number" ? a.score : null,
+    numericValue: typeof a.numericValue === "number" ? a.numericValue : undefined,
+  };
+}
+
+function extractOpportunities(audits: Record<string, unknown>, ids: string[]): PsiAudit[] {
+  return ids
+    .map(id => {
+      const a = audits[id] as Record<string, unknown> | undefined;
+      if (!a || (typeof a.score === "number" && a.score >= 0.9)) return null;
+      const details = a.details as Record<string, unknown> | undefined;
+      return {
+        id,
+        title: (a.title as string) ?? id,
+        description: (a.description as string) ?? "",
+        displayValue: (a.displayValue as string) ?? undefined,
+        score: typeof a.score === "number" ? a.score : null,
+        savingsMs: typeof details?.overallSavingsMs === "number" ? details.overallSavingsMs : undefined,
+        savingsBytes: typeof details?.overallSavingsBytes === "number" ? details.overallSavingsBytes : undefined,
+      } satisfies PsiAudit;
+    })
+    .filter(Boolean) as PsiAudit[];
 }
 
 export async function POST(req: NextRequest) {
   let url: string;
+  let strategy: "mobile" | "desktop" = "mobile";
   try {
-    ({ url } = await req.json());
+    ({ url, strategy = "mobile" } = await req.json());
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
@@ -50,127 +93,115 @@ export async function POST(req: NextRequest) {
   if (!url || typeof url !== "string") {
     return NextResponse.json({ error: "Missing URL" }, { status: 400 });
   }
-
   if (!url.startsWith("http://") && !url.startsWith("https://")) {
     url = `https://${url}`;
   }
 
-  let parsedUrl: URL;
-  try {
-    parsedUrl = new URL(url);
-  } catch {
+  try { new URL(url); } catch {
     return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
   }
 
-  const start = Date.now();
-  let res: Response;
-  let ttfbMs: number;
-  let html: string;
+  const apiKey = process.env.PAGESPEED_API_KEY ?? "";
+  const psiUrl =
+    `https://www.googleapis.com/pagespeedonline/v5/runPagespeed` +
+    `?url=${encodeURIComponent(url)}` +
+    `&strategy=${strategy}` +
+    `&category=performance` +
+    (apiKey ? `&key=${apiKey}` : "");
 
+  let psiRes: Response;
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
-    res = await fetch(parsedUrl.toString(), {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; PageSpeedBot/1.0)",
-        "Accept": "text/html,application/xhtml+xml,*/*",
-        "Accept-Encoding": "gzip, deflate, br",
-      },
-      signal: controller.signal,
-      redirect: "follow",
-    });
-    ttfbMs = Date.now() - start;
-    html = await res.text();
-    clearTimeout(timeout);
+    psiRes = await fetch(psiUrl, { signal: AbortSignal.timeout(30000) });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     if (msg.includes("abort") || msg.includes("timeout")) {
-      return NextResponse.json({ error: "Request timed out after 15 seconds" }, { status: 504 });
+      return NextResponse.json({ error: "PageSpeed Insights timed out — try again in a moment." }, { status: 504 });
     }
-    if (msg.includes("ENOTFOUND") || msg.includes("getaddrinfo")) {
-      return NextResponse.json({ error: `Domain not found: ${parsedUrl.hostname}` }, { status: 404 });
+    return NextResponse.json({ error: `Request failed: ${msg}` }, { status: 502 });
+  }
+
+  if (!psiRes.ok) {
+    const body = await psiRes.json().catch(() => ({})) as Record<string, unknown>;
+    const msg = (body?.error as Record<string, unknown>)?.message as string | undefined;
+    if (psiRes.status === 429) {
+      return NextResponse.json({ error: "PageSpeed Insights rate limit hit — try again in a few seconds." }, { status: 429 });
     }
-    return NextResponse.json({ error: msg }, { status: 502 });
+    return NextResponse.json({ error: msg ?? `PageSpeed Insights returned ${psiRes.status}` }, { status: psiRes.status });
   }
 
-  const loadTimeMs = Date.now() - start;
-  const contentSizeBytes = new TextEncoder().encode(html).length;
-  const transferSizeBytes = parseInt(res.headers.get("content-length") ?? "0") || contentSizeBytes;
+  const data = await psiRes.json() as Record<string, unknown>;
+  const lr = data.lighthouseResult as Record<string, unknown>;
+  const audits = (lr?.audits ?? {}) as Record<string, unknown>;
+  const categories = (lr?.categories ?? {}) as Record<string, unknown>;
+  const perfScore = Math.round(((categories.performance as Record<string, unknown>)?.score as number ?? 0) * 100);
 
-  // Count resources in HTML
-  const scriptMatches = (html.match(/<script[^>]+src=/gi) ?? []).length;
-  const styleMatches = (html.match(/<link[^>]+stylesheet/gi) ?? []).length;
-  const imgMatches = (html.match(/<img[^>]+src=/gi) ?? []).length;
-  const fontMatches = (html.match(/font-face|\.woff2?|\.ttf/gi) ?? []).length;
-  const total = scriptMatches + styleMatches + imgMatches + fontMatches;
+  const metrics: PageSpeedResult["metrics"] = {
+    fcp:  extractMetric(audits, "first-contentful-paint"),
+    si:   extractMetric(audits, "speed-index"),
+    lcp:  extractMetric(audits, "largest-contentful-paint"),
+    tbt:  extractMetric(audits, "total-blocking-time"),
+    cls:  extractMetric(audits, "cumulative-layout-shift"),
+    tti:  extractMetric(audits, "interactive"),
+    ttfb: extractMetric(audits, "server-response-time"),
+  };
 
-  const sizeKb = contentSizeBytes / 1024;
+  const opportunities = extractOpportunities(audits, [
+    "render-blocking-resources",
+    "unused-css-rules",
+    "unused-javascript",
+    "uses-optimized-images",
+    "uses-webp-images",
+    "uses-text-compression",
+    "uses-long-cache-ttl",
+    "efficient-animated-content",
+    "uses-responsive-images",
+    "preload-lcp-image",
+    "uses-rel-preconnect",
+    "font-display",
+  ]);
 
-  const issues: string[] = [];
-  const suggestions: string[] = [];
+  const diagnostics = extractOpportunities(audits, [
+    "dom-size",
+    "critical-request-chains",
+    "network-requests",
+    "network-rtt",
+    "network-server-latency",
+    "main-thread-tasks",
+    "bootup-time",
+    "third-party-summary",
+    "no-document-write",
+    "uses-passive-event-listeners",
+    "image-alt",
+    "link-text",
+  ]);
 
-  if (ttfbMs > 600) {
-    issues.push(`Slow server response time (${ttfbMs}ms TTFB)`);
-    suggestions.push("Consider server-side caching, CDN, or upgrading hosting to reduce TTFB below 200ms.");
-  }
-  if (loadTimeMs > 3000) {
-    issues.push(`High total load time (${loadTimeMs}ms)`);
-    suggestions.push("Lazy-load below-the-fold content and defer non-critical JavaScript.");
-  }
-  if (sizeKb > 500) {
-    issues.push(`Large HTML payload (${sizeKb.toFixed(0)} KB)`);
-    suggestions.push("Minify HTML, enable gzip/brotli compression, and remove unused markup.");
-  }
-  if (scriptMatches > 15) {
-    issues.push(`High number of script tags (${scriptMatches})`);
-    suggestions.push("Bundle JavaScript files and use code splitting to reduce request count.");
-  }
-  if (styleMatches > 8) {
-    issues.push(`Multiple stylesheets (${styleMatches})`);
-    suggestions.push("Combine CSS files and inline critical styles to reduce render-blocking requests.");
-  }
-  if (!res.headers.get("cache-control")) {
-    issues.push("No Cache-Control header");
-    suggestions.push("Set Cache-Control headers to allow browsers and CDNs to cache responses.");
-  }
-  if (!html.includes('loading="lazy"') && imgMatches > 3) {
-    suggestions.push(`Add loading="lazy" to images — found ${imgMatches} <img> tags without it detected.`);
-  }
-  if (html.includes("<script ") && !html.includes("defer") && !html.includes("async")) {
-    suggestions.push("Add defer or async to script tags to avoid render-blocking.");
-  }
-  if (!res.headers.get("content-encoding")) {
-    suggestions.push("Enable gzip or brotli compression — no Content-Encoding header detected.");
-  }
+  const le = data.loadingExperience as Record<string, unknown> | undefined;
+  const leMetrics = (le?.metrics ?? {}) as Record<string, unknown>;
 
-  const responseHeaders: { [key: string]: string } = {};
-  for (const [k, v] of res.headers.entries()) {
-    responseHeaders[k] = v;
+  function fieldMetric(key: string): FieldMetric | undefined {
+    const m = leMetrics[key] as Record<string, unknown> | undefined;
+    if (!m || typeof m.percentile !== "number") return undefined;
+    return { value: m.percentile as number, category: m.category as FieldMetric["category"] };
   }
 
-  const perfScore = scorePerf(loadTimeMs, ttfbMs, sizeKb, total);
-  const sizeScore = sizeKb < 50 ? 100 : sizeKb < 150 ? 85 : sizeKb < 300 ? 65 : sizeKb < 500 ? 45 : 25;
-  const requestScore = total < 20 ? 100 : total < 40 ? 80 : total < 60 ? 60 : total < 80 ? 40 : 20;
-  const ttfbScore = ttfbMs < 100 ? 100 : ttfbMs < 200 ? 90 : ttfbMs < 400 ? 70 : ttfbMs < 600 ? 50 : 25;
+  const fieldData: PageSpeedResult["fieldData"] = {
+    fcp: fieldMetric("FIRST_CONTENTFUL_PAINT_MS"),
+    lcp: fieldMetric("LARGEST_CONTENTFUL_PAINT_MS"),
+    cls: fieldMetric("CUMULATIVE_LAYOUT_SHIFT_SCORE"),
+    fid: fieldMetric("FIRST_INPUT_DELAY_MS"),
+    inp: fieldMetric("INTERACTION_TO_NEXT_PAINT"),
+    overallCategory: le?.overall_category as string | undefined,
+  };
 
   return NextResponse.json({
-    url: parsedUrl.toString(),
-    finalUrl: res.url ?? parsedUrl.toString(),
-    statusCode: res.status,
-    loadTimeMs,
-    ttfbMs,
-    contentSizeBytes,
-    transferSizeBytes,
-    resourceCounts: {
-      scripts: scriptMatches,
-      stylesheets: styleMatches,
-      images: imgMatches,
-      fonts: fontMatches,
-      total,
-    },
-    scores: { performance: perfScore, sizeScore, requestScore, ttfbScore },
-    issues,
-    suggestions,
-    headers: responseHeaders,
+    url,
+    finalUrl: (data.id as string) ?? url,
+    strategy,
+    fetchTime: (lr?.fetchTime as string) ?? new Date().toISOString(),
+    performanceScore: perfScore,
+    metrics,
+    opportunities,
+    diagnostics,
+    fieldData: Object.values(fieldData).some(Boolean) ? fieldData : undefined,
   } satisfies PageSpeedResult);
 }
