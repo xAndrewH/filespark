@@ -170,19 +170,32 @@ export default function FileCard({ item, onConvert, onRemove, onChange, onOpenKe
                   />
                 )}
 
-                {/* Quality slider */}
+                {/* Quality slider + savings estimate */}
                 {item.mode === "compress" && (
-                  <div className="flex items-center gap-2 flex-1 min-w-32">
-                    <span className="text-slate-400 text-xs shrink-0">Quality</span>
-                    <input
-                      type="range"
-                      min={1}
-                      max={100}
-                      value={item.quality}
-                      onChange={(e) => onChange(item.id, { quality: Number(e.target.value) })}
-                      className="flex-1"
-                    />
-                    <span className="text-white text-xs w-8 text-right shrink-0 font-mono">{item.quality}%</span>
+                  <div className="flex-1 min-w-40 space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-slate-400 text-xs shrink-0">Quality</span>
+                      <input
+                        type="range"
+                        min={1}
+                        max={100}
+                        value={item.quality}
+                        onChange={(e) => onChange(item.id, { quality: Number(e.target.value) })}
+                        className="flex-1 accent-violet-500"
+                      />
+                      <span className="text-white text-xs w-8 text-right shrink-0 font-mono">{item.quality}%</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-0.5">
+                      <div className="flex-1 h-1 bg-slate-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-violet-500 to-violet-400 rounded-full transition-all duration-150"
+                          style={{ width: `${100 - item.quality}%` }}
+                        />
+                      </div>
+                      <span className="text-slate-500 text-xs shrink-0">
+                        {formatBytes(Math.round(item.size * item.quality / 100))} est. · ~{Math.round((1 - item.quality / 100) * 100)}% saved
+                      </span>
+                    </div>
                   </div>
                 )}
 
@@ -245,6 +258,16 @@ export default function FileCard({ item, onConvert, onRemove, onChange, onOpenKe
                   </svg>
                   Done
                 </span>
+                {item.mode === "compress" && item.resultSize != null && (
+                  <span className="text-xs text-violet-400 font-medium">
+                    {formatBytes(item.resultSize)}
+                    {item.resultSize < item.size && (
+                      <span className="text-green-400 ml-1">
+                        (saved {Math.round((1 - item.resultSize / item.size) * 100)}%)
+                      </span>
+                    )}
+                  </span>
+                )}
                 <a
                   href={item.resultUrl}
                   download={downloadName}
