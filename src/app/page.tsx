@@ -3,7 +3,7 @@
 import React from "react";
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
-import { Type, FileCode, GitCompare, AlignLeft, Shuffle, Link as LucideLink, Hash, Braces, Search, Table2, CaseSensitive, SpellCheck, Code2, Wand2, Paintbrush, Terminal, Pipette, Palette, Blend, Layers, BoxSelect, SquareDashed, Bookmark, Ruler, Maximize2, Clock, Binary, Timer, Key, Calculator, Coins, Hourglass, Percent, BarChart2, ImagePlus, Minimize2, Scissors, PenTool, FileImage, Camera, FilePlus2, ScanLine, QrCode, Globe, BookOpen, Tag, FileText, Shapes, Image, Library, ArrowLeftRight } from "lucide-react";
+import { Type, FileCode, GitCompare, AlignLeft, Shuffle, Link as LucideLink, Hash, Braces, Search, Table2, CaseSensitive, SpellCheck, Code2, Wand2, Paintbrush, Terminal, Pipette, Palette, Blend, Layers, BoxSelect, SquareDashed, Bookmark, Ruler, Maximize2, Clock, Binary, Timer, Key, Calculator, Coins, Hourglass, Percent, BarChart2, ImagePlus, Minimize2, Scissors, PenTool, FileImage, Camera, FilePlus2, ScanLine, QrCode, Globe, BookOpen, Tag, FileText, Shapes, Image, Library, ArrowLeftRight, PackageMinus, Server, Gauge, FileMinus2, Lock, Map } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -492,8 +492,8 @@ export default function HomePage() {
           </h1>
 
           <p className="text-slate-400 text-xl leading-relaxed mb-5 max-w-2xl mx-auto">
-            Convert <span className="text-white font-semibold">80+ file formats</span> and access{" "}
-            <span className="text-white font-semibold">50+ free browser tools</span>. No upload, no account, nothing stored.
+            Convert and compress <span className="text-white font-semibold">80+ file formats</span> and access{" "}
+            <span className="text-white font-semibold">60+ free browser tools</span>. No upload, no account, nothing stored.
           </p>
 
           <div className="flex items-center justify-center gap-2 text-slate-500 text-sm mb-2">
@@ -756,8 +756,8 @@ export default function HomePage() {
               {
                 num: "2",
                 icon: <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" /></svg>,
-                title: "Choose a format",
-                desc: "Pick from 80+ supported formats across images, video, audio, and more",
+                title: "Convert or compress",
+                desc: "Pick from 80+ output formats — or switch to Compress to shrink file size while keeping the same format",
               },
               {
                 num: "3",
@@ -791,7 +791,7 @@ export default function HomePage() {
               <div>
                 <p className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-2">Browser Tools</p>
                 <h2 className="text-4xl font-black text-white leading-tight">
-                  50+ tools.<br />
+                  60+ tools.<br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-pink-400">Zero installs.</span>
                 </h2>
                 <p className="text-slate-500 text-sm mt-3 max-w-sm">Every tool runs entirely in your browser. No sign-up, no uploads, no waiting.</p>
@@ -821,6 +821,8 @@ export default function HomePage() {
               { href: "/tools/js-beautifier",   icon: Wand2,           title: "JS Beautifier",          desc: "Format JavaScript & TypeScript" },
               { href: "/tools/css-beautifier",  icon: Paintbrush,      title: "CSS Beautifier",         desc: "Format CSS and SCSS" },
               { href: "/tools/python-beautifier",icon: Terminal,       title: "Python Beautifier",     desc: "PEP 8 compliant formatting" },
+              { href: "/tools/css-minifier",    icon: PackageMinus,    title: "CSS Minifier",           desc: "Strip whitespace & comments" },
+              { href: "/tools/js-minifier",     icon: Minimize2,       title: "JS Minifier",            desc: "Minify JavaScript for production" },
             ]} />
 
             {/* ── Design & Visual ── */}
@@ -832,6 +834,8 @@ export default function HomePage() {
               { href: "/tools/box-shadow",     icon: BoxSelect,     title: "Box Shadow Builder",      desc: "Multi-layer shadows, live preview" },
               { href: "/tools/border-radius",  icon: SquareDashed,  title: "Border Radius",           desc: "Per-side visual builder" },
               { href: "/tools/favicon",        icon: Bookmark,      title: "Favicon Generator",       desc: "All standard sizes from any image" },
+              { href: "/tools/css-animation",  icon: Layers,        title: "CSS Animation Builder",   desc: "Keyframe editor with live preview" },
+              { href: "/tools/placeholder-image", icon: ImagePlus,  title: "Placeholder Image",       desc: "Any size, custom colors & text" },
             ]} />
 
             {/* ── Converters & Calculators ── */}
@@ -859,6 +863,7 @@ export default function HomePage() {
               { href: "/tools/exif",               icon: Camera,      title: "EXIF Viewer",            desc: "Camera, GPS & image metadata" },
               { href: "/tools/pdf-merge",          icon: FilePlus2,   title: "PDF Merge",              desc: "Combine & reorder PDFs" },
               { href: "/tools/pdf-to-images",      icon: ScanLine,    title: "PDF to Images",         desc: "Each page to PNG" },
+              { href: "/tools/pdf-pages",          icon: FileMinus2,  title: "Reorder / Delete Pages", desc: "Drag to reorder, click to remove" },
               { href: "/tools/qr",                 icon: QrCode,      title: "QR Generator",          desc: "Any URL or text → QR PNG" },
             ]} />
 
@@ -867,12 +872,16 @@ export default function HomePage() {
               { href: "/tools/http-status",         icon: Globe,      title: "HTTP Status Codes",    desc: "Searchable reference for every code" },
               { href: "/tools/framework-reference", icon: BookOpen,   title: "Framework Reference",  desc: "Tailwind, Bootstrap, React, Next.js" },
               { href: "/tools/utm-builder",         icon: Tag,        title: "UTM Builder",          desc: "Build UTM-tagged campaign URLs" },
+              { href: "/tools/ssl-checker",         icon: Lock,       title: "SSL Checker",          desc: "Cert expiry, issuer, SANs & fingerprint" },
+              { href: "/tools/dns-lookup",          icon: Server,     title: "DNS Lookup",           desc: "A, AAAA, MX, NS, TXT & SOA records" },
+              { href: "/tools/sitemap-generator",   icon: Map,        title: "Sitemap Generator",    desc: "Build or fetch a sitemap.xml" },
+              { href: "/tools/page-speed",          icon: Gauge,      title: "Page Speed Estimator", desc: "TTFB, load time & performance tips" },
             ]} />
 
             <div className="mt-10 text-center">
               <Link href="/tools"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition-colors shadow-lg shadow-blue-500/20">
-                Browse all 50+ tools
+                Browse all 60+ tools
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
               </Link>
             </div>
@@ -904,7 +913,7 @@ export default function HomePage() {
                 {/* Feature grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-auto">
                   {[
-                    { icon: "⚡", label: "Browser-powered", desc: "All 50+ tools run 100% client-side" },
+                    { icon: "⚡", label: "Browser-powered", desc: "All 60+ tools run 100% client-side" },
                     { icon: "🗑️", label: "Auto-deleted", desc: "Server files wiped immediately after conversion" },
                     { icon: "🔑", label: "Zero accounts", desc: "No login, no email, no sign-up ever" },
                     { icon: "📜", label: "Local history", desc: "Conversion history stays on your device only" },
