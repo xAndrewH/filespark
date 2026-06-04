@@ -61,9 +61,8 @@ export default function SslCheckerPage() {
         : { label: "Valid", classes: "bg-green-500/20 text-green-400 border-green-500/40" }
     : null;
 
-  const daysMax = 365;
   const daysBarPct = result
-    ? Math.min(100, Math.max(0, (result.daysUntil / daysMax) * 100))
+    ? Math.min(100, Math.max(0, (result.daysUntil / result.totalDays) * 100))
     : 0;
   const daysBarColor = result?.isExpired
     ? "bg-red-500"
@@ -171,7 +170,9 @@ export default function SslCheckerPage() {
               <div className="flex items-center justify-between">
                 <span className="text-slate-500 text-xs">Days Remaining</span>
                 <span className={`text-sm font-semibold ${result.isExpired ? "text-red-400" : result.isExpiringSoon ? "text-yellow-400" : "text-green-400"}`}>
-                  {result.isExpired ? `Expired ${Math.abs(result.daysUntil)} days ago` : `${result.daysUntil} days`}
+                  {result.isExpired
+                    ? `Expired ${Math.abs(result.daysUntil)} days ago`
+                    : `${result.daysUntil} of ${result.totalDays} days`}
                 </span>
               </div>
               <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
