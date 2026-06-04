@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { Type, FileCode, GitCompare, AlignLeft, Shuffle, Link as LucideLink, Hash, Braces, Search, Table2, CaseSensitive, SpellCheck, Code2, Wand2, Paintbrush, Terminal, Pipette, Palette, Blend, Layers, BoxSelect, SquareDashed, Bookmark, Ruler, Maximize2, Clock, Binary, Timer, Key, Calculator, Coins, Hourglass, Percent, BarChart2, ImagePlus, Minimize2, Scissors, PenTool, FileImage, Camera, FilePlus2, ScanLine, QrCode, Globe, BookOpen, Tag, FileText, Shapes, Image, Library, ArrowLeftRight } from "lucide-react";
 import {
@@ -20,7 +20,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { FileItem, Category, ConversionMode } from "@/types";
-import { detectCategory, getDefaultOutput, needsImageMagick } from "@/lib/formats";
+import { detectCategory, getDefaultOutput, needsImageMagick, getCompatibleOutputs } from "@/lib/formats";
 import { imageNeedsServer } from "@/lib/image-client";
 import { archiveNeedsServer } from "@/lib/archive-client";
 import { getCloudConvertKey } from "@/lib/cloudconvert-client";
@@ -417,6 +417,14 @@ export default function HomePage() {
     }
   }, [files]);
 
+  const batchSetFormat = useCallback((category: Category, targetFormat: string) => {
+    setFiles(prev => prev.map(f =>
+      f.category === category && (f.status === "idle" || f.status === "error")
+        ? { ...f, targetFormat }
+        : f
+    ));
+  }, []);
+
   /* ── Derived state ───────────────────────────────────────── */
   const hasIdle      = files.some((f) => f.status === "idle"       || f.status === "error");
   const doneFiles    = files.filter((f) => f.status === "done");
@@ -424,6 +432,19 @@ export default function HomePage() {
   const isConverting = files.some((f) => f.status === "converting" || f.status === "loading-ffmpeg");
   const doneCount    = doneFiles.length;
   const totalCount   = files.length;
+  const idleCount    = files.filter(f => f.status === "idle" || f.status === "error").length;
+
+  const idleCategoryGroups = useMemo(() => {
+    const map = new Map<Category, FileItem[]>();
+    for (const f of files) {
+      if (f.status === "idle" || f.status === "error") {
+        const arr = map.get(f.category) ?? [];
+        arr.push(f);
+        map.set(f.category, arr);
+      }
+    }
+    return [...map.entries()].filter(([, items]) => items.length >= 2);
+  }, [files]);
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -532,21 +553,24 @@ export default function HomePage() {
             </div>
           ) : (
             <div>
-              <div className="flex items-center justify-between mb-4">
+              {/* Header row */}
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <h2 className="text-white font-semibold text-base">
                     Files <span className="text-slate-500 font-normal text-sm">({files.length})</span>
                   </h2>
-                  {doneCount > 0 && (
-                    <span className="flex items-center gap-1.5 text-xs text-slate-400">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
-                      {doneCount} / {totalCount} done
-                    </span>
-                  )}
                 </div>
-                <div className="flex gap-2 flex-wrap justify-end">
+                <div className="flex gap-2 flex-wrap justify-end items-center">
                   {hasIdle && !isConverting && (
-                    <button onClick={convertAll} className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm shadow-blue-500/20">Convert All</button>
+                    <button
+                      onClick={convertAll}
+                      className="flex items-center gap-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm shadow-blue-500/20"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 3l14 9-14 9V3z" />
+                      </svg>
+                      Convert All {idleCount > 1 && <span className="opacity-75">({idleCount})</span>}
+                    </button>
                   )}
                   {hasDone && doneCount >= 2 && (
                     <button onClick={downloadAllZip} disabled={zipLoading}
@@ -565,6 +589,61 @@ export default function HomePage() {
                   <button onClick={clearAll} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm rounded-lg transition-colors">Clear All</button>
                 </div>
               </div>
+
+              {/* Overall progress bar while converting */}
+              {(isConverting || doneCount > 0) && totalCount > 1 && (
+                <div className="mb-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-slate-500">
+                      {isConverting ? `Converting… ${doneCount} / ${totalCount} done` : `${doneCount} / ${totalCount} converted`}
+                    </span>
+                    <span className="text-xs font-mono text-slate-500">{Math.round((doneCount / totalCount) * 100)}%</span>
+                  </div>
+                  <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-blue-500 to-violet-500 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.round((doneCount / totalCount) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Batch format controls — shown when 2+ idle files share a category */}
+              {idleCategoryGroups.length > 0 && !isConverting && (
+                <div className="mb-3 space-y-1.5">
+                  {idleCategoryGroups.map(([category, items]) => {
+                    const formats = getCompatibleOutputs(category, items[0].extension)
+                      .filter(f => f !== items[0].extension && (items[0].extension !== "jpg" || f !== "jpeg") && (items[0].extension !== "jpeg" || f !== "jpg"));
+                    const currentFmt = items[0].targetFormat;
+                    const CATEGORY_LABEL: Partial<Record<Category, string>> = {
+                      image: "images", video: "videos", audio: "audio files",
+                      pdf: "PDFs", document: "documents", ebook: "ebooks",
+                      gif: "GIFs", font: "fonts", archive: "archives",
+                    };
+                    return (
+                      <div key={category} className="flex items-center gap-2.5 px-3 py-2 bg-slate-900/70 border border-slate-800/60 rounded-xl">
+                        <svg className="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7" />
+                        </svg>
+                        <span className="text-slate-400 text-xs shrink-0">
+                          Set all {items.length} {CATEGORY_LABEL[category] ?? category + " files"} to
+                        </span>
+                        <select
+                          value={currentFmt}
+                          onChange={e => batchSetFormat(category, e.target.value)}
+                          className="bg-slate-800 border border-slate-700 text-white rounded-md px-2 py-0.5 text-xs uppercase font-mono focus:outline-none focus:border-blue-500/60 cursor-pointer"
+                        >
+                          {formats.map(f => (
+                            <option key={f} value={f}>{f.toUpperCase()}</option>
+                          ))}
+                        </select>
+                        <span className="text-slate-600 text-xs">— updates instantly</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
                 <SortableContext items={files.map((f) => f.id)} strategy={verticalListSortingStrategy}>
                   <div className="space-y-2.5">
