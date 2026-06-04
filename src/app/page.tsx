@@ -171,6 +171,7 @@ export default function HomePage() {
   const [zipLoading, setZipLoading]     = useState(false);
   const [keyModalOpen, setKeyModalOpen] = useState(false);
   const [activePair, setActivePair]     = useState<string | null>(null);
+  const [pageMode, setPageMode]         = useState<"convert" | "compress">("convert");
   const sessionDownloads                = useRef<Map<string, { url: string; filename: string }>>(new Map());
   const converterRef                    = useRef<HTMLDivElement>(null);
 
@@ -183,7 +184,7 @@ export default function HomePage() {
     setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, ...updates } : f)));
   }, []);
 
-  const makeItem = (file: File): FileItem => {
+  const makeItem = useCallback((file: File): FileItem => {
     const ext          = getExtension(file.name);
     const cat          = detectCategory(file.name) ?? "video";
     const targetFormat = getDefaultOutput(cat as Category, ext);
@@ -191,13 +192,20 @@ export default function HomePage() {
       id: generateId(), file,
       name: file.name, size: file.size,
       category: cat as Category, extension: ext, targetFormat,
-      mode: "convert" as ConversionMode,
+      mode: pageMode,
       quality: 80, status: "idle" as const, progress: 0,
     };
-  };
+  }, [pageMode]);
 
   const addFiles = useCallback((newFiles: File[]) => {
     setFiles((prev) => [...prev, ...newFiles.map(makeItem)]);
+  }, [makeItem]);
+
+  const switchPageMode = useCallback((mode: "convert" | "compress") => {
+    setPageMode(mode);
+    setFiles(prev => prev.map(f =>
+      f.status === "idle" || f.status === "error" ? { ...f, mode } : f
+    ));
   }, []);
 
   const removeFile = useCallback((id: string) => {
@@ -486,7 +494,43 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ── FORMAT CHIPS ─────────────────────────────────────── */}
+        {/* ── MODE TABS ────────────────────────────────────────── */}
+        <div className="max-w-5xl mx-auto px-4 pb-5">
+          <div className="flex gap-1 p-1 bg-slate-900/60 border border-slate-800/60 rounded-xl w-fit mx-auto">
+            <button
+              onClick={() => switchPageMode("convert")}
+              className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-150 ${
+                pageMode === "convert"
+                  ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Convert
+            </button>
+            <button
+              onClick={() => switchPageMode("compress")}
+              className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-150 ${
+                pageMode === "compress"
+                  ? "bg-violet-600 text-white shadow-sm shadow-violet-500/30"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+              Compress
+            </button>
+          </div>
+          {pageMode === "compress" && (
+            <p className="text-center text-slate-500 text-xs mt-2">Reduce file size while keeping the same format — ideal for images, video, and audio.</p>
+          )}
+        </div>
+
+        {/* ── FORMAT CHIPS (convert mode only) ─────────────────── */}
+        {pageMode === "convert" && (
         <div className="max-w-5xl mx-auto px-4 pb-6">
           <div className="flex flex-wrap gap-2 justify-center">
             {FORMAT_PAIRS.map(({ from, to }) => {
@@ -517,6 +561,7 @@ export default function HomePage() {
             })}
           </div>
         </div>
+        )}
 
         {/* ── FILE CONVERTER ───────────────────────────────────── */}
         <div ref={converterRef} className="max-w-5xl mx-auto px-4 pb-20">
@@ -564,12 +609,19 @@ export default function HomePage() {
                   {hasIdle && !isConverting && (
                     <button
                       onClick={convertAll}
-                      className="flex items-center gap-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm shadow-blue-500/20"
+                      className={`flex items-center gap-1.5 px-4 py-1.5 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm ${
+                        pageMode === "compress"
+                          ? "bg-violet-600 hover:bg-violet-500 shadow-violet-500/20"
+                          : "bg-blue-600 hover:bg-blue-500 shadow-blue-500/20"
+                      }`}
                     >
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 3l14 9-14 9V3z" />
+                        {pageMode === "compress"
+                          ? <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                          : <path strokeLinecap="round" strokeLinejoin="round" d="M5 3l14 9-14 9V3z" />
+                        }
                       </svg>
-                      Convert All {idleCount > 1 && <span className="opacity-75">({idleCount})</span>}
+                      {pageMode === "compress" ? "Compress" : "Convert"} All {idleCount > 1 && <span className="opacity-75">({idleCount})</span>}
                     </button>
                   )}
                   {hasDone && doneCount >= 2 && (
@@ -608,8 +660,8 @@ export default function HomePage() {
                 </div>
               )}
 
-              {/* Batch format controls — shown when 2+ idle files share a category */}
-              {idleCategoryGroups.length > 0 && !isConverting && (
+              {/* Batch format controls — shown when 2+ idle files share a category (convert mode only) */}
+              {pageMode === "convert" && idleCategoryGroups.length > 0 && !isConverting && (
                 <div className="mb-3 space-y-1.5">
                   {idleCategoryGroups.map(([category, items]) => {
                     const formats = getCompatibleOutputs(category, items[0].extension)
