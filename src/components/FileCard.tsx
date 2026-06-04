@@ -2,8 +2,9 @@
 
 import { useMemo, useEffect, useState } from "react";
 import type { FileItem, Category } from "@/types";
-import { OUTPUT_FORMATS } from "@/lib/formats";
+import { getCompatibleOutputs } from "@/lib/formats";
 import { formatBytes, replaceExtension } from "@/lib/utils";
+import { getCloudConvertKey } from "@/lib/cloudconvert-client";
 import SearchableSelect from "./SearchableSelect";
 
 const ICONS: Record<Category, string> = {
@@ -62,20 +63,23 @@ interface Props {
   onConvert: (item: FileItem) => void;
   onRemove: (id: string) => void;
   onChange: (id: string, updates: Partial<FileItem>) => void;
+  onOpenKeyModal?: () => void;
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
-export default function FileCard({ item, onConvert, onRemove, onChange, dragHandleProps }: Props) {
-  const allOutputs = OUTPUT_FORMATS[item.category];
-  const outputFormats = useMemo(() => allOutputs.filter(
-    (f) => f !== item.extension && f !== (item.extension === "jpg" ? "jpeg" : item.extension)
-  ), [allOutputs, item.extension]);
+export default function FileCard({ item, onConvert, onRemove, onChange, onOpenKeyModal, dragHandleProps }: Props) {
+  const outputFormats = useMemo(() => {
+    const compatible = getCompatibleOutputs(item.category, item.extension);
+    const norm = item.extension === "jpg" ? "jpeg" : item.extension === "jpeg" ? "jpg" : item.extension;
+    return compatible.filter((f) => f !== item.extension && f !== norm);
+  }, [item.category, item.extension]);
 
   const canCompress = ["image", "video", "audio"].includes(item.category);
   const isProcessing = item.status === "converting" || item.status === "loading-ffmpeg";
   const isDone = item.status === "done";
   const isError = item.status === "error";
   const showPreview = PREVIEW_CATEGORIES.has(item.category);
+  const needsCloudConvert = (item.category === "document" || item.category === "ebook") && !getCloudConvertKey();
 
   const downloadName = item.resultName ?? replaceExtension(item.name, item.targetFormat);
 
@@ -166,19 +170,32 @@ export default function FileCard({ item, onConvert, onRemove, onChange, dragHand
                   />
                 )}
 
-                {/* Quality slider */}
+                {/* Quality slider + savings estimate */}
                 {item.mode === "compress" && (
-                  <div className="flex items-center gap-2 flex-1 min-w-32">
-                    <span className="text-slate-400 text-xs shrink-0">Quality</span>
-                    <input
-                      type="range"
-                      min={1}
-                      max={100}
-                      value={item.quality}
-                      onChange={(e) => onChange(item.id, { quality: Number(e.target.value) })}
-                      className="flex-1"
-                    />
-                    <span className="text-white text-xs w-8 text-right shrink-0 font-mono">{item.quality}%</span>
+                  <div className="flex-1 min-w-40 space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-slate-400 text-xs shrink-0">Quality</span>
+                      <input
+                        type="range"
+                        min={1}
+                        max={100}
+                        value={item.quality}
+                        onChange={(e) => onChange(item.id, { quality: Number(e.target.value) })}
+                        className="flex-1 accent-violet-500"
+                      />
+                      <span className="text-white text-xs w-8 text-right shrink-0 font-mono">{item.quality}%</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-0.5">
+                      <div className="flex-1 h-1 bg-slate-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-violet-500 to-violet-400 rounded-full transition-all duration-150"
+                          style={{ width: `${100 - item.quality}%` }}
+                        />
+                      </div>
+                      <span className="text-slate-500 text-xs shrink-0">
+                        {formatBytes(Math.round(item.size * item.quality / 100))} est. · ~{Math.round((1 - item.quality / 100) * 100)}% saved
+                      </span>
+                    </div>
                   </div>
                 )}
 
@@ -188,6 +205,21 @@ export default function FileCard({ item, onConvert, onRemove, onChange, dragHand
                 >
                   {item.mode === "compress" ? "Compress" : "Convert"}
                 </button>
+              </div>
+            )}
+
+            {/* CloudConvert upfront warning */}
+            {needsCloudConvert && !isProcessing && !isDone && !isError && (
+              <div className="mt-2.5 flex items-start gap-2 px-3 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                <svg className="w-3.5 h-3.5 text-yellow-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                </svg>
+                <span className="text-yellow-300 text-xs leading-relaxed">
+                  ⚡ Requires a free CloudConvert API key · 25 conversions/day free
+                  {onOpenKeyModal && (
+                    <button onClick={onOpenKeyModal} className="ml-1.5 underline underline-offset-2 hover:text-yellow-200 transition-colors">Add key</button>
+                  )}
+                </span>
               </div>
             )}
 
@@ -226,6 +258,16 @@ export default function FileCard({ item, onConvert, onRemove, onChange, dragHand
                   </svg>
                   Done
                 </span>
+                {item.mode === "compress" && item.resultSize != null && (
+                  <span className="text-xs text-violet-400 font-medium">
+                    {formatBytes(item.resultSize)}
+                    {item.resultSize < item.size && (
+                      <span className="text-green-400 ml-1">
+                        (saved {Math.round((1 - item.resultSize / item.size) * 100)}%)
+                      </span>
+                    )}
+                  </span>
+                )}
                 <a
                   href={item.resultUrl}
                   download={downloadName}
@@ -247,14 +289,24 @@ export default function FileCard({ item, onConvert, onRemove, onChange, dragHand
 
             {/* Error */}
             {isError && (
-              <div className="mt-3 flex items-center gap-3 flex-wrap">
-                <span className="text-red-400 text-xs truncate max-w-xs">✗ {item.error ?? "Unknown error"}</span>
-                <button
-                  onClick={() => onChange(item.id, { status: "idle", progress: 0, error: undefined })}
-                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors shrink-0"
-                >
-                  Retry
-                </button>
+              <div className="mt-3 flex flex-wrap items-start gap-3">
+                <span className="text-red-400 text-xs break-words min-w-0 flex-1">✗ {item.error ?? "Unknown error"}</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  {onOpenKeyModal && item.error?.includes("CloudConvert") && (
+                    <button
+                      onClick={onOpenKeyModal}
+                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition-colors"
+                    >
+                      Add API Key
+                    </button>
+                  )}
+                  <button
+                    onClick={() => onChange(item.id, { status: "idle", progress: 0, error: undefined })}
+                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors"
+                  >
+                    Retry
+                  </button>
+                </div>
               </div>
             )}
           </div>

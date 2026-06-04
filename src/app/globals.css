@@ -81,6 +81,15 @@ body {
   animation: bounce-soft 1s ease-in-out infinite;
 }
 
+/* Page speed loading ring */
+.animate-spin-slow {
+  animation: spin 2s linear infinite;
+}
+@keyframes spin {
+  from { transform: rotate(-90deg); }
+  to { transform: rotate(270deg); }
+}
+
 /* Hero radial glow overlay — apply to the hero wrapper */
 .hero-glow {
   background:
