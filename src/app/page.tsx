@@ -162,6 +162,16 @@ function UrlInput({ onFiles }: { onFiles: (files: File[]) => void }) {
   );
 }
 
+/* ── Format pair chips ───────────────────────────────────────── */
+const FORMAT_PAIRS = [
+  { from: "HEIC", to: "JPG"  },
+  { from: "MP4",  to: "MP3"  },
+  { from: "PDF",  to: "DOCX" },
+  { from: "PNG",  to: "WEBP" },
+  { from: "DOCX", to: "PDF"  },
+  { from: "GIF",  to: "MP4"  },
+];
+
 /* ── Main page ───────────────────────────────────────────────── */
 export default function HomePage() {
   const [files, setFiles]               = useState<FileItem[]>([]);
@@ -171,6 +181,7 @@ export default function HomePage() {
   const [inputTab, setInputTab]         = useState<"file" | "url">("file");
   const [zipLoading, setZipLoading]     = useState(false);
   const [keyModalOpen, setKeyModalOpen] = useState(false);
+  const [activePair, setActivePair]     = useState<string | null>(null);
   const sessionDownloads                = useRef<Map<string, { url: string; filename: string }>>(new Map());
 
   useEffect(() => { setHistoryCount(getHistory().length); }, []);
@@ -285,8 +296,9 @@ export default function HomePage() {
 
       // ── ImageMagick WASM (exotic image formats) ──────────────
       if (isImgMagick) {
-        updateFile(item.id, { progress: 20 });
+        updateFile(item.id, { status: "converting", progress: 10 });
         const { convertWithImageMagick } = await import("@/lib/imagemagick-client");
+        updateFile(item.id, { progress: 20 });
         finishConvert(item, await convertWithImageMagick(item.file, outputFmt), outputFmt);
         return;
       }
@@ -446,6 +458,82 @@ export default function HomePage() {
           {/* Rotating conversion preview */}
           <div className="flex justify-center mb-4">
             <ConversionPreview />
+          </div>
+        </div>
+
+        {/* ── HOW IT WORKS ─────────────────────────────────────── */}
+        <div className="max-w-5xl mx-auto px-4 pb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              {
+                num: "1",
+                icon: (
+                  <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.32 5.75 5.75 0 011.503 11.096" />
+                  </svg>
+                ),
+                title: "Drop your file",
+                desc: "Drag & drop or click to browse — any file type works",
+              },
+              {
+                num: "2",
+                icon: (
+                  <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                  </svg>
+                ),
+                title: "Choose a format",
+                desc: "Pick from 80+ supported formats across images, video, audio, and more",
+              },
+              {
+                num: "3",
+                icon: (
+                  <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                ),
+                title: "Download instantly",
+                desc: "Converted in your browser — nothing stored, no waiting",
+              },
+            ].map(({ num, icon, title, desc }) => (
+              <div key={num} className="flex items-start gap-3.5 p-4 rounded-xl bg-slate-900/50 border border-slate-800/60">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-blue-500/15 border border-blue-500/25 flex items-center justify-center text-blue-400 font-bold text-sm">
+                  {num}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    {icon}
+                    <p className="text-white font-semibold text-sm">{title}</p>
+                  </div>
+                  <p className="text-slate-500 text-xs leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Format pair chips */}
+          <div className="flex flex-wrap gap-2 mt-5">
+            {FORMAT_PAIRS.map(({ from, to }) => {
+              const key = `${from}-${to}`;
+              const isActive = activePair === key;
+              return (
+                <button
+                  key={key}
+                  onClick={() => setActivePair(isActive ? null : key)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 border ${
+                    isActive
+                      ? "bg-blue-600/20 border-blue-500/50 text-blue-300"
+                      : "bg-slate-800/70 border-slate-700/60 text-slate-400 hover:border-slate-600 hover:text-slate-200"
+                  }`}
+                >
+                  <span className="font-semibold">{from}</span>
+                  <svg className="w-3 h-3 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                  <span className="font-semibold">{to}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 

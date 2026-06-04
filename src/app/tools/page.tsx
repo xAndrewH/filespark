@@ -266,7 +266,7 @@ function ToolsPageInner() {
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder={`Search ${TOTAL} tools…`}
+            placeholder="Search 50+ tools…"
             className="w-full bg-slate-900/60 border border-slate-800/60 rounded-2xl pl-11 pr-24 py-3 text-slate-200 text-sm focus:outline-none focus:border-blue-500/60 placeholder:text-slate-600 transition-colors"
           />
           {query ? (
