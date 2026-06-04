@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-/* ── Types (inlined so no server route import needed) ─────────────── */
+/* ── Types ───────────────────────────────────────────────────────── */
 interface PsiMetric {
   id: string;
   title: string;
@@ -101,6 +101,7 @@ function parsePsiResponse(data: Record<string, unknown>, url: string, strategy: 
       "dom-size", "critical-request-chains", "network-requests", "network-rtt",
       "network-server-latency", "main-thread-tasks", "bootup-time",
       "third-party-summary", "no-document-write", "uses-passive-event-listeners",
+      "image-alt", "link-text",
     ]),
     fieldData: {
       fcp: fieldMetric("FIRST_CONTENTFUL_PAINT_MS"),
@@ -113,52 +114,63 @@ function parsePsiResponse(data: Record<string, unknown>, url: string, strategy: 
   };
 }
 
-/* ── helpers ─────────────────────────────────────────────────────── */
-function scoreColor(score: number | null) {
+/* ── Helpers ─────────────────────────────────────────────────────── */
+function scoreColor(score: number | null): string {
   if (score === null) return "#94a3b8";
   if (score >= 0.9) return "#0cce6b";
   if (score >= 0.5) return "#ffa400";
   return "#ff4e42";
 }
+
 function scoreLabel(score: number | null): { text: string; cls: string } {
   if (score === null) return { text: "N/A", cls: "text-slate-400" };
   if (score >= 0.9) return { text: "Good", cls: "text-green-400" };
   if (score >= 0.5) return { text: "Needs Improvement", cls: "text-orange-400" };
   return { text: "Poor", cls: "text-red-400" };
 }
-function fieldCategoryColor(cat?: string) {
+
+function fieldCategoryColor(cat?: string): string {
   if (cat === "FAST") return "text-green-400";
   if (cat === "AVERAGE") return "text-orange-400";
   if (cat === "SLOW") return "text-red-400";
   return "text-slate-400";
 }
-function fieldCategoryLabel(cat?: string) {
+
+function fieldCategoryLabel(cat?: string): string {
   if (cat === "FAST") return "Fast";
   if (cat === "AVERAGE") return "Moderate";
   if (cat === "SLOW") return "Slow";
   return "—";
 }
-function formatMs(ms?: number) {
-  if (ms === undefined) return "—";
-  return ms >= 1000 ? `${(ms / 1000).toFixed(1)} s` : `${Math.round(ms)} ms`;
-}
 
-const LS_KEY = "psi_api_key";
+function formatMs(ms?: number): string {
+  if (ms === undefined) return "—";
+  if (ms >= 1000) return `${(ms / 1000).toFixed(1)} s`;
+  return `${Math.round(ms)} ms`;
+}
 
 /* ── Score ring ──────────────────────────────────────────────────── */
 function ScoreRing({ score, strategy }: { score: number; strategy: string }) {
-  const r = 52, circ = 2 * Math.PI * r;
+  const r = 52;
+  const circ = 2 * Math.PI * r;
   const color = score >= 90 ? "#0cce6b" : score >= 50 ? "#ffa400" : "#ff4e42";
+  const bgColor = score >= 90 ? "#0cce6b22" : score >= 50 ? "#ffa40022" : "#ff4e4222";
+
   return (
     <div className="flex flex-col items-center gap-2">
       <div className="relative w-36 h-36">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
           <circle cx="60" cy="60" r={r} fill="none" stroke="#1e293b" strokeWidth="8" />
-          <circle cx="60" cy="60" r={r} fill="none" stroke={color} strokeWidth="8" strokeLinecap="round"
-            strokeDasharray={circ} strokeDashoffset={circ - (score / 100) * circ}
-            style={{ transition: "stroke-dashoffset 0.8s ease" }} />
+          <circle
+            cx="60" cy="60" r={r} fill="none"
+            stroke={color} strokeWidth="8"
+            strokeLinecap="round"
+            strokeDasharray={circ}
+            strokeDashoffset={circ - (score / 100) * circ}
+            style={{ transition: "stroke-dashoffset 0.8s ease" }}
+          />
         </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center rounded-full" style={{ background: `${color}18` }}>
+        <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ background: bgColor, borderRadius: "50%" }}>
           <span className="text-4xl font-black text-white leading-none">{score}</span>
           <span className="text-xs text-slate-400 mt-1">/ 100</span>
         </div>
@@ -175,7 +187,8 @@ function ScoreRing({ score, strategy }: { score: number; strategy: string }) {
 function MetricCard({ metric }: { metric: PsiMetric }) {
   const color = scoreColor(metric.score);
   const { text, cls } = scoreLabel(metric.score);
-  const SHORT: Record<string, string> = {
+  const barPct = metric.score !== null ? Math.round(metric.score * 100) : 0;
+  const SHORT_LABELS: Record<string, string> = {
     "first-contentful-paint": "FCP", "speed-index": "SI",
     "largest-contentful-paint": "LCP", "total-blocking-time": "TBT",
     "cumulative-layout-shift": "CLS", "interactive": "TTI", "server-response-time": "TTFB",
@@ -184,13 +197,12 @@ function MetricCard({ metric }: { metric: PsiMetric }) {
     <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4 space-y-2">
       <div className="flex items-start justify-between gap-2">
         <span className="text-slate-400 text-xs leading-snug">{metric.title}</span>
-        <span className="text-slate-600 text-xs font-mono shrink-0">{SHORT[metric.id] ?? metric.id.toUpperCase()}</span>
+        <span className="text-slate-600 text-xs font-mono shrink-0">{SHORT_LABELS[metric.id] ?? metric.id.toUpperCase()}</span>
       </div>
       <p className="text-white text-xl font-bold leading-none">{metric.displayValue}</p>
       <div className="space-y-1">
         <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
-          <div className="h-full rounded-full transition-all duration-700"
-            style={{ width: `${metric.score !== null ? Math.round(metric.score * 100) : 0}%`, backgroundColor: color }} />
+          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${barPct}%`, backgroundColor: color }} />
         </div>
         <span className={`text-xs font-medium ${cls}`}>{text}</span>
       </div>
@@ -200,11 +212,12 @@ function MetricCard({ metric }: { metric: PsiMetric }) {
 
 /* ── Audit row ───────────────────────────────────────────────────── */
 function AuditRow({ audit, expanded, onToggle }: { audit: PsiAudit; expanded: boolean; onToggle: () => void }) {
+  const color = scoreColor(audit.score);
   const hasSavings = audit.savingsMs || audit.savingsBytes;
   return (
     <div className="border border-slate-800/60 rounded-xl overflow-hidden">
       <button onClick={onToggle} className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-800/30 transition-colors">
-        <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: scoreColor(audit.score) }} />
+        <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
         <span className="flex-1 text-slate-200 text-sm">{audit.title}</span>
         {hasSavings && (
           <span className="text-slate-500 text-xs shrink-0">
@@ -212,13 +225,15 @@ function AuditRow({ audit, expanded, onToggle }: { audit: PsiAudit; expanded: bo
             {audit.savingsBytes ? `−${Math.round(audit.savingsBytes / 1024)} KB` : ""}
           </span>
         )}
-        {audit.displayValue && !hasSavings && <span className="text-slate-500 text-xs shrink-0">{audit.displayValue}</span>}
+        {audit.displayValue && !hasSavings && (
+          <span className="text-slate-500 text-xs shrink-0">{audit.displayValue}</span>
+        )}
         <svg className={`w-3.5 h-3.5 text-slate-600 shrink-0 transition-transform ${expanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
       {expanded && audit.description && (
-        <div className="px-4 pb-3">
+        <div className="px-4 pb-3 pt-0">
           <p className="text-slate-500 text-xs leading-relaxed">{audit.description.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")}</p>
         </div>
       )}
@@ -226,27 +241,94 @@ function AuditRow({ audit, expanded, onToggle }: { audit: PsiAudit; expanded: bo
   );
 }
 
-/* ── Main page ───────────────────────────────────────────────────── */
-export default function PageSpeedPage() {
-  const [input, setInput]       = useState("");
-  const [strategy, setStrategy] = useState<"mobile" | "desktop">("mobile");
-  const [loading, setLoading]   = useState(false);
-  const [result, setResult]     = useState<PageSpeedResult | null>(null);
-  const [error, setError]       = useState<string | null>(null);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [apiKey, setApiKey]     = useState("");
-  const [showKeyInput, setShowKeyInput] = useState(false);
+/* ── Score legend ────────────────────────────────────────────────── */
+function ScoreLegend() {
+  return (
+    <div className="flex items-center gap-4 text-xs text-slate-500">
+      {[
+        { color: "#ff4e42", label: "0–49 Poor" },
+        { color: "#ffa400", label: "50–89 Needs improvement" },
+        { color: "#0cce6b", label: "90–100 Good" },
+      ].map(({ color, label }) => (
+        <span key={label} className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
+          {label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/* ── API key panel ───────────────────────────────────────────────── */
+function ApiKeyPanel({ onClose }: { onClose: () => void }) {
+  const [draft, setDraft] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [hasKey, setHasKey] = useState(false);
 
   useEffect(() => {
-    setApiKey(localStorage.getItem(LS_KEY) ?? "");
+    const k = localStorage.getItem("psi_api_key");
+    if (k) { setDraft(k); setHasKey(true); }
   }, []);
 
-  const saveKey = (k: string) => {
-    setApiKey(k);
-    if (k.trim()) localStorage.setItem(LS_KEY, k.trim());
-    else localStorage.removeItem(LS_KEY);
-    setShowKeyInput(false);
+  const save = () => {
+    const trimmed = draft.trim();
+    if (trimmed) { localStorage.setItem("psi_api_key", trimmed); setHasKey(true); }
+    else { localStorage.removeItem("psi_api_key"); setHasKey(false); }
+    setSaved(true);
+    setTimeout(onClose, 800);
   };
+
+  const remove = () => {
+    localStorage.removeItem("psi_api_key");
+    setDraft("");
+    setHasKey(false);
+    setSaved(false);
+  };
+
+  return (
+    <div className="bg-slate-900/80 border border-slate-700/60 rounded-2xl p-5 space-y-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-white text-sm font-semibold">Google PageSpeed API Key</p>
+          <p className="text-slate-500 text-xs mt-0.5">Optional. Stored only in this browser — never sent to our servers.</p>
+        </div>
+        <button onClick={onClose} className="text-slate-600 hover:text-slate-400 shrink-0">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <ol className="text-slate-500 text-xs space-y-1 list-decimal list-inside">
+        <li>Open Google Cloud Console → APIs &amp; Services → Credentials</li>
+        <li>Create API Key → restrict to PageSpeed Insights API</li>
+        <li>Paste it below (free tier: 25,000 requests/day)</li>
+      </ol>
+      <div className="flex gap-2">
+        <input
+          value={draft}
+          onChange={e => { setDraft(e.target.value); setSaved(false); }}
+          placeholder="AIza…"
+          className="flex-1 bg-slate-800/60 border border-slate-700/50 rounded-lg px-3 py-2 text-slate-200 text-xs font-mono focus:outline-none focus:border-blue-500/60 transition-colors"
+        />
+        <button onClick={save} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs font-medium text-white transition-colors shrink-0">
+          {saved ? "Saved ✓" : "Save"}
+        </button>
+        {hasKey && (
+          <button onClick={remove} className="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-slate-400 transition-colors shrink-0">Remove</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── Main page ───────────────────────────────────────────────────── */
+export default function PageSpeedPage() {
+  const [input, setInput]               = useState("");
+  const [strategy, setStrategy]         = useState<"mobile" | "desktop">("mobile");
+  const [loading, setLoading]           = useState(false);
+  const [result, setResult]             = useState<PageSpeedResult | null>(null);
+  const [error, setError]               = useState<string | null>(null);
+  const [expanded, setExpanded]         = useState<Set<string>>(new Set());
+  const [showKeyPanel, setShowKeyPanel] = useState(false);
+  const [isRateLimit, setIsRateLimit]   = useState(false);
 
   const analyze = async () => {
     let url = input.trim();
@@ -255,47 +337,51 @@ export default function PageSpeedPage() {
     setLoading(true);
     setResult(null);
     setError(null);
+    setIsRateLimit(false);
     setExpanded(new Set());
 
     try {
-      const key = localStorage.getItem(LS_KEY) ?? "";
-      const psiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed`
-        + `?url=${encodeURIComponent(url)}&strategy=${strategy}&category=performance`
-        + (key ? `&key=${key}` : "");
+      const key = localStorage.getItem("psi_api_key") ?? "";
+      const psiUrl =
+        `https://www.googleapis.com/pagespeedonline/v5/runPagespeed` +
+        `?url=${encodeURIComponent(url)}&strategy=${strategy}&category=performance` +
+        (key ? `&key=${key}` : "");
 
       const res = await fetch(psiUrl, { signal: AbortSignal.timeout(30000) });
-      const data = await res.json() as Record<string, unknown>;
 
       if (!res.ok) {
-        const errMsg = ((data?.error as Record<string, unknown>)?.message as string) ?? "";
+        const body = await res.json().catch(() => ({})) as Record<string, unknown>;
+        const msg = ((body?.error as Record<string, unknown>)?.message as string | undefined) ?? `Error ${res.status}`;
         if (res.status === 429) {
-          setError("Rate limit hit. Add a free Google API key below to get your own quota (25,000 requests/day).");
-        } else if (res.status === 400 && errMsg.toLowerCase().includes("key")) {
-          setError("Invalid API key. Check the key you entered and try again, or remove it to use the keyless limit.");
+          setIsRateLimit(true);
+          setError("Google's free quota limit was hit. Add your own free API key to get 25,000 analyses/day.");
         } else {
-          setError(errMsg || `PageSpeed Insights returned ${res.status}`);
+          setError(msg);
         }
         return;
       }
 
+      const data = await res.json() as Record<string, unknown>;
       setResult(parsePsiResponse(data, url, strategy));
-    } catch (err: unknown) {
+    } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       if (msg.includes("abort") || msg.includes("timeout")) {
-        setError("Request timed out — Lighthouse audits can take 15–30 seconds. Try again.");
+        setError("Request timed out — try again in a moment.");
       } else {
-        setError(`Request failed: ${msg}`);
+        setError("Network error — could not reach Google PageSpeed Insights.");
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleAudit = (id: string) => setExpanded(prev => {
-    const next = new Set(prev);
-    if (next.has(id)) next.delete(id); else next.add(id);
-    return next;
-  });
+  const toggleAudit = (id: string) => {
+    setExpanded(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   const metricList = result
     ? [result.metrics.fcp, result.metrics.si, result.metrics.lcp, result.metrics.tbt, result.metrics.cls, result.metrics.tti]
@@ -331,41 +417,40 @@ export default function PageSpeedPage() {
             </button>
           </div>
 
+          {/* Strategy + API key toggle */}
           <div className="flex items-center justify-between">
-            {/* Strategy */}
-            <div className="flex gap-1 p-0.5 bg-slate-800/60 rounded-lg">
+            <div className="flex gap-1 p-0.5 bg-slate-800/60 rounded-lg w-fit">
               {(["mobile", "desktop"] as const).map(s => (
-                <button key={s} onClick={() => setStrategy(s)}
-                  className={`px-4 py-1.5 rounded-md text-xs font-medium transition-colors ${strategy === s ? "bg-slate-700 text-white" : "text-slate-400 hover:text-slate-200"}`}>
+                <button
+                  key={s}
+                  onClick={() => setStrategy(s)}
+                  className={`px-4 py-1.5 rounded-md text-xs font-medium transition-colors capitalize ${
+                    strategy === s ? "bg-slate-700 text-white" : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
                   {s === "mobile" ? "📱 Mobile" : "🖥️ Desktop"}
                 </button>
               ))}
             </div>
-
-            {/* API Key toggle */}
-            <button onClick={() => setShowKeyInput(v => !v)}
-              className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors">
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
-              </svg>
-              {apiKey ? <span className="text-green-500">API Key set</span> : "Add API Key"}
+            <button
+              onClick={() => setShowKeyPanel(v => !v)}
+              className="text-slate-600 hover:text-slate-400 text-xs flex items-center gap-1 transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+              API Key
             </button>
           </div>
 
-          {/* API key input */}
-          {showKeyInput && (
-            <ApiKeyPanel current={apiKey} onSave={saveKey} />
-          )}
+          {showKeyPanel && <ApiKeyPanel onClose={() => setShowKeyPanel(false)} />}
         </div>
 
         {/* Loading */}
         {loading && (
           <div className="mt-6 flex flex-col items-center gap-4 py-12">
             <div className="relative w-24 h-24">
-              <svg className="w-full h-full animate-spin-slow" viewBox="0 0 120 120">
+              <svg className="w-full h-full -rotate-90 animate-spin-slow" viewBox="0 0 120 120">
                 <circle cx="60" cy="60" r="52" fill="none" stroke="#1e293b" strokeWidth="8" />
-                <circle cx="60" cy="60" r="52" fill="none" stroke="#3b82f6" strokeWidth="8"
-                  strokeLinecap="round" strokeDasharray="326.7" strokeDashoffset="245" />
+                <circle cx="60" cy="60" r="52" fill="none" stroke="#3b82f6" strokeWidth="8" strokeLinecap="round" strokeDasharray="326.7" strokeDashoffset="245" />
               </svg>
             </div>
             <div className="text-center">
@@ -384,16 +469,14 @@ export default function PageSpeedPage() {
               </svg>
               <p className="text-red-400 text-sm">{error}</p>
             </div>
-            {error.includes("Rate limit") && (
-              <div className="ml-8">
-                <button onClick={() => setShowKeyInput(true)}
-                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors">
-                  Add a free Google API key
-                </button>
-                <p className="text-slate-600 text-xs mt-1.5">
-                  Get one free at <span className="text-slate-400">console.cloud.google.com</span> → Enable "PageSpeed Insights API" → Credentials → Create API Key
-                </p>
-              </div>
+            {isRateLimit && (
+              <button
+                onClick={() => { setShowKeyPanel(true); setError(null); setIsRateLimit(false); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                className="ml-8 inline-flex items-center gap-1.5 text-xs px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-400 rounded-lg transition-colors"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                Add a free Google API key
+              </button>
             )}
           </div>
         )}
@@ -401,11 +484,12 @@ export default function PageSpeedPage() {
         {/* Results */}
         {result && !loading && (
           <div className="mt-6 space-y-5">
-            {/* Score */}
+
+            {/* Score + legend */}
             <div className="bg-slate-900/60 border border-slate-800/60 rounded-2xl p-6">
               <div className="flex flex-col sm:flex-row items-center gap-8">
                 <ScoreRing score={result.performanceScore} strategy={result.strategy} />
-                <div className="flex-1 space-y-3 text-center sm:text-left">
+                <div className="flex-1 space-y-4 text-center sm:text-left">
                   <div>
                     <p className="text-slate-400 text-xs mb-1">Analyzed URL</p>
                     <p className="text-white text-sm font-medium break-all">{result.finalUrl}</p>
@@ -418,19 +502,12 @@ export default function PageSpeedPage() {
                       </span>
                     </div>
                   )}
-                  <div className="flex items-center gap-4 text-xs text-slate-500 justify-center sm:justify-start">
-                    {[{ color: "#ff4e42", label: "0–49 Poor" }, { color: "#ffa400", label: "50–89 Needs improvement" }, { color: "#0cce6b", label: "90–100 Good" }].map(({ color, label }) => (
-                      <span key={label} className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                        {label}
-                      </span>
-                    ))}
-                  </div>
+                  <ScoreLegend />
                 </div>
               </div>
             </div>
 
-            {/* Metrics */}
+            {/* Core Web Vitals */}
             <div>
               <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Core Web Vitals &amp; Metrics</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -438,30 +515,33 @@ export default function PageSpeedPage() {
               </div>
             </div>
 
+            {/* TTFB */}
             {result.metrics.ttfb && (
-              <div className="grid grid-cols-1">
+              <div className="grid grid-cols-1 gap-3">
                 <MetricCard metric={result.metrics.ttfb} />
               </div>
             )}
 
             {/* Field data */}
-            {result.fieldData && Object.values(result.fieldData).some(Boolean) && (
+            {result.fieldData && (result.fieldData.fcp || result.fieldData.lcp || result.fieldData.cls) && (
               <div className="bg-slate-900/60 border border-slate-800/60 rounded-2xl p-5">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Field Data — Real User Measurements (p75)</p>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Field Data — Real User Measurements</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {[
-                    { key: "fcp", label: "FCP", v: result.fieldData.fcp, fmt: (n: number) => formatMs(n) },
-                    { key: "lcp", label: "LCP", v: result.fieldData.lcp, fmt: (n: number) => formatMs(n) },
-                    { key: "cls", label: "CLS", v: result.fieldData.cls, fmt: (n: number) => n.toFixed(3) },
-                    { key: "fid", label: "FID", v: result.fieldData.fid, fmt: (n: number) => formatMs(n) },
-                    { key: "inp", label: "INP", v: result.fieldData.inp, fmt: (n: number) => formatMs(n) },
-                  ].filter(d => d.v).map(({ key, label, v, fmt }) => (
+                    { key: "fcp", label: "FCP", value: result.fieldData.fcp, fmt: (v: number) => formatMs(v) },
+                    { key: "lcp", label: "LCP", value: result.fieldData.lcp, fmt: (v: number) => formatMs(v) },
+                    { key: "cls", label: "CLS", value: result.fieldData.cls, fmt: (v: number) => v.toFixed(2) },
+                    { key: "fid", label: "FID", value: result.fieldData.fid, fmt: (v: number) => formatMs(v) },
+                    { key: "inp", label: "INP", value: result.fieldData.inp, fmt: (v: number) => formatMs(v) },
+                  ].filter(d => d.value).map(({ key, label, value, fmt }) => (
                     <div key={key} className="bg-slate-800/40 rounded-xl px-4 py-3 space-y-1">
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400 text-xs">{label}</span>
-                        <span className={`text-xs font-medium ${fieldCategoryColor(v?.category)}`}>{fieldCategoryLabel(v?.category)}</span>
+                        <span className={`text-xs font-medium ${fieldCategoryColor(value?.category)}`}>
+                          {fieldCategoryLabel(value?.category)}
+                        </span>
                       </div>
-                      <p className="text-white text-lg font-bold">{v ? fmt(v.value) : "—"}</p>
+                      <p className="text-white text-lg font-bold">{value ? fmt(value.value) : "—"}</p>
                     </div>
                   ))}
                 </div>
@@ -493,42 +573,9 @@ export default function PageSpeedPage() {
             )}
 
             <p className="text-slate-700 text-xs text-center pb-4">
-              Google PageSpeed Insights · Lighthouse {result.strategy} · {new Date(result.fetchTime).toLocaleTimeString()}
+              Data from Google PageSpeed Insights · Lighthouse {result.strategy} audit · {new Date(result.fetchTime).toLocaleTimeString()}
             </p>
           </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ── API Key panel ───────────────────────────────────────────────── */
-function ApiKeyPanel({ current, onSave }: { current: string; onSave: (k: string) => void }) {
-  const [val, setVal] = useState(current);
-  return (
-    <div className="bg-slate-800/40 border border-slate-700/40 rounded-xl p-4 space-y-3">
-      <div>
-        <p className="text-slate-300 text-xs font-medium mb-0.5">Google API Key <span className="text-slate-500 font-normal">(optional — stored locally, never sent to our servers)</span></p>
-        <p className="text-slate-500 text-xs leading-relaxed">
-          Without a key, requests go directly from your browser and share Google&apos;s public quota (may be busy).
-          A free key gives you 25,000 requests/day. Get one at{" "}
-          <span className="text-blue-400">console.cloud.google.com</span> → Enable &quot;PageSpeed Insights API&quot; → Credentials → Create API Key.
-        </p>
-      </div>
-      <div className="flex gap-2">
-        <input
-          value={val}
-          onChange={e => setVal(e.target.value)}
-          placeholder="AIza…"
-          className="flex-1 bg-slate-900/60 border border-slate-700/50 rounded-lg px-3 py-1.5 text-slate-200 text-sm font-mono focus:outline-none focus:border-blue-500/60 transition-colors"
-        />
-        <button onClick={() => onSave(val)} className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors">
-          Save
-        </button>
-        {current && (
-          <button onClick={() => onSave("")} className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs rounded-lg transition-colors">
-            Remove
-          </button>
         )}
       </div>
     </div>

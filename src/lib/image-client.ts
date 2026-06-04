@@ -14,7 +14,7 @@ const SERVER_INPUT_EXTS = new Set([
 
 // Output formats canvas cannot produce (fall back to server)
 const SERVER_OUTPUT_EXTS = new Set([
-  "tiff", "tif", "bmp", "ico", "avif", "heic", "heif",
+  "tiff", "tif", "ico", "avif", "heic", "heif",
   "psd", "cr2", "nef", "arw", "dng", "eps", "ai", "xcf",
 ]);
 

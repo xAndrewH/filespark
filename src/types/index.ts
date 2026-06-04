@@ -27,5 +27,6 @@ export interface FileItem {
   progress: number;
   resultUrl?: string;
   resultName?: string;
+  resultSize?: number;
   error?: string;
 }

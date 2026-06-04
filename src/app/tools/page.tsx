@@ -30,6 +30,8 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/js-beautifier",    icon: Wand2,          title: "JavaScript Beautifier",     description: "Format JavaScript and TypeScript following Airbnb / ESLint standards." },
       { href: "/tools/css-beautifier",   icon: Paintbrush,     title: "CSS Beautifier",            description: "Format CSS, SCSS, and Sass with proper spacing and rule separation." },
       { href: "/tools/python-beautifier",icon: Terminal,       title: "Python Beautifier",         description: "Format Python code with PEP 8 compliant 4-space indentation." },
+      { href: "/tools/css-minifier",     icon: PackageMinus,   title: "CSS Minifier",              description: "Strip whitespace and comments from CSS to reduce file size." },
+      { href: "/tools/js-minifier",      icon: Minimize2,      title: "JS Minifier",               description: "Minify JavaScript and TypeScript for production builds." },
     ],
   },
   {
@@ -45,6 +47,9 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/border-radius",   icon: SquareDashed, title: "Border Radius Builder",    description: "Shape rounded corners per-side visually and copy the CSS." },
       { href: "/tools/favicon",         icon: Bookmark,     title: "Favicon Generator",        description: "Upload any image and get favicon PNGs at all standard sizes." },
       { href: "/tools/color-contrast",  icon: Contrast,     title: "Color Contrast Checker",   description: "Check foreground/background pairs against WCAG AA and AAA ratios." },
+      { href: "/tools/css-grid",         icon: LayoutTemplate, title: "CSS Grid Builder",         description: "Visual grid builder — set rows, columns, and gaps, then copy the CSS." },
+      { href: "/tools/css-animation",    icon: Layers,         title: "CSS Animation Builder",    description: "Build keyframe animations visually and export the CSS." },
+      { href: "/tools/landing-page-template", icon: Newspaper, title: "Landing Page Checklist",  description: "45-item checklist to audit your landing page against conversion best practices." },
     ],
   },
   {
@@ -65,6 +70,7 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/average-calculator",      icon: BarChart2,      title: "Average Calculator",       description: "Mean, median, mode, and range for any set of numbers." },
       { href: "/tools/age-calculator",          icon: CalendarDays,   title: "Age Calculator",           description: "Calculate exact age in years, months, and days from a birthdate." },
       { href: "/tools/sales-tax",               icon: Receipt,        title: "Sales Tax Calculator",     description: "Calculate tax amount and total price for any rate." },
+      { href: "/tools/conversion-rate",         icon: Percent,        title: "Conversion Rate Calculator", description: "Calculate conversion rates, revenue impact, and A/B test significance." },
     ],
   },
   {
@@ -77,6 +83,11 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/utm-builder",         icon: Tag,       title: "UTM Builder",            description: "Build UTM-tagged URLs for campaign tracking." },
       { href: "/tools/my-ip",               icon: Wifi,      title: "What's My IP",           description: "See your public IP address, location, and network info." },
       { href: "/tools/og-meta",             icon: Share2,    title: "OG Meta Tag Generator",  description: "Fill in title, description, and image — get the full Open Graph head block." },
+      { href: "/tools/sitemap-generator",   icon: Map,       title: "Sitemap Generator",      description: "Paste a list of URLs and generate a valid sitemap.xml with per-URL overrides." },
+      { href: "/tools/ssl-checker",         icon: Lock,      title: "SSL Certificate Checker", description: "Enter a domain and see cert expiry, issuer, SANs, and fingerprint." },
+      { href: "/tools/dns-lookup",          icon: Server,    title: "DNS Lookup",              description: "Query A, AAAA, CNAME, MX, NS, TXT, and SOA records for any domain." },
+      { href: "/tools/page-speed",          icon: Gauge,     title: "Page Speed Estimator",    description: "Check load time, TTFB, resource counts, and get performance tips for any URL." },
+      { href: "/tools/regex-cheatsheet",    icon: FileSearch, title: "Regex Cheat Sheet",      description: "Searchable reference for regex syntax — anchors, quantifiers, groups, and common patterns." },
     ],
   },
   {
@@ -93,6 +104,8 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/pdf-merge",          icon: FilePlus2,  title: "PDF Merge",               description: "Combine multiple PDFs into one, reorder pages before merging." },
       { href: "/tools/pdf-to-images",      icon: ScanLine,   title: "PDF to Images",          description: "Convert each PDF page to a PNG at multiple quality levels." },
       { href: "/tools/qr",                 icon: QrCode,     title: "QR Code Generator",      description: "Generate QR codes from any URL or text. Download as PNG." },
+      { href: "/tools/pdf-pages",          icon: FileMinus2, title: "Reorder / Delete PDF Pages", description: "Drag to reorder or remove pages from a PDF before saving." },
+      { href: "/tools/placeholder-image",  icon: ImagePlus,  title: "Placeholder Image Generator", description: "Generate placeholder images at any size with custom colors and text." },
     ],
   },
 ];
@@ -113,33 +126,29 @@ const COMING_SOON: { icon: IconComponent; title: string; description: string }[]
   // Developer — Security & Network
   { icon: ShieldCheck,     title: "JWT Decoder",                   description: "Decode and inspect JWT headers, payloads, and expiry at a glance." },
   { icon: Fingerprint,     title: "UUID / ULID Generator",         description: "Generate cryptographically random UUIDs and ULIDs in bulk." },
-  { icon: Lock,            title: "SSL Certificate Checker",       description: "Enter a domain and see cert expiry, issuer, and chain details." },
-  { icon: Server,          title: "DNS Lookup",                    description: "Query A, CNAME, MX, NS, and TXT records for any domain." },
+  // DNS Lookup is now live at /tools/dns-lookup
   { icon: Network,         title: "IP Subnet Calculator",          description: "CIDR notation → usable hosts, broadcast address, and IP range." },
   { icon: MapPin,          title: "IP Address Lookup",             description: "Look up geolocation and network details for any IP." },
   { icon: Webhook,         title: "Webhook Tester",                description: "Generate a unique endpoint and inspect incoming POST payloads live." },
   { icon: Activity,        title: "HTTP Header Analyzer",          description: "Paste or fetch a URL and inspect all response headers." },
   // Developer — CSS & Frontend
-  { icon: PackageMinus,    title: "CSS Minifier",                  description: "Strip whitespace and comments from CSS to reduce file size." },
-  { icon: Minimize2,       title: "JS Minifier",                   description: "Minify JavaScript and TypeScript for production builds." },
+  // CSS Minifier is now live at /tools/css-minifier
+  // JS Minifier is now live at /tools/js-minifier
   { icon: MousePointer2,   title: "CSS Specificity Calculator",    description: "Paste a CSS selector and instantly see its specificity score." },
   { icon: SlidersHorizontal, title: "Tailwind Class Sorter",       description: "Sort Tailwind class strings per Prettier Tailwind plugin order." },
-  { icon: LayoutTemplate,  title: "CSS Grid Generator",            description: "Visual grid builder — set rows, columns, and gaps, then copy the CSS." },
-  { icon: Layers,          title: "CSS Animation Builder",         description: "Build keyframe animations visually and export the CSS." },
+  // CSS Animation Builder is now live at /tools/css-animation
   // Developer — Coding Utilities
   { icon: Bot,             title: "Robots.txt Generator",          description: "Build allow/disallow rules and preview your robots.txt file." },
-  { icon: Map,             title: "Sitemap Generator",             description: "Paste a list of URLs and generate a valid sitemap.xml." },
   { icon: FileText,        title: "HTML → Markdown",               description: "Convert pasted HTML into clean Markdown." },
   { icon: Sigma,           title: "Chmod Calculator",              description: "Click a permissions grid and get the octal code and symbolic notation." },
   { icon: Cpu,             title: "Cron Humanizer",                description: "Paste a cron expression and get a plain-English description." },
-  { icon: FileSearch,      title: "Regex Cheat Sheet",             description: "Interactive reference for regex syntax with live examples." },
   { icon: Code2,           title: "Code to Image",                 description: "Turn a code snippet into a shareable, styled PNG." },
-  { icon: ImagePlus,       title: "Placeholder Image Generator",   description: "Generate placeholder images at any size with custom colors and text." },
+  // Placeholder Image Generator is now live at /tools/placeholder-image
   { icon: Workflow,        title: "ASCII Art Generator",           description: "Convert text or images into ASCII art." },
   { icon: Columns,         title: "Markdown Table Generator",      description: "Build Markdown tables visually and copy the formatted output." },
   // Images & Media
   { icon: ZoomIn,          title: "Upscale Image",                 description: "AI-powered image upscaling up to 4× resolution." },
-  { icon: FileMinus2,      title: "Reorder / Delete PDF Pages",    description: "Drag to reorder or remove pages from a PDF before saving." },
+  // Reorder / Delete PDF Pages is now live at /tools/pdf-pages
   { icon: Barcode,         title: "Barcode Generator",             description: "Generate Code 128, QR, EAN, and UPC barcodes." },
   { icon: Play,            title: "YouTube Thumbnail Downloader",  description: "Download thumbnails from any YouTube video in all resolutions." },
   { icon: Replace,         title: "Find & Replace",                description: "Find and replace text across one or multiple files." },
@@ -147,7 +156,6 @@ const COMING_SOON: { icon: IconComponent; title: string; description: string }[]
   { icon: TrendingUp,      title: "ROAS Calculator",               description: "Enter ad spend and revenue to calculate return on ad spend." },
   { icon: BarChart2,       title: "CPM / CPC / CTR Calculator",    description: "Enter any two of spend, impressions, or clicks to calculate the third." },
   { icon: FlaskConical,    title: "A/B Test Calculator",           description: "Enter visitors and conversions for two variants to check statistical significance." },
-  { icon: Percent,         title: "Conversion Rate Calculator",    description: "Clicks → conversions → CPA, CVR, and breakeven CPC." },
   { icon: DollarSign,      title: "ROI Calculator",                description: "Calculate return on investment, net profit, and payback period." },
   { icon: Users,           title: "Customer LTV Calculator",       description: "Estimate customer lifetime value from AOV, purchase frequency, and lifespan." },
   { icon: LineChart,       title: "Break-Even Calculator",         description: "Fixed costs, variable costs, and price → break-even units and revenue." },
@@ -164,10 +172,9 @@ const COMING_SOON: { icon: IconComponent; title: string; description: string }[]
   { icon: Globe,           title: "Meta Tag Analyzer",             description: "Enter a URL and see all OG, Twitter Card, and SEO meta tags it serves." },
   { icon: ListChecks,      title: "Schema Markup Generator",       description: "Choose a type (Article, FAQ, Product) and get the JSON-LD snippet." },
   { icon: Smartphone,      title: "Social Image Resizer",          description: "Upload one image and export crops for OG, Twitter, LinkedIn, and Instagram." },
-  { icon: Gauge,           title: "Page Speed Estimator",          description: "Check Core Web Vitals and performance tips for any public URL." },
+  // Page Speed Estimator is now live at /tools/page-speed
   { icon: Rss,             title: "RSS Feed Reader",               description: "Paste an RSS or Atom feed URL and browse entries in a clean reader." },
   { icon: Newspaper,       title: "Press Release Formatter",       description: "Paste your press release and format it to AP Style with boilerplate." },
-  { icon: ClipboardCheck,  title: "Landing Page Checklist",        description: "Score your landing page against 30+ conversion best-practice criteria." },
   { icon: Languages,       title: "Hreflang Tag Generator",        description: "Specify language/region pairs and get the full set of hreflang link tags." },
   { icon: PieChart,        title: "Traffic Source Attribution",    description: "Enter channel traffic numbers and see your acquisition mix as a chart." },
   { icon: TestTube2,       title: "UTM Campaign Planner",          description: "Plan and document multiple campaign UTM structures in a shareable sheet." },
@@ -248,7 +255,7 @@ function ToolsPageInner() {
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
-          Back to Filespark
+          Back to FileSpark
         </Link>
 
         <div className="mb-8">
@@ -265,7 +272,7 @@ function ToolsPageInner() {
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder={`Search ${TOTAL} tools…`}
+            placeholder="Search 50+ tools…"
             className="w-full bg-slate-900/60 border border-slate-800/60 rounded-2xl pl-11 pr-24 py-3 text-slate-200 text-sm focus:outline-none focus:border-blue-500/60 placeholder:text-slate-600 transition-colors"
           />
           {query ? (
