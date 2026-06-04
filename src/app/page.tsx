@@ -40,13 +40,13 @@ const EXAMPLES = [
   { from: "HEIC", to: "JPG",  fromColor: "from-amber-500/20",   toColor: "from-sky-500/20"     },
   { from: "PNG",  to: "WEBP", fromColor: "from-emerald-500/20", toColor: "from-pink-500/20"    },
   { from: "EPUB", to: "MOBI", fromColor: "from-cyan-500/20",    toColor: "from-orange-500/20"  },
-  { from: "ZIP",  to: "7Z",   fromColor: "from-slate-500/20",   toColor: "from-indigo-500/20"  },
+  { from: "MP3",  to: "WAV",  fromColor: "from-slate-500/20",   toColor: "from-indigo-500/20"  },
 ];
 
 const FORMAT_EMOJI: Record<string, string> = {
   PDF: "📄", DOCX: "📝", MP4: "🎬", MP3: "🎵", HEIC: "🖼️",
   JPG: "🖼️", PNG: "🖼️", WEBP: "🖼️", EPUB: "📚", MOBI: "📚",
-  ZIP: "📦", "7Z": "📦",
+  ZIP: "📦", WAV: "🎵",
 };
 
 function ConversionPreview() {
@@ -119,7 +119,13 @@ function UrlInput({ onFiles }: { onFiles: (files: File[]) => void }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: url.trim() }),
       });
-      if (!res.ok) { setError(await res.text()); return; }
+      if (!res.ok) {
+        const text = await res.text();
+        setError(res.status === 422 ? "Invalid or unsupported URL. Make sure it's a direct link to a file." :
+                 res.status === 413 ? "File is too large to fetch." :
+                 text || `Failed to fetch (${res.status})`);
+        return;
+      }
       const blob = await res.blob();
       const filename = res.headers.get("x-filename") ?? url.split("/").pop() ?? "file";
       const file = new File([blob], filename, { type: blob.type });
@@ -183,6 +189,7 @@ export default function HomePage() {
   const [keyModalOpen, setKeyModalOpen] = useState(false);
   const [activePair, setActivePair]     = useState<string | null>(null);
   const sessionDownloads                = useRef<Map<string, { url: string; filename: string }>>(new Map());
+  const converterRef                    = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setHistoryCount(getHistory().length); }, []);
 
@@ -240,6 +247,36 @@ export default function HomePage() {
   }, [addFiles]);
 
   /* ── Conversion ──────────────────────────────────────────── */
+  const friendlyError = useCallback((err: unknown, category: string): string => {
+    const msg = err instanceof Error ? err.message : String(err ?? "Unknown error");
+    if (msg.includes("API key not configured") || msg.includes("API key is required"))
+      return "A CloudConvert API key is required. It's free — 25 conversions/day. Click 'Add API Key' above.";
+    if (msg.includes("CloudConvert timed out"))
+      return "Conversion timed out. Try a smaller file or check your internet connection, then retry.";
+    if (msg.includes("Upload failed"))
+      return "Upload to CloudConvert failed. Check your internet connection and try again.";
+    if (msg.includes("CloudConvert error 422"))
+      return "CloudConvert rejected the request — your API key may be invalid or the format pair is unsupported.";
+    if (msg.includes("CloudConvert") && msg.toLowerCase().includes("invalid"))
+      return "CloudConvert API key looks invalid. Double-check it in the key settings and try again.";
+    if (msg.includes("Browser could not decode"))
+      return "Your browser can't read this file. It may be corrupted, or try opening it in another app first.";
+    if (msg.includes("browser could not encode") || msg.includes("output is not supported in-browser"))
+      return "Your browser doesn't support encoding to this format. Try PNG or WEBP as an alternative.";
+    if (msg.includes("No files found in archive"))
+      return "The archive appears to be empty or corrupted. Check the file and try again.";
+    if (msg.includes("extraction is not supported") || msg.includes("creation is not supported"))
+      return msg;
+    if (msg.includes("Server error 5") || msg.match(/server error \d{3}/i))
+      return "Server error. Try again in a moment — if it keeps failing, try a different output format.";
+    if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("network"))
+      return "Network error. Check your internet connection and try again.";
+    if ((category === "video" || category === "audio" || category === "gif") &&
+        (msg.includes("memory") || msg.includes("out of memory")))
+      return "File is too large for in-browser processing. Try a shorter clip or lower resolution.";
+    return msg || "Conversion failed. Check the file isn't corrupted and try a different output format.";
+  }, []);
+
   const saveToHistory = useCallback((item: FileItem, resultSize: number, resultUrl: string, resultName: string) => {
     const id = addHistoryEntry({
       originalName: item.name, originalSize: item.size, originalExt: item.extension,
@@ -352,9 +389,9 @@ export default function HomePage() {
       finishConvert(item, await res.blob(), outputFmt);
 
     } catch (err) {
-      updateFile(item.id, { status: "error", error: err instanceof Error ? err.message : "Conversion failed" });
+      updateFile(item.id, { status: "error", error: friendlyError(err, category) });
     }
-  }, [updateFile, saveToHistory, finishConvert]);
+  }, [updateFile, saveToHistory, finishConvert, friendlyError]);
 
   const convertAll = useCallback(() => {
     files.filter((f) => f.status === "idle" || f.status === "error").forEach(convertFile);
@@ -519,7 +556,12 @@ export default function HomePage() {
               return (
                 <button
                   key={key}
-                  onClick={() => setActivePair(isActive ? null : key)}
+                  onClick={() => {
+                    setActivePair(isActive ? null : key);
+                    if (!isActive) {
+                      setTimeout(() => converterRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+                    }
+                  }}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 border ${
                     isActive
                       ? "bg-blue-600/20 border-blue-500/50 text-blue-300"
@@ -538,9 +580,20 @@ export default function HomePage() {
         </div>
 
         {/* ── FILE CONVERTER ───────────────────────────────────── */}
-        <div className="max-w-5xl mx-auto px-4 pb-20">
+        <div ref={converterRef} className="max-w-5xl mx-auto px-4 pb-20">
           {files.length === 0 ? (
             <div>
+              {activePair && (() => {
+                const pair = FORMAT_PAIRS.find(p => `${p.from}-${p.to}` === activePair);
+                return pair ? (
+                  <p className="text-blue-400 text-xs font-medium mb-3 flex items-center gap-1.5">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                    Drop your {pair.from} file here to convert it to {pair.to}
+                  </p>
+                ) : null;
+              })()}
               <div className="flex gap-1 mb-3 w-fit">
                 {(["file", "url"] as const).map((tab) => (
                   <button key={tab} onClick={() => setInputTab(tab)}
