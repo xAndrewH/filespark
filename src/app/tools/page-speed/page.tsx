@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import type { PageAnalysis, AnalysisIssue } from "@/app/api/page-speed/route";
+import type { PageAnalysis, CategoryResult, AnalysisIssue } from "@/app/api/page-speed/route";
 
 /* ── Helpers ─────────────────────────────────────────────────────── */
 function scoreColor(score: number): string {
@@ -11,17 +11,29 @@ function scoreColor(score: number): string {
   return "#ff4e42";
 }
 
-function ttfbColor(ms: number): string {
-  if (ms <= 200) return "#0cce6b";
-  if (ms <= 600) return "#ffa400";
-  return "#ff4e42";
+function scoreLabel(score: number): string {
+  if (score >= 90) return "Good";
+  if (score >= 50) return "Needs improvement";
+  return "Poor";
 }
 
-function ttfbLabel(ms: number): { text: string; cls: string } {
-  if (ms <= 200) return { text: "Fast", cls: "text-green-400" };
-  if (ms <= 600) return { text: "Moderate", cls: "text-orange-400" };
-  if (ms <= 1500) return { text: "Slow", cls: "text-red-400" };
-  return { text: "Very Slow", cls: "text-red-500" };
+function scoreLabelCls(score: number): string {
+  if (score >= 90) return "text-green-400";
+  if (score >= 50) return "text-orange-400";
+  return "text-red-400";
+}
+
+function ttfbLabel(ms: number): string {
+  if (ms <= 200) return "Fast";
+  if (ms <= 600) return "Moderate";
+  if (ms <= 1500) return "Slow";
+  return "Very Slow";
+}
+
+function ttfbCls(ms: number): string {
+  if (ms <= 200) return "text-green-400";
+  if (ms <= 600) return "text-orange-400";
+  return "text-red-400";
 }
 
 function fmtBytes(b: number): string {
@@ -30,60 +42,44 @@ function fmtBytes(b: number): string {
   return `${b} B`;
 }
 
-function impactColor(impact: AnalysisIssue["impact"]): string {
-  if (impact === "high") return "#ff4e42";
-  if (impact === "medium") return "#ffa400";
-  return "#94a3b8";
-}
-
-function impactLabel(impact: AnalysisIssue["impact"]): string {
-  if (impact === "high") return "High";
-  if (impact === "medium") return "Medium";
-  return "Low";
-}
-
 function impactCls(impact: AnalysisIssue["impact"]): string {
   if (impact === "high") return "text-red-400";
   if (impact === "medium") return "text-orange-400";
-  return "text-slate-400";
+  return "text-slate-500";
+}
+
+function impactDot(impact: AnalysisIssue["impact"]): string {
+  if (impact === "high") return "#ff4e42";
+  if (impact === "medium") return "#ffa400";
+  return "#64748b";
 }
 
 /* ── Score ring ──────────────────────────────────────────────────── */
-function ScoreRing({ score }: { score: number }) {
-  const r = 52;
+function ScoreRing({ score, label, accent }: { score: number; label: string; accent: string }) {
+  const r = 36;
   const circ = 2 * Math.PI * r;
   const color = scoreColor(score);
-  const bgColor = score >= 90 ? "#0cce6b22" : score >= 50 ? "#ffa40022" : "#ff4e4222";
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="relative w-36 h-36">
-        <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
-          <circle cx="60" cy="60" r={r} fill="none" stroke="#1e293b" strokeWidth="8" />
+      <div className="relative w-24 h-24">
+        <svg className="w-full h-full -rotate-90" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r={r} fill="none" stroke="#1e293b" strokeWidth="6" />
           <circle
-            cx="60" cy="60" r={r} fill="none"
-            stroke={color} strokeWidth="8" strokeLinecap="round"
+            cx="40" cy="40" r={r} fill="none"
+            stroke={color} strokeWidth="6" strokeLinecap="round"
             strokeDasharray={circ}
             strokeDashoffset={circ - (score / 100) * circ}
             style={{ transition: "stroke-dashoffset 0.8s ease" }}
           />
         </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ background: bgColor, borderRadius: "50%" }}>
-          <span className="text-4xl font-black text-white leading-none">{score}</span>
-          <span className="text-xs text-slate-400 mt-1">/ 100</span>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-2xl font-black text-white leading-none">{score}</span>
         </div>
       </div>
-      <p className="text-white text-sm font-semibold">Performance</p>
-    </div>
-  );
-}
-
-/* ── Stat card ───────────────────────────────────────────────────── */
-function StatCard({ label, value, sub, color }: { label: string; value: string; sub?: string; color?: string }) {
-  return (
-    <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4 space-y-1.5">
-      <p className="text-slate-400 text-xs">{label}</p>
-      <p className="text-white text-xl font-bold leading-none" style={color ? { color } : undefined}>{value}</p>
-      {sub && <p className={`text-xs font-medium ${sub.includes("Good") || sub.includes("Fast") ? "text-green-400" : sub.includes("Slow") || sub.includes("Poor") ? "text-red-400" : "text-orange-400"}`}>{sub}</p>}
+      <div className="text-center">
+        <p className="text-slate-300 text-xs font-semibold">{label}</p>
+        <p className={`text-xs mt-0.5 ${scoreLabelCls(score)}`}>{scoreLabel(score)}</p>
+      </div>
     </div>
   );
 }
@@ -91,7 +87,7 @@ function StatCard({ label, value, sub, color }: { label: string; value: string; 
 /* ── Check row ───────────────────────────────────────────────────── */
 function CheckRow({ label, pass, detail }: { label: string; pass: boolean; detail?: string }) {
   return (
-    <div className="flex items-center gap-3 py-2 border-b border-slate-800/40 last:border-0">
+    <div className="flex items-center gap-3 py-2.5 border-b border-slate-800/40 last:border-0">
       <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${pass ? "bg-green-500/20" : "bg-red-500/20"}`}>
         {pass
           ? <svg className="w-3 h-3 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -106,13 +102,12 @@ function CheckRow({ label, pass, detail }: { label: string; pass: boolean; detai
 
 /* ── Issue row ───────────────────────────────────────────────────── */
 function IssueRow({ issue, expanded, onToggle }: { issue: AnalysisIssue; expanded: boolean; onToggle: () => void }) {
-  const color = impactColor(issue.impact);
   return (
     <div className="border border-slate-800/60 rounded-xl overflow-hidden">
       <button onClick={onToggle} className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-800/30 transition-colors">
-        <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
+        <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: impactDot(issue.impact) }} />
         <span className="flex-1 text-slate-200 text-sm">{issue.title}</span>
-        <span className={`text-xs font-medium shrink-0 ${impactCls(issue.impact)}`}>{impactLabel(issue.impact)}</span>
+        <span className={`text-xs font-medium shrink-0 capitalize ${impactCls(issue.impact)}`}>{issue.impact}</span>
         <svg className={`w-3.5 h-3.5 text-slate-600 shrink-0 transition-transform ${expanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
@@ -122,11 +117,54 @@ function IssueRow({ issue, expanded, onToggle }: { issue: AnalysisIssue; expande
           <p className="text-slate-500 text-xs leading-relaxed">{issue.description}</p>
           {issue.details && issue.details.length > 0 && (
             <ul className="space-y-1">
-              {issue.details.map((d, i) => (
-                <li key={i} className="text-slate-600 text-xs font-mono truncate">↳ {d}</li>
-              ))}
+              {issue.details.map((d, i) => <li key={i} className="text-slate-600 text-xs font-mono truncate">↳ {d}</li>)}
             </ul>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Category section ────────────────────────────────────────────── */
+function CategorySection({
+  title, accent, result, checks, expanded, onToggle,
+}: {
+  title: string;
+  accent: string;
+  result: CategoryResult;
+  checks: { label: string; pass: boolean; detail?: string }[];
+  expanded: Set<string>;
+  onToggle: (id: string) => void;
+}) {
+  const hasIssues = result.issues.length > 0;
+  return (
+    <div className="bg-slate-900/60 border border-slate-800/60 rounded-2xl overflow-hidden">
+      <div className="px-5 py-4 border-b border-slate-800/60 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: accent }} />
+          <h3 className="text-white font-semibold text-sm">{title}</h3>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-slate-500 text-xs">{result.passed}/{result.total} passed</span>
+          <span className="text-sm font-bold" style={{ color: scoreColor(result.score) }}>{result.score}</span>
+        </div>
+      </div>
+
+      {/* Checks */}
+      <div className="px-5 divide-y divide-slate-800/40">
+        {checks.map(c => <CheckRow key={c.label} {...c} />)}
+      </div>
+
+      {/* Issues */}
+      {hasIssues && (
+        <div className="px-5 pb-4 pt-3 space-y-2">
+          <p className="text-xs font-semibold text-slate-600 uppercase tracking-widest mb-3">Issues</p>
+          {result.issues
+            .sort((a, b) => ({ high: 0, medium: 1, low: 2 }[a.impact]) - ({ high: 0, medium: 1, low: 2 }[b.impact]))
+            .map(issue => (
+              <IssueRow key={issue.id} issue={issue} expanded={expanded.has(issue.id)} onToggle={() => onToggle(issue.id)} />
+            ))}
         </div>
       )}
     </div>
@@ -136,12 +174,8 @@ function IssueRow({ issue, expanded, onToggle }: { issue: AnalysisIssue; expande
 /* ── Score legend ────────────────────────────────────────────────── */
 function ScoreLegend() {
   return (
-    <div className="flex items-center gap-4 text-xs text-slate-500">
-      {[
-        { color: "#ff4e42", label: "0–49 Poor" },
-        { color: "#ffa400", label: "50–89 Needs improvement" },
-        { color: "#0cce6b", label: "90–100 Good" },
-      ].map(({ color, label }) => (
+    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+      {[{ color: "#ff4e42", label: "0–49 Poor" }, { color: "#ffa400", label: "50–89 Needs improvement" }, { color: "#0cce6b", label: "90–100 Good" }].map(({ color, label }) => (
         <span key={label} className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
           {label}
@@ -190,6 +224,9 @@ export default function PageSpeedPage() {
     });
   };
 
+  const r = result;
+  const c = r?.categories;
+
   return (
     <div className="min-h-screen bg-slate-950">
       <div className="max-w-3xl mx-auto px-4 py-12">
@@ -199,7 +236,7 @@ export default function PageSpeedPage() {
         </Link>
 
         <h1 className="text-3xl font-bold text-white mb-1">Page Speed</h1>
-        <p className="text-slate-500 text-sm mb-8">Analyze any URL — TTFB, page weight, render-blocking resources, compression, and more. No API keys needed.</p>
+        <p className="text-slate-500 text-sm mb-8">Analyzes performance, accessibility, best practices, and SEO — similar to Lighthouse, no API key needed.</p>
 
         {/* Input */}
         <div className="bg-slate-900/60 border border-slate-800/60 rounded-2xl p-5">
@@ -232,7 +269,7 @@ export default function PageSpeedPage() {
             </div>
             <div className="text-center">
               <p className="text-slate-300 text-sm font-medium">Analyzing page…</p>
-              <p className="text-slate-600 text-xs mt-1">Fetching and parsing resources</p>
+              <p className="text-slate-600 text-xs mt-1">Fetching and auditing resources</p>
             </div>
           </div>
         )}
@@ -248,112 +285,122 @@ export default function PageSpeedPage() {
         )}
 
         {/* Results */}
-        {result && !loading && (
+        {r && c && !loading && (
           <div className="mt-6 space-y-5">
 
-            {/* Score card */}
+            {/* 4 score rings */}
             <div className="bg-slate-900/60 border border-slate-800/60 rounded-2xl p-6">
-              <div className="flex flex-col sm:flex-row items-center gap-8">
-                <ScoreRing score={result.score} />
-                <div className="flex-1 space-y-4 text-center sm:text-left">
-                  <div>
-                    <p className="text-slate-400 text-xs mb-1">Analyzed URL</p>
-                    <p className="text-white text-sm font-medium break-all">{result.finalUrl}</p>
-                  </div>
-                  <div>
-                    <p className="text-slate-400 text-xs mb-1">Issues found</p>
-                    <p className="text-white text-sm font-semibold">
-                      {result.issues.filter(i => i.impact === "high").length} high &nbsp;·&nbsp;
-                      {result.issues.filter(i => i.impact === "medium").length} medium &nbsp;·&nbsp;
-                      {result.issues.filter(i => i.impact === "low").length} low
-                    </p>
-                  </div>
-                  <ScoreLegend />
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-5">
+                <ScoreRing score={c.performance.score}   label="Performance"    accent="#3b82f6" />
+                <ScoreRing score={c.accessibility.score} label="Accessibility"  accent="#10b981" />
+                <ScoreRing score={c.bestPractices.score} label="Best Practices" accent="#f59e0b" />
+                <ScoreRing score={c.seo.score}           label="SEO"            accent="#a855f7" />
+              </div>
+              <div className="border-t border-slate-800/60 pt-4 space-y-2">
+                <p className="text-slate-400 text-xs">
+                  <span className="text-slate-300 font-medium">Analyzed:</span> {r.finalUrl}
+                </p>
+                {r.hasTitle && <p className="text-slate-600 text-xs truncate">"{r.title}"</p>}
+                <ScoreLegend />
+              </div>
+            </div>
+
+            {/* Stats row */}
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+              {[
+                { label: "TTFB", value: r.ttfb >= 1000 ? `${(r.ttfb / 1000).toFixed(1)}s` : `${r.ttfb}ms`, cls: ttfbCls(r.ttfb), sub: ttfbLabel(r.ttfb) },
+                { label: "HTML", value: fmtBytes(r.htmlSize), cls: "text-white", sub: r.compressed ? "Compressed" : "No gzip" },
+                { label: "Scripts", value: String(r.scripts.length), cls: "text-white", sub: `${r.renderBlockingScripts.length} blocking` },
+                { label: "CSS files", value: String(r.stylesheets.length), cls: "text-white", sub: `${r.inlineStyles} inline` },
+                { label: "Images", value: String(r.images.length), cls: "text-white", sub: `${r.lazyImageCount} lazy` },
+                { label: "3rd parties", value: String(r.thirdPartyDomains.length), cls: "text-white", sub: "domains" },
+              ].map(s => (
+                <div key={s.label} className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-3 text-center">
+                  <p className="text-slate-500 text-xs mb-1">{s.label}</p>
+                  <p className={`text-lg font-bold leading-none ${s.cls}`}>{s.value}</p>
+                  <p className="text-slate-600 text-xs mt-1">{s.sub}</p>
                 </div>
-              </div>
+              ))}
             </div>
 
-            {/* Key metrics */}
-            <div>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Performance Metrics</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <StatCard
-                  label="Time to First Byte"
-                  value={result.ttfb >= 1000 ? `${(result.ttfb / 1000).toFixed(2)} s` : `${result.ttfb} ms`}
-                  sub={ttfbLabel(result.ttfb).text}
-                  color={ttfbColor(result.ttfb)}
-                />
-                <StatCard
-                  label="HTML Size"
-                  value={fmtBytes(result.htmlSize)}
-                  sub={result.compressed ? "Compressed ✓" : "No compression"}
-                />
-                <StatCard
-                  label="Scripts"
-                  value={String(result.scripts.length)}
-                  sub={result.renderBlockingScripts.length > 0 ? `${result.renderBlockingScripts.length} render-blocking` : "None blocking"}
-                />
-                <StatCard
-                  label="Stylesheets"
-                  value={String(result.stylesheets.length)}
-                  sub={result.stylesheets.length > 3 ? "Consider combining" : "OK"}
-                />
-                <StatCard
-                  label="Images"
-                  value={String(result.images.length)}
-                  sub={result.images.filter(i => !i.hasAlt).length > 0 ? `${result.images.filter(i => !i.hasAlt).length} missing alt` : "All have alt"}
-                />
-                <StatCard
-                  label="Inline Scripts"
-                  value={String(result.inlineScripts)}
-                  sub={result.inlineScripts > 5 ? "Consider externalizing" : "OK"}
-                />
-              </div>
-            </div>
+            {/* Performance */}
+            <CategorySection
+              title="Performance"
+              accent="#3b82f6"
+              result={c.performance}
+              expanded={expanded}
+              onToggle={toggleIssue}
+              checks={[
+                { label: "Fast server response (TTFB ≤ 600ms)", pass: r.ttfb <= 600, detail: `${r.ttfb}ms` },
+                { label: "Text compression enabled", pass: r.compressed },
+                { label: "Reasonable HTML size (< 150 KB)", pass: r.htmlSize < 150_000, detail: fmtBytes(r.htmlSize) },
+                { label: "No render-blocking scripts", pass: r.renderBlockingScripts.length === 0, detail: r.renderBlockingScripts.length > 0 ? `${r.renderBlockingScripts.length} found` : undefined },
+                { label: "Few render-blocking stylesheets (≤ 3)", pass: r.stylesheets.length <= 3, detail: `${r.stylesheets.length} found` },
+                { label: "Viewport meta tag present", pass: r.hasViewport },
+                { label: "Images use lazy loading", pass: r.images.length <= 3 || r.lazyImageCount >= r.images.length - 1 },
+                { label: "Modern image formats (WebP/AVIF)", pass: r.modernImageCount > 0 || r.legacyImageCount === 0 },
+                { label: "Few third-party domains (≤ 3)", pass: r.thirdPartyDomains.length <= 3, detail: `${r.thirdPartyDomains.length} found` },
+                { label: "Preconnect hints for 3rd parties", pass: r.hasPreconnect || r.thirdPartyDomains.length === 0 },
+              ]}
+            />
 
-            {/* Quick checks */}
-            <div className="bg-slate-900/60 border border-slate-800/60 rounded-2xl p-5">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Quick Checks</p>
-              <div className="divide-y divide-slate-800/40">
-                <CheckRow label="HTTPS enabled" pass={result.https} />
-                <CheckRow label="Text compression (gzip/br)" pass={result.compressed} />
-                <CheckRow label="Viewport meta tag" pass={result.hasViewport} />
-                <CheckRow label="Cache-Control header" pass={result.hasCacheControl} />
-                <CheckRow label="Title tag present" pass={result.hasTitle} detail={result.hasTitle ? `${result.titleLength} chars` : undefined} />
-                <CheckRow label="No render-blocking scripts" pass={result.renderBlockingScripts.length === 0} detail={result.renderBlockingScripts.length > 0 ? `${result.renderBlockingScripts.length} found` : undefined} />
-                <CheckRow label="All images have alt text" pass={result.images.filter(i => !i.hasAlt).length === 0} detail={result.images.filter(i => !i.hasAlt).length > 0 ? `${result.images.filter(i => !i.hasAlt).length} missing` : undefined} />
-                <CheckRow label="Images have dimensions" pass={result.images.filter(i => !i.hasDimensions).length === 0} detail={result.images.filter(i => !i.hasDimensions).length > 0 ? `${result.images.filter(i => !i.hasDimensions).length} missing` : undefined} />
-              </div>
-            </div>
+            {/* Accessibility */}
+            <CategorySection
+              title="Accessibility"
+              accent="#10b981"
+              result={c.accessibility}
+              expanded={expanded}
+              onToggle={toggleIssue}
+              checks={[
+                { label: "HTML lang attribute set", pass: r.hasLang, detail: r.lang || undefined },
+                { label: "All images have alt text", pass: r.imagesWithoutAlt === 0, detail: r.imagesWithoutAlt > 0 ? `${r.imagesWithoutAlt} missing` : undefined },
+                { label: "Images have width & height", pass: r.imagesWithoutDimensions === 0, detail: r.imagesWithoutDimensions > 0 ? `${r.imagesWithoutDimensions} missing` : undefined },
+                { label: "Character set declared", pass: r.hasCharset },
+                { label: "Buttons have accessible labels", pass: r.buttonsWithoutLabel === 0, detail: r.buttonsWithoutLabel > 0 ? `${r.buttonsWithoutLabel} unlabelled` : undefined },
+                { label: "Form inputs have associated labels", pass: r.inputsWithoutLabel === 0, detail: r.inputsWithoutLabel > 0 ? `${r.inputsWithoutLabel} unlabelled` : undefined },
+                { label: "Exactly one H1 heading", pass: r.h1Count === 1, detail: `${r.h1Count} found` },
+              ]}
+            />
 
-            {/* Issues */}
-            {result.issues.length > 0 && (
-              <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Issues &amp; Opportunities</p>
-                <div className="space-y-2">
-                  {result.issues
-                    .sort((a, b) => {
-                      const order = { high: 0, medium: 1, low: 2 };
-                      return order[a.impact] - order[b.impact];
-                    })
-                    .map(issue => (
-                      <IssueRow key={issue.id} issue={issue} expanded={expanded.has(issue.id)} onToggle={() => toggleIssue(issue.id)} />
-                    ))}
-                </div>
-              </div>
-            )}
+            {/* Best Practices */}
+            <CategorySection
+              title="Best Practices"
+              accent="#f59e0b"
+              result={c.bestPractices}
+              expanded={expanded}
+              onToggle={toggleIssue}
+              checks={[
+                { label: "Served over HTTPS", pass: r.https },
+                { label: "DOCTYPE html declared", pass: r.hasDoctype },
+                { label: "Character set meta tag", pass: r.hasCharset },
+                { label: "No mixed content (HTTP on HTTPS)", pass: r.mixedContentCount === 0, detail: r.mixedContentCount > 0 ? `${r.mixedContentCount} found` : undefined },
+                { label: "Cache-Control header present", pass: r.hasCacheControl },
+                { label: 'External links have rel="noopener"', pass: r.externalLinksWithoutNoopener === 0, detail: r.externalLinksWithoutNoopener > 0 ? `${r.externalLinksWithoutNoopener} missing` : undefined },
+                { label: "Password fields not on HTTP", pass: !r.passwordInputOnHttp },
+              ]}
+            />
 
-            {result.issues.length === 0 && (
-              <div className="bg-green-500/10 border border-green-500/30 rounded-2xl p-5 flex items-center gap-3">
-                <svg className="w-5 h-5 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                <p className="text-green-400 text-sm">No issues detected — page looks well-optimized!</p>
-              </div>
-            )}
+            {/* SEO */}
+            <CategorySection
+              title="SEO"
+              accent="#a855f7"
+              result={c.seo}
+              expanded={expanded}
+              onToggle={toggleIssue}
+              checks={[
+                { label: "Title tag (10–60 chars)", pass: r.hasTitle && r.titleLength >= 10 && r.titleLength <= 60, detail: r.hasTitle ? `${r.titleLength} chars` : "missing" },
+                { label: "Meta description (50–160 chars)", pass: r.hasMetaDescription && r.metaDescriptionLength >= 50 && r.metaDescriptionLength <= 160, detail: r.hasMetaDescription ? `${r.metaDescriptionLength} chars` : "missing" },
+                { label: "HTML lang attribute", pass: r.hasLang },
+                { label: "Exactly one H1", pass: r.h1Count === 1, detail: `${r.h1Count} found` },
+                { label: "Not blocked by noindex", pass: !r.isNoIndex },
+                { label: "Canonical URL declared", pass: r.hasCanonical },
+                { label: "Open Graph tags", pass: r.hasOgTags },
+                { label: "Structured data (JSON-LD)", pass: r.hasStructuredData },
+              ]}
+            />
 
             <p className="text-slate-700 text-xs text-center pb-4">
-              Analyzed via FileSpark server · {new Date(result.fetchTime).toLocaleTimeString()}
+              Static HTML analysis · FileSpark · {new Date(r.fetchTime).toLocaleTimeString()}
             </p>
           </div>
         )}
