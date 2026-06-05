@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import Footer from "@/components/Footer";
 import { CommandPalette } from "@/components/CommandPalette";
 import { BackToTop } from "@/components/BackToTop";
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Footer />
         <CommandPalette />
         <BackToTop />
+        <Analytics />
       </body>
     </html>
   );
