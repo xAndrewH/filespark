@@ -123,9 +123,15 @@ function IssueRow({ issue, expanded, onToggle }: { issue: AnalysisIssue; expande
         <div className="px-4 pb-3 space-y-2">
           <p className="text-slate-500 text-xs leading-relaxed">{issue.description}</p>
           {issue.details && issue.details.length > 0 && (
-            <ul className="space-y-1">
-              {issue.details.map((d, i) => <li key={i} className="text-slate-600 text-xs font-mono truncate">↳ {d}</li>)}
-            </ul>
+            <div className="max-h-64 overflow-y-auto scrollbar-thin rounded-lg bg-slate-950/60 border border-slate-800/40 px-3 py-2">
+              <ul className="space-y-1">
+                {issue.details.map((d, i) => (
+                  <li key={i} className="text-slate-500 text-xs font-mono break-all">
+                    <span className="text-slate-700 mr-1.5">{i + 1}.</span>{d}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
       )}
@@ -341,12 +347,12 @@ export default function PageSpeedPage() {
                 { label: "Fast server response (TTFB ≤ 600ms)", pass: r.ttfb <= 600, detail: `${r.ttfb}ms`, snippet: r.ttfb > 600 ? `${r.ttfb}ms — aim for under 600ms` : undefined },
                 { label: "Text compression enabled", pass: r.compressed, snippet: r.compressed ? "gzip / br" : "not enabled — add gzip or Brotli" },
                 { label: "Reasonable HTML size (< 150 KB)", pass: r.htmlSize < 150_000, detail: fmtBytes(r.htmlSize), snippet: r.htmlSize >= 150_000 ? `${fmtBytes(r.htmlSize)} raw HTML` : undefined },
-                { label: "No render-blocking scripts", pass: r.renderBlockingScripts.length === 0, detail: r.renderBlockingScripts.length > 0 ? `${r.renderBlockingScripts.length} found` : undefined, snippet: r.renderBlockingScripts.length > 0 ? r.renderBlockingScripts.slice(0, 2).map(s => s.url.split("/").pop()).join(", ") : undefined },
-                { label: "Few render-blocking stylesheets (≤ 3)", pass: r.stylesheets.length <= 3, detail: `${r.stylesheets.length} found`, snippet: r.stylesheets.length > 3 ? r.stylesheets.slice(0, 2).map(s => s.url.split("/").pop()).join(", ") : undefined },
+                { label: "No render-blocking scripts", pass: r.renderBlockingScripts.length === 0, detail: r.renderBlockingScripts.length > 0 ? `${r.renderBlockingScripts.length} found` : undefined, snippet: r.renderBlockingScripts.length > 0 ? r.renderBlockingScripts.map(s => s.url.split("/").pop()).join(", ") : undefined },
+                { label: "Few render-blocking stylesheets (≤ 3)", pass: r.stylesheets.length <= 3, detail: `${r.stylesheets.length} found`, snippet: r.stylesheets.length > 3 ? r.stylesheets.map(s => s.url.split("/").pop()).join(", ") : undefined },
                 { label: "Viewport meta tag present", pass: r.hasViewport, snippet: !r.hasViewport ? 'add <meta name="viewport" content="width=device-width, initial-scale=1">' : undefined },
                 { label: "Images use lazy loading", pass: r.images.length <= 3 || r.lazyImageCount >= r.images.length - 1, snippet: r.images.length > 3 ? `${r.lazyImageCount} of ${r.images.length} images have loading="lazy"` : undefined },
                 { label: "Modern image formats (WebP/AVIF)", pass: r.modernImageCount > 0 || r.legacyImageCount === 0, snippet: r.legacyImageCount > 0 ? `${r.legacyImageCount} JPEG/PNG image${r.legacyImageCount > 1 ? "s" : ""} — convert to WebP or AVIF` : r.modernImageCount > 0 ? `${r.modernImageCount} WebP/AVIF image${r.modernImageCount > 1 ? "s" : ""} found` : undefined },
-                { label: "Few third-party domains (≤ 3)", pass: r.thirdPartyDomains.length <= 3, detail: `${r.thirdPartyDomains.length} found`, snippet: r.thirdPartyDomains.length > 0 ? r.thirdPartyDomains.slice(0, 4).join(", ") : undefined },
+                { label: "Few third-party domains (≤ 3)", pass: r.thirdPartyDomains.length <= 3, detail: `${r.thirdPartyDomains.length} found`, snippet: r.thirdPartyDomains.length > 0 ? r.thirdPartyDomains.join(", ") : undefined },
                 { label: "Preconnect hints for 3rd parties", pass: r.hasPreconnect || r.thirdPartyDomains.length === 0, snippet: !r.hasPreconnect && r.thirdPartyDomains.length > 0 ? `add <link rel="preconnect" href="..."> for ${r.thirdPartyDomains[0]}` : undefined },
               ]}
             />
@@ -360,7 +366,7 @@ export default function PageSpeedPage() {
               onToggle={toggleIssue}
               checks={[
                 { label: "HTML lang attribute set", pass: r.hasLang, snippet: r.hasLang ? `lang="${r.lang}"` : 'not set — add lang="en" (or your language) to <html>' },
-                { label: "All images have alt text", pass: r.imagesWithoutAlt === 0, detail: r.imagesWithoutAlt > 0 ? `${r.imagesWithoutAlt} missing` : undefined, snippet: r.images.filter(i => !i.hasAlt).slice(0, 2).map(i => i.src.split("/").pop()).join(", ") || undefined },
+                { label: "All images have alt text", pass: r.imagesWithoutAlt === 0, detail: r.imagesWithoutAlt > 0 ? `${r.imagesWithoutAlt} missing` : undefined, snippet: r.images.filter(i => !i.hasAlt).map(i => i.src.split("/").pop()).join(", ") || undefined },
                 { label: "Images have width & height", pass: r.imagesWithoutDimensions === 0, detail: r.imagesWithoutDimensions > 0 ? `${r.imagesWithoutDimensions} missing` : undefined },
                 { label: "Character set declared", pass: r.hasCharset, snippet: r.hasCharset ? `charset="${r.charsetValue}"` : 'add <meta charset="UTF-8"> in <head>' },
                 { label: "Buttons have accessible labels", pass: r.buttonsWithoutLabel === 0, detail: r.buttonsWithoutLabel > 0 ? `${r.buttonsWithoutLabel} unlabelled` : undefined, snippet: r.buttonsWithoutLabel > 0 ? "add aria-label or visible text to empty buttons" : undefined },
@@ -382,7 +388,7 @@ export default function PageSpeedPage() {
                 { label: "Character set meta tag", pass: r.hasCharset, snippet: r.hasCharset ? `charset="${r.charsetValue}"` : 'add <meta charset="UTF-8"> in <head>' },
                 { label: "No mixed content (HTTP on HTTPS)", pass: r.mixedContentCount === 0, detail: r.mixedContentCount > 0 ? `${r.mixedContentCount} found` : undefined, snippet: r.mixedContentCount > 0 ? "HTTP resources loaded on HTTPS page" : undefined },
                 { label: "Cache-Control header present", pass: r.hasCacheControl, snippet: !r.hasCacheControl ? "server response has no Cache-Control header" : undefined },
-                { label: 'External links have rel="noopener"', pass: r.externalLinksWithoutNoopener.length === 0, detail: r.externalLinksWithoutNoopener.length > 0 ? `${r.externalLinksWithoutNoopener.length} missing` : undefined, snippet: r.externalLinksWithoutNoopener.slice(0, 1).map(u => u.length > 60 ? u.slice(0, 60) + "…" : u)[0] },
+                { label: 'External links have rel="noopener"', pass: r.externalLinksWithoutNoopener.length === 0, detail: r.externalLinksWithoutNoopener.length > 0 ? `${r.externalLinksWithoutNoopener.length} missing` : undefined, snippet: r.externalLinksWithoutNoopener[0] },
                 { label: "Password fields not on HTTP", pass: !r.passwordInputOnHttp, snippet: r.passwordInputOnHttp ? "password input found on non-HTTPS page" : undefined },
               ]}
             />
@@ -396,9 +402,9 @@ export default function PageSpeedPage() {
               onToggle={toggleIssue}
               checks={[
                 { label: "Title tag (10–60 chars)", pass: r.hasTitle && r.titleLength >= 10 && r.titleLength <= 60, detail: r.hasTitle ? `${r.titleLength} chars` : "missing", snippet: r.title ? `"${r.title}"` : "no <title> tag found" },
-                { label: "Meta description (50–160 chars)", pass: r.hasMetaDescription && r.metaDescriptionLength >= 50 && r.metaDescriptionLength <= 160, detail: r.hasMetaDescription ? `${r.metaDescriptionLength} chars` : "missing", snippet: r.metaDescriptionText ? `"${r.metaDescriptionText.slice(0, 80)}${r.metaDescriptionText.length > 80 ? "…" : ""}"` : "no meta description found" },
+                { label: "Meta description (50–160 chars)", pass: r.hasMetaDescription && r.metaDescriptionLength >= 50 && r.metaDescriptionLength <= 160, detail: r.hasMetaDescription ? `${r.metaDescriptionLength} chars` : "missing", snippet: r.metaDescriptionText ? `"${r.metaDescriptionText}"` : "no meta description found" },
                 { label: "HTML lang attribute", pass: r.hasLang, snippet: r.hasLang ? `lang="${r.lang}"` : "not set" },
-                { label: "Exactly one H1", pass: r.h1Count === 1, detail: `${r.h1Count} found`, snippet: r.h1Texts[0] ? `"${r.h1Texts[0]}"` : r.h1Count === 0 ? "no H1 found" : `${r.h1Count} H1s: "${r.h1Texts.slice(0, 2).join('", "')}"` },
+                { label: "Exactly one H1", pass: r.h1Count === 1, detail: `${r.h1Count} found`, snippet: r.h1Texts.length > 0 ? r.h1Texts.map(t => `"${t}"`).join(", ") : "no H1 found" },
                 { label: "Not blocked by noindex", pass: !r.isNoIndex, snippet: r.isNoIndex ? "noindex found — page excluded from search engines" : undefined },
                 { label: "Canonical URL declared", pass: r.hasCanonical, snippet: r.canonicalUrl ? r.canonicalUrl : "no canonical tag found" },
                 { label: "Open Graph tags", pass: r.hasOgTags, snippet: r.ogTitle ? `og:title = "${r.ogTitle}"` : r.hasOgTags ? "OG tags present" : "no og:title / og:description found" },
