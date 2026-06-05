@@ -205,14 +205,14 @@ function buildPerformance(d: Omit<PageAnalysis, "categories">): CategoryResult {
   else {
     const n = d.renderBlockingScripts.length;
     deductions += Math.min(n * 5, 20);
-    issues.push({ id: "render-blocking-scripts", title: `${n} render-blocking script${n > 1 ? "s" : ""}`, description: "Scripts without defer or async block HTML parsing. Add defer or async to <head> scripts.", impact: n > 2 ? "high" : "medium", details: d.renderBlockingScripts.slice(0, 5).map(s => s.url) });
+    issues.push({ id: "render-blocking-scripts", title: `${n} render-blocking script${n > 1 ? "s" : ""}`, description: "Scripts without defer or async block HTML parsing. Add defer or async to <head> scripts.", impact: n > 2 ? "high" : "medium", details: d.renderBlockingScripts.map(s => s.url) });
   }
 
   checks++;
   if (d.stylesheets.length <= 3) { passed++; }
   else {
     deductions += Math.min((d.stylesheets.length - 3) * 3, 12);
-    issues.push({ id: "many-stylesheets", title: `${d.stylesheets.length} render-blocking stylesheets`, description: "Each external stylesheet blocks rendering. Combine CSS files or inline critical CSS.", impact: "medium", details: d.stylesheets.slice(0, 5).map(s => s.url) });
+    issues.push({ id: "many-stylesheets", title: `${d.stylesheets.length} render-blocking stylesheets`, description: "Each external stylesheet blocks rendering. Combine CSS files or inline critical CSS.", impact: "medium", details: d.stylesheets.map(s => s.url) });
   }
 
   checks++;
@@ -241,7 +241,7 @@ function buildPerformance(d: Omit<PageAnalysis, "categories">): CategoryResult {
   if (d.thirdPartyDomains.length <= 3) { passed++; }
   else {
     deductions += Math.min((d.thirdPartyDomains.length - 3) * 2, 10);
-    issues.push({ id: "many-third-parties", title: `${d.thirdPartyDomains.length} third-party domains`, description: "Each external domain adds DNS lookup and connection overhead. Audit and remove unused third-party scripts.", impact: "medium", details: d.thirdPartyDomains.slice(0, 8) });
+    issues.push({ id: "many-third-parties", title: `${d.thirdPartyDomains.length} third-party domains`, description: "Each external domain adds DNS lookup and connection overhead. Audit and remove unused third-party scripts.", impact: "medium", details: d.thirdPartyDomains });
   }
 
   checks++;
@@ -271,14 +271,14 @@ function buildAccessibility(d: Omit<PageAnalysis, "categories">): CategoryResult
   if (d.imagesWithoutAlt === 0) { passed++; }
   else {
     deductions += Math.min(d.imagesWithoutAlt * 5, 20);
-    issues.push({ id: "images-no-alt", title: `${d.imagesWithoutAlt} image${d.imagesWithoutAlt > 1 ? "s" : ""} missing alt text`, description: "Alt text is required for screen readers and shown when images fail to load.", impact: "high" });
+    issues.push({ id: "images-no-alt", title: `${d.imagesWithoutAlt} image${d.imagesWithoutAlt > 1 ? "s" : ""} missing alt text`, description: "Alt text is required for screen readers and shown when images fail to load.", impact: "high", details: d.images.filter(i => !i.hasAlt).map(i => i.src) });
   }
 
   checks++;
   if (d.imagesWithoutDimensions === 0) { passed++; }
   else {
     deductions += 5;
-    issues.push({ id: "images-no-dimensions", title: `${d.imagesWithoutDimensions} image${d.imagesWithoutDimensions > 1 ? "s" : ""} without width/height`, description: "Setting explicit dimensions prevents layout shift (CLS) while images load.", impact: "medium" });
+    issues.push({ id: "images-no-dimensions", title: `${d.imagesWithoutDimensions} image${d.imagesWithoutDimensions > 1 ? "s" : ""} without width/height`, description: "Setting explicit dimensions prevents layout shift (CLS) while images load.", impact: "medium", details: d.images.filter(i => !i.hasDimensions).map(i => i.src) });
   }
 
   checks++;
@@ -361,7 +361,7 @@ function buildBestPractices(d: Omit<PageAnalysis, "categories">): CategoryResult
   else {
     const n = d.externalLinksWithoutNoopener.length;
     deductions += 5;
-    issues.push({ id: "no-noopener", title: `${n} external link${n > 1 ? "s" : ""} without rel="noopener"`, description: 'Add rel="noopener noreferrer" to target="_blank" links to prevent tabnapping security exploits.', impact: "medium", details: d.externalLinksWithoutNoopener.slice(0, 6) });
+    issues.push({ id: "no-noopener", title: `${n} external link${n > 1 ? "s" : ""} without rel="noopener"`, description: 'Add rel="noopener noreferrer" to target="_blank" links to prevent tabnapping security exploits.', impact: "medium", details: d.externalLinksWithoutNoopener });
   }
 
   checks++;
