@@ -36,5 +36,13 @@ export function useToolHistory() {
     });
   }, []);
 
-  return { favorites, recents, toggleFavorite, recordVisit };
+  const removeRecent = useCallback((href: string) => {
+    setRecents(prev => {
+      const next = prev.filter(r => r.href !== href);
+      try { localStorage.setItem(RECENT_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }, []);
+
+  return { favorites, recents, toggleFavorite, recordVisit, removeRecent };
 }

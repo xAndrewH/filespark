@@ -195,7 +195,7 @@ function ToolsPageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const { favorites, recents, toggleFavorite, recordVisit } = useToolHistory();
+  const { favorites, recents, toggleFavorite, recordVisit, removeRecent } = useToolHistory();
 
   const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
   const [activeCategory, setActiveCategory] = useState<string | null>(() => searchParams.get("cat") ?? null);
@@ -378,6 +378,7 @@ function ToolsPageInner() {
                       <ToolCard key={href} href={tool.href} icon={tool.icon} title={tool.title} description={tool.description}
                         isFavorite={favorites.includes(href)}
                         onFavorite={e => { e.preventDefault(); e.stopPropagation(); toggleFavorite(href); }}
+                        onRemove={e => { e.preventDefault(); e.stopPropagation(); removeRecent(href); }}
                         onNavigate={() => handleNavigate(href, title)} />
                     );
                   })}
@@ -423,9 +424,10 @@ function ToolsPageInner() {
   );
 }
 
-function ToolCard({ href, icon: Icon, title, description, tag, onNavigate, isFavorite, onFavorite }: {
+function ToolCard({ href, icon: Icon, title, description, tag, onNavigate, isFavorite, onFavorite, onRemove }: {
   href: string; icon: IconComponent; title: string; description: string; tag?: string;
   onNavigate: () => void; isFavorite?: boolean; onFavorite?: (e: React.MouseEvent) => void;
+  onRemove?: (e: React.MouseEvent) => void;
 }) {
   return (
     <Link
@@ -447,6 +449,17 @@ function ToolCard({ href, icon: Icon, title, description, tag, onNavigate, isFav
                 className={`w-5 h-5 flex items-center justify-center rounded transition-all ${isFavorite ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
               >
                 <Heart className={`w-3.5 h-3.5 transition-colors ${isFavorite ? "text-pink-400 fill-pink-400" : "text-slate-500 hover:text-pink-400"}`} />
+              </button>
+            )}
+            {onRemove && (
+              <button
+                onClick={onRemove}
+                title="Remove from recently used"
+                className="w-5 h-5 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 transition-all hover:bg-slate-700/60"
+              >
+                <svg className="w-3 h-3 text-slate-500 hover:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             )}
             <svg className="w-3 h-3 text-slate-600 group-hover:text-blue-400 mt-0.5 transition-colors group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
