@@ -65,6 +65,7 @@ export interface PageAnalysis {
   hasLang: boolean;
   lang: string;
   hasCharset: boolean;
+  charsetValue: string;
   buttonsWithoutLabel: number;
   inputsWithoutLabel: number;
   imagesWithoutAlt: number;
@@ -73,7 +74,7 @@ export interface PageAnalysis {
   // Best Practices
   hasDoctype: boolean;
   mixedContentCount: number;
-  externalLinksWithoutNoopener: number;
+  externalLinksWithoutNoopener: string[];
   passwordInputOnHttp: boolean;
 
   // SEO
@@ -82,12 +83,17 @@ export interface PageAnalysis {
   title: string;
   hasMetaDescription: boolean;
   metaDescriptionLength: number;
+  metaDescriptionText: string;
   hasCanonical: boolean;
+  canonicalUrl: string;
   isNoIndex: boolean;
   hasRobotsMeta: boolean;
   h1Count: number;
+  h1Texts: string[];
   hasStructuredData: boolean;
+  structuredDataTypes: string[];
   hasOgTags: boolean;
+  ogTitle: string;
 
   // Category scores
   categories: {
@@ -351,10 +357,11 @@ function buildBestPractices(d: Omit<PageAnalysis, "categories">): CategoryResult
   }
 
   checks++;
-  if (d.externalLinksWithoutNoopener === 0) { passed++; }
+  if (d.externalLinksWithoutNoopener.length === 0) { passed++; }
   else {
+    const n = d.externalLinksWithoutNoopener.length;
     deductions += 5;
-    issues.push({ id: "no-noopener", title: `${d.externalLinksWithoutNoopener} external link${d.externalLinksWithoutNoopener > 1 ? "s" : ""} without rel="noopener"`, description: 'Add rel="noopener noreferrer" to target="_blank" links to prevent tabnapping security exploits.', impact: "medium" });
+    issues.push({ id: "no-noopener", title: `${n} external link${n > 1 ? "s" : ""} without rel="noopener"`, description: 'Add rel="noopener noreferrer" to target="_blank" links to prevent tabnapping security exploits.', impact: "medium", details: d.externalLinksWithoutNoopener.slice(0, 6) });
   }
 
   checks++;
@@ -537,15 +544,22 @@ export async function POST(req: NextRequest) {
     return !labelledIds.has(idM?.[1] ?? "") && !/aria-label=/i.test(attrs) && !/aria-labelledby=/i.test(attrs) && !/title=/i.test(attrs);
   }).length;
 
+  // Accessibility extras
+  const charsetM = /<meta[^>]+charset=["']?([^"'\s>]+)["']?[^>]*>/i.exec(html);
+  const charsetValue = charsetM ? charsetM[1].toUpperCase() : "";
+
   // Best practices
   const hasDoctype = /^\s*<!doctype\s+html/i.test(html);
   const mixedContentCount = https
     ? [...html.matchAll(/(?:src|href)=["']http:\/\/[^"']+["']/gi)].length
     : 0;
-  const externalLinksWithoutNoopener = [...html.matchAll(/<a([^>]+)>/gi)].filter(m => {
-    const a = m[1];
-    return /target=["']_blank["']/i.test(a) && !/rel=["'][^"']*noopener[^"']*["']/i.test(a);
-  }).length;
+  const externalLinksWithoutNoopener = [...html.matchAll(/<a([^>]+)>/gi)]
+    .filter(m => {
+      const a = m[1];
+      return /target=["']_blank["']/i.test(a) && !/rel=["'][^"']*noopener[^"']*["']/i.test(a);
+    })
+    .map(m => { const h = /href=["']([^"']+)["']/i.exec(m[1]); return h?.[1] ?? ""; })
+    .filter(Boolean);
   const passwordInputOnHttp = !https && /<input[^>]+type=["']password["'][^>]*>/i.test(html);
 
   // SEO
@@ -558,14 +572,36 @@ export async function POST(req: NextRequest) {
                     /<meta[^>]+content=["']([^"']+)["'][^>]+name=["']description["'][^>]*/i.exec(html);
   const hasMetaDescription = !!metaDescM;
   const metaDescriptionLength = metaDescM ? metaDescM[1].length : 0;
+  const metaDescriptionText = metaDescM ? metaDescM[1].slice(0, 200) : "";
 
-  const hasCanonical = /<link[^>]+rel=["']canonical["'][^>]*>/i.test(html);
+  const canonicalM = /<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["'][^>]*/i.exec(html) ??
+                     /<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["'][^>]*/i.exec(html);
+  const hasCanonical = !!canonicalM;
+  const canonicalUrl = canonicalM ? canonicalM[1] : "";
+
   const robotsM = /<meta[^>]+name=["']robots["'][^>]+content=["']([^"']*)["'][^>]*/i.exec(html);
   const isNoIndex = /noindex/i.test(robotsM?.[1] ?? "");
   const hasRobotsMeta = !!robotsM;
-  const h1Count = (html.match(/<h1[^>]*>/gi) ?? []).length;
-  const hasStructuredData = /<script[^>]+type=["']application\/ld\+json["'][^>]*>/i.test(html);
+
+  const h1Matches = [...html.matchAll(/<h1[^>]*>([\s\S]*?)<\/h1>/gi)];
+  const h1Count = h1Matches.length;
+  const h1Texts = h1Matches.map(m => m[1].replace(/<[^>]*>/g, "").trim().slice(0, 80)).filter(Boolean);
+
+  const jsonLdMatches = [...html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
+  const hasStructuredData = jsonLdMatches.length > 0;
+  const structuredDataTypes: string[] = [];
+  for (const match of jsonLdMatches) {
+    try {
+      const data = JSON.parse(match[1]) as Record<string, unknown>;
+      const t = data["@type"];
+      if (t) structuredDataTypes.push(Array.isArray(t) ? (t as string[]).join(", ") : String(t));
+    } catch { /* invalid JSON */ }
+  }
+
   const hasOgTags = /<meta[^>]+property=["']og:/i.test(html);
+  const ogTitleM = /<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["'][^>]*/i.exec(html) ??
+                   /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:title["'][^>]*/i.exec(html);
+  const ogTitle = ogTitleM ? ogTitleM[1].slice(0, 80) : "";
 
   const base: Omit<PageAnalysis, "categories"> = {
     url, finalUrl, fetchTime: new Date().toISOString(), ttfb,
@@ -573,11 +609,12 @@ export async function POST(req: NextRequest) {
     scripts, stylesheets, images, renderBlockingScripts, inlineScripts, inlineStyles,
     thirdPartyDomains, hasViewport, hasPreconnect, hasPreload,
     lazyImageCount, modernImageCount, legacyImageCount,
-    hasLang, lang, hasCharset, buttonsWithoutLabel, inputsWithoutLabel,
+    hasLang, lang, hasCharset, charsetValue, buttonsWithoutLabel, inputsWithoutLabel,
     imagesWithoutAlt, imagesWithoutDimensions,
     hasDoctype, mixedContentCount, externalLinksWithoutNoopener, passwordInputOnHttp,
-    hasTitle, titleLength, title, hasMetaDescription, metaDescriptionLength,
-    hasCanonical, isNoIndex, hasRobotsMeta, h1Count, hasStructuredData, hasOgTags,
+    hasTitle, titleLength, title, hasMetaDescription, metaDescriptionLength, metaDescriptionText,
+    hasCanonical, canonicalUrl, isNoIndex, hasRobotsMeta, h1Count, h1Texts,
+    hasStructuredData, structuredDataTypes, hasOgTags, ogTitle,
   };
 
   return NextResponse.json({
