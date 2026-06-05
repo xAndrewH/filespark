@@ -66,8 +66,8 @@ export interface PageAnalysis {
   lang: string;
   hasCharset: boolean;
   charsetValue: string;
-  buttonsWithoutLabel: number;
-  inputsWithoutLabel: number;
+  unlabelledButtons: string[];
+  unlabelledInputs: string[];
   imagesWithoutAlt: number;
   imagesWithoutDimensions: number;
 
@@ -226,15 +226,16 @@ function buildPerformance(d: Omit<PageAnalysis, "categories">): CategoryResult {
   if (d.images.length <= 3 || lazyRatio >= 0.5) { passed++; }
   else {
     deductions += 8;
-    const missing = d.images.length - d.lazyImageCount - 1;
-    issues.push({ id: "no-lazy-load", title: `${missing} image${missing > 1 ? "s" : ""} not lazy loaded`, description: 'Add loading="lazy" to below-the-fold images to defer loading and reduce initial page weight.', impact: "medium" });
+    const notLazy = d.images.slice(1).filter(i => !i.hasLazy);
+    issues.push({ id: "no-lazy-load", title: `${notLazy.length} image${notLazy.length > 1 ? "s" : ""} not lazy loaded`, description: 'Add loading="lazy" to below-the-fold images to defer loading and reduce initial page weight.', impact: "medium", details: notLazy.map(i => i.src) });
   }
 
   checks++;
   if (d.modernImageCount > 0 || d.legacyImageCount === 0) { passed++; }
   else if (d.legacyImageCount > 0) {
     deductions += 5;
-    issues.push({ id: "legacy-image-formats", title: `${d.legacyImageCount} image${d.legacyImageCount > 1 ? "s" : ""} using legacy formats`, description: "Use WebP or AVIF instead of JPEG/PNG to reduce image size by 25–35% with the same quality.", impact: "medium" });
+    const legacyImgs = d.images.filter(i => ["jpg", "jpeg", "png", "gif"].includes(i.format));
+    issues.push({ id: "legacy-image-formats", title: `${d.legacyImageCount} image${d.legacyImageCount > 1 ? "s" : ""} using legacy formats`, description: "Use WebP or AVIF instead of JPEG/PNG to reduce image size by 25–35% with the same quality.", impact: "medium", details: legacyImgs.map(i => `[${i.format.toUpperCase()}] ${i.src}`) });
   }
 
   checks++;
@@ -289,17 +290,17 @@ function buildAccessibility(d: Omit<PageAnalysis, "categories">): CategoryResult
   }
 
   checks++;
-  if (d.buttonsWithoutLabel === 0) { passed++; }
+  if (d.unlabelledButtons.length === 0) { passed++; }
   else {
-    deductions += Math.min(d.buttonsWithoutLabel * 5, 15);
-    issues.push({ id: "buttons-no-label", title: `${d.buttonsWithoutLabel} button${d.buttonsWithoutLabel > 1 ? "s" : ""} without accessible label`, description: "Buttons need visible text or an aria-label so screen reader users know their purpose.", impact: "high" });
+    deductions += Math.min(d.unlabelledButtons.length * 5, 15);
+    issues.push({ id: "buttons-no-label", title: `${d.unlabelledButtons.length} button${d.unlabelledButtons.length > 1 ? "s" : ""} without accessible label`, description: "Buttons need visible text or an aria-label so screen reader users know their purpose.", impact: "high", details: d.unlabelledButtons });
   }
 
   checks++;
-  if (d.inputsWithoutLabel === 0) { passed++; }
+  if (d.unlabelledInputs.length === 0) { passed++; }
   else {
-    deductions += Math.min(d.inputsWithoutLabel * 5, 15);
-    issues.push({ id: "inputs-no-label", title: `${d.inputsWithoutLabel} input${d.inputsWithoutLabel > 1 ? "s" : ""} without associated label`, description: "Form inputs need a <label for='...'>, aria-label, or aria-labelledby for screen readers.", impact: "high" });
+    deductions += Math.min(d.unlabelledInputs.length * 5, 15);
+    issues.push({ id: "inputs-no-label", title: `${d.unlabelledInputs.length} input${d.unlabelledInputs.length > 1 ? "s" : ""} without associated label`, description: "Form inputs need a <label for='...'>, aria-label, or aria-labelledby for screen readers.", impact: "high", details: d.unlabelledInputs });
   }
 
   checks++;
@@ -529,20 +530,45 @@ export async function POST(req: NextRequest) {
   const imagesWithoutAlt = images.filter(i => !i.hasAlt).length;
   const imagesWithoutDimensions = images.filter(i => !i.hasDimensions).length;
 
+  function attrVal(attrs: string, name: string): string | null {
+    return /=["']([^"']+)["']/i.exec(attrs.match(new RegExp(`\\b${name}=["'][^"']*["']`, "i"))?.[0] ?? "")?.[1] ?? null;
+  }
+
   const allButtons = [...html.matchAll(/<button([^>]*)>([\s\S]*?)<\/button>/gi)];
-  const buttonsWithoutLabel = allButtons.filter(b => {
-    const attrs = b[1]; const content = b[2].replace(/<[^>]*>/g, "").trim();
-    return !content && !/aria-label=/i.test(attrs) && !/aria-labelledby=/i.test(attrs) && !/title=/i.test(attrs);
-  }).length;
+  const unlabelledButtons = allButtons
+    .filter(b => {
+      const attrs = b[1]; const content = b[2].replace(/<[^>]*>/g, "").trim();
+      return !content && !/aria-label=/i.test(attrs) && !/aria-labelledby=/i.test(attrs) && !/title=/i.test(attrs);
+    })
+    .map(b => {
+      const attrs = b[1];
+      const id = attrVal(attrs, "id"); const cls = attrVal(attrs, "class"); const type = attrVal(attrs, "type");
+      const parts: string[] = ["<button"];
+      if (type) parts.push(`type="${type}"`);
+      if (id) parts.push(`id="${id}"`);
+      else if (cls) parts.push(`class="${cls.split(" ").slice(0, 3).join(" ")}"`);
+      return parts.join(" ") + "> — no visible text or aria-label";
+    });
 
   const allInputs = [...html.matchAll(/<input([^>]*)>/gi)];
   const labelledIds = new Set([...html.matchAll(/for=["']([^"']+)["']/gi)].map(m => m[1]));
-  const inputsWithoutLabel = allInputs.filter(inp => {
-    const attrs = inp[1];
-    if (/type=["'](?:hidden|submit|button|reset|image|checkbox|radio)["']/i.test(attrs)) return false;
-    const idM = /\bid=["']([^"']+)["']/i.exec(attrs);
-    return !labelledIds.has(idM?.[1] ?? "") && !/aria-label=/i.test(attrs) && !/aria-labelledby=/i.test(attrs) && !/title=/i.test(attrs);
-  }).length;
+  const unlabelledInputs = allInputs
+    .filter(inp => {
+      const attrs = inp[1];
+      if (/type=["'](?:hidden|submit|button|reset|image|checkbox|radio)["']/i.test(attrs)) return false;
+      const idM = /\bid=["']([^"']+)["']/i.exec(attrs);
+      return !labelledIds.has(idM?.[1] ?? "") && !/aria-label=/i.test(attrs) && !/aria-labelledby=/i.test(attrs) && !/title=/i.test(attrs);
+    })
+    .map(inp => {
+      const attrs = inp[1];
+      const type = attrVal(attrs, "type") ?? "text"; const id = attrVal(attrs, "id");
+      const name = attrVal(attrs, "name"); const placeholder = attrVal(attrs, "placeholder");
+      const parts: string[] = [`<input type="${type}"`];
+      if (id) parts.push(`id="${id}"`);
+      if (name) parts.push(`name="${name}"`);
+      if (placeholder) parts.push(`placeholder="${placeholder.slice(0, 40)}"`);
+      return parts.join(" ") + "> — no associated label";
+    });
 
   // Accessibility extras
   const charsetM = /<meta[^>]+charset=["']?([^"'\s>]+)["']?[^>]*>/i.exec(html);
@@ -609,7 +635,7 @@ export async function POST(req: NextRequest) {
     scripts, stylesheets, images, renderBlockingScripts, inlineScripts, inlineStyles,
     thirdPartyDomains, hasViewport, hasPreconnect, hasPreload,
     lazyImageCount, modernImageCount, legacyImageCount,
-    hasLang, lang, hasCharset, charsetValue, buttonsWithoutLabel, inputsWithoutLabel,
+    hasLang, lang, hasCharset, charsetValue, unlabelledButtons, unlabelledInputs,
     imagesWithoutAlt, imagesWithoutDimensions,
     hasDoctype, mixedContentCount, externalLinksWithoutNoopener, passwordInputOnHttp,
     hasTitle, titleLength, title, hasMetaDescription, metaDescriptionLength, metaDescriptionText,

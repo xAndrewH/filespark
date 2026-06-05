@@ -369,8 +369,8 @@ export default function PageSpeedPage() {
                 { label: "All images have alt text", pass: r.imagesWithoutAlt === 0, detail: r.imagesWithoutAlt > 0 ? `${r.imagesWithoutAlt} missing` : undefined, snippet: r.images.filter(i => !i.hasAlt).map(i => i.src.split("/").pop()).join(", ") || undefined },
                 { label: "Images have width & height", pass: r.imagesWithoutDimensions === 0, detail: r.imagesWithoutDimensions > 0 ? `${r.imagesWithoutDimensions} missing` : undefined },
                 { label: "Character set declared", pass: r.hasCharset, snippet: r.hasCharset ? `charset="${r.charsetValue}"` : 'add <meta charset="UTF-8"> in <head>' },
-                { label: "Buttons have accessible labels", pass: r.buttonsWithoutLabel === 0, detail: r.buttonsWithoutLabel > 0 ? `${r.buttonsWithoutLabel} unlabelled` : undefined, snippet: r.buttonsWithoutLabel > 0 ? "add aria-label or visible text to empty buttons" : undefined },
-                { label: "Form inputs have associated labels", pass: r.inputsWithoutLabel === 0, detail: r.inputsWithoutLabel > 0 ? `${r.inputsWithoutLabel} unlabelled` : undefined, snippet: r.inputsWithoutLabel > 0 ? "add <label for='...'> or aria-label to each input" : undefined },
+                { label: "Buttons have accessible labels", pass: r.unlabelledButtons.length === 0, detail: r.unlabelledButtons.length > 0 ? `${r.unlabelledButtons.length} unlabelled` : undefined, snippet: r.unlabelledButtons.length > 0 ? "add aria-label or visible text to each button" : undefined },
+                { label: "Form inputs have associated labels", pass: r.unlabelledInputs.length === 0, detail: r.unlabelledInputs.length > 0 ? `${r.unlabelledInputs.length} unlabelled` : undefined, snippet: r.unlabelledInputs.length > 0 ? "add <label for='...'> or aria-label to each input" : undefined },
                 { label: "Exactly one H1 heading", pass: r.h1Count === 1, detail: `${r.h1Count} found`, snippet: r.h1Texts.length > 0 ? `"${r.h1Texts[0]}"${r.h1Texts.length > 1 ? ` (+${r.h1Texts.length - 1} more)` : ""}` : r.h1Count === 0 ? "no H1 found" : undefined },
               ]}
             />
