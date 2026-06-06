@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { Type, FileCode, GitCompare, AlignLeft, Shuffle, Link as LucideLink, Hash, Braces, Search, Table2, CaseSensitive, SpellCheck, Code2, Wand2, Paintbrush, Terminal, Pipette, Palette, Blend, Layers, BoxSelect, SquareDashed, Bookmark, Ruler, Maximize2, Clock, Binary, Timer, Key, Calculator, Coins, Hourglass, Percent, BarChart2, ImagePlus, Minimize2, Scissors, PenTool, FileImage, Camera, FilePlus2, ScanLine, QrCode, Globe, BookOpen, Tag, ArrowLeftRight, Image, ZoomIn, FileMinus2, Replace, Barcode, CalendarDays, Receipt, Wifi, MapPin, Play, Heart, ShieldCheck, FileJson2, Share2, Contrast, Fingerprint, Database, FileCode2, Lock, Zap, Network, Bot, Map, FileText, Columns, FlaskConical, MessageSquare, Mail, Smartphone, TrendingUp, Star, DollarSign, Users, Gauge, Server, CheckCheck, Sigma, Languages, MousePointer2, PackageMinus, Activity, Megaphone, LayoutTemplate, Newspaper, TestTube2, BookMarked, Code, Cpu, Radio, Rss, PenLine, ListChecks, Webhook, FileSearch, TableProperties, SlidersHorizontal, FileDiff, Workflow, ClipboardCheck, LineChart, PieChart, AreaChart } from "lucide-react";
+import { Type, FileCode, GitCompare, AlignLeft, Shuffle, Link as LucideLink, Hash, Braces, Search, Table2, CaseSensitive, SpellCheck, Code2, Wand2, Paintbrush, Terminal, Pipette, Palette, Blend, Layers, BoxSelect, SquareDashed, Bookmark, Ruler, Maximize2, Clock, Binary, Timer, Key, Calculator, Coins, Hourglass, Percent, BarChart2, ImagePlus, Minimize2, Scissors, PenTool, FileImage, Camera, FilePlus2, ScanLine, QrCode, Globe, BookOpen, Tag, ArrowLeftRight, Image, ZoomIn, FileMinus2, Replace, Barcode, CalendarDays, Receipt, Wifi, MapPin, Play, Heart, ShieldCheck, FileJson2, Share2, Contrast, Fingerprint, Database, FileCode2, Lock, Zap, Network, Bot, Map, FileText, Columns, FlaskConical, MessageSquare, Mail, Smartphone, TrendingUp, Star, DollarSign, Users, Gauge, Server, CheckCheck, Sigma, Languages, MousePointer2, PackageMinus, Activity, Megaphone, LayoutTemplate, Newspaper, TestTube2, BookMarked, Code, Cpu, Radio, Rss, PenLine, ListChecks, Webhook, FileSearch, TableProperties, SlidersHorizontal, FileDiff, Workflow, ClipboardCheck, LineChart, PieChart, AreaChart, Film } from "lucide-react";
 import { useToolHistory } from "@/hooks/useToolHistory";
 
 type IconComponent = React.ComponentType<{ className?: string }>;
@@ -48,6 +48,9 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/base-converter",    icon: Binary,       title: "Number Base Converter",    description: "Convert numbers between binary, octal, decimal, and hex." },
       { href: "/tools/password",          icon: Key,          title: "Password Generator",       description: "Cryptographically secure passwords with strength scoring." },
       { href: "/tools/code-to-image",     icon: Code,         title: "Code to Image",            description: "Turn a code snippet into a shareable, styled PNG." },
+      { href: "/tools/jwt-decoder",       icon: ShieldCheck,  title: "JWT Decoder",              description: "Decode and inspect JWT headers, payloads, claims, and expiry." },
+      { href: "/tools/image-to-base64",   icon: FileImage,    title: "Image → Base64",           description: "Convert images to Base64 data URIs, or decode them back to files." },
+      { href: "/tools/mock-data",         icon: Database,     title: "Mock Data Generator",      description: "Build a schema and generate fake JSON, CSV, or SQL test data." },
       { href: "/tools/framework-reference", icon: BookOpen,   title: "Framework Reference",      description: "Snippets for Tailwind, Bootstrap, Sass, React, and Next.js." },
     ],
   },
@@ -81,6 +84,7 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/svg-to-png",         icon: FileImage,  title: "SVG to PNG",                  description: "Convert SVG files or pasted code to PNG at up to 4× scale." },
       { href: "/tools/placeholder-image",  icon: ImagePlus,  title: "Placeholder Image Generator", description: "Generate placeholder images at any size with custom colors and text." },
       { href: "/tools/youtube-thumbnail",  icon: Play,       title: "YouTube Thumbnail Generator", description: "Design custom 1280×720 thumbnails with text, gradients, and images." },
+      { href: "/tools/video-to-gif",       icon: Film,       title: "Video to GIF",                description: "Turn a clip of any video into an optimized GIF, right in your browser." },
       { href: "/tools/exif",               icon: Camera,     title: "EXIF Viewer",                 description: "Read camera settings, GPS, and metadata from images." },
       { href: "/tools/qr",                 icon: QrCode,     title: "QR Code Generator",           description: "Generate QR codes from any URL or text. Download as PNG." },
       { href: "/tools/pdf-merge",          icon: FilePlus2,  title: "PDF Merge",                   description: "Combine multiple PDFs into one, reorder pages before merging." },
@@ -95,6 +99,7 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
     tools: [
       { href: "/tools/page-speed",          icon: Gauge,      title: "Page Speed Estimator",    description: "Check load time, TTFB, resource counts, and get performance tips for any URL." },
       { href: "/tools/meta-tag-analyzer",   icon: Tag,        title: "Meta Tag Analyzer",       description: "Enter a URL and see all OG, Twitter Card, and SEO meta tags it serves." },
+      { href: "/tools/og-preview",          icon: Share2,     title: "Social Card Preview",     description: "Enter a URL and see how it renders on Facebook, X, and LinkedIn." },
       { href: "/tools/http-headers",        icon: Activity,   title: "HTTP Header Analyzer",    description: "Fetch a URL and inspect all response headers, categorized and scored." },
       { href: "/tools/ssl-checker",         icon: Lock,       title: "SSL Certificate Checker", description: "Enter a domain and see cert expiry, issuer, SANs, and fingerprint." },
       { href: "/tools/dns-lookup",          icon: Server,     title: "DNS Lookup",              description: "Query A, AAAA, CNAME, MX, NS, TXT, and SOA records for any domain." },
@@ -154,7 +159,7 @@ const COMING_SOON: { icon: IconComponent; title: string; description: string }[]
   { icon: Database,        title: "SQL Formatter",                 description: "Format and beautify SQL queries with configurable indentation." },
   { icon: Terminal,        title: ".ENV Formatter",                description: "Sort, deduplicate, and convert .env files to JSON or YAML." },
   // Developer — Security & Network
-  { icon: ShieldCheck,     title: "JWT Decoder",                   description: "Decode and inspect JWT headers, payloads, and expiry at a glance." },
+  // JWT Decoder is now live at /tools/jwt-decoder
   { icon: Fingerprint,     title: "UUID / ULID Generator",         description: "Generate cryptographically random UUIDs and ULIDs in bulk." },
   // DNS Lookup is now live at /tools/dns-lookup
   { icon: Network,         title: "IP Subnet Calculator",          description: "CIDR notation → usable hosts, broadcast address, and IP range." },
