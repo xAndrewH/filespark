@@ -3,6 +3,22 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | FileSpark",
+  description:
+    "FileSpark never stores your files. All conversions happen in your browser or in-memory on our servers. No cookies, no tracking, no personal data collected.",
+  alternates: { canonical: "/privacy" },
+  openGraph: {
+    title: "Privacy Policy | FileSpark",
+    description:
+      "FileSpark never stores your files. All conversions happen in your browser or in-memory on our servers. No cookies, no tracking, no personal data collected.",
+    url: "/privacy",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Privacy Policy | FileSpark",
+    description:
+      "FileSpark never stores your files. All conversions happen in your browser or in-memory on our servers. No cookies, no tracking, no personal data collected.",
+  },
 };
 
 export default function PrivacyPage() {

@@ -11,11 +11,21 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
 export const metadata: Metadata = {
   title: "FileSpark — File Converter & Browser Tools",
   description:
-    "Convert and compress 80+ file formats. Use 60+ free browser tools for developers and marketers. No account, no installs, nothing stored.",
+    "Convert and compress 80+ file formats. Use 85+ free browser tools for developers, designers, and marketers. No account, no installs, nothing stored.",
   metadataBase: new URL("https://filespark.app"),
   openGraph: {
     siteName: "FileSpark",
+    title: "FileSpark — File Converter & Browser Tools",
+    description:
+      "Convert and compress 80+ file formats. Use 85+ free browser tools for developers, designers, and marketers. No account, no installs, nothing stored.",
     url: "https://filespark.app",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "FileSpark — File Converter & Browser Tools",
+    description:
+      "Convert and compress 80+ file formats. Use 85+ free browser tools for developers, designers, and marketers. No account, no installs, nothing stored.",
   },
 };
 

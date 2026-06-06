@@ -3,6 +3,22 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Terms of Use | FileSpark",
+  description:
+    "Read FileSpark's terms of use. Free to use for personal and commercial purposes. You retain full ownership of all files you convert.",
+  alternates: { canonical: "/terms" },
+  openGraph: {
+    title: "Terms of Use | FileSpark",
+    description:
+      "Read FileSpark's terms of use. Free to use for personal and commercial purposes. You retain full ownership of all files you convert.",
+    url: "/terms",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Terms of Use | FileSpark",
+    description:
+      "Read FileSpark's terms of use. Free to use for personal and commercial purposes. You retain full ownership of all files you convert.",
+  },
 };
 
 export default function TermsPage() {

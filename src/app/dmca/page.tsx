@@ -3,6 +3,22 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "DMCA Policy | FileSpark",
+  description:
+    "FileSpark's DMCA policy. We respect intellectual property rights and respond promptly to valid copyright takedown notices.",
+  alternates: { canonical: "/dmca" },
+  openGraph: {
+    title: "DMCA Policy | FileSpark",
+    description:
+      "FileSpark's DMCA policy. We respect intellectual property rights and respond promptly to valid copyright takedown notices.",
+    url: "/dmca",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "DMCA Policy | FileSpark",
+    description:
+      "FileSpark's DMCA policy. We respect intellectual property rights and respond promptly to valid copyright takedown notices.",
+  },
 };
 
 export default function DmcaPage() {

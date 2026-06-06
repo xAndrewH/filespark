@@ -493,7 +493,7 @@ export default function HomePage() {
 
           <p className="text-slate-400 text-xl leading-relaxed mb-5 max-w-2xl mx-auto">
             Convert and compress <span className="text-white font-semibold">80+ file formats</span> and access{" "}
-            <span className="text-white font-semibold">60+ free browser tools</span>. No upload, no account, nothing stored.
+            <span className="text-white font-semibold">85+ free browser tools</span>. No upload, no account, nothing stored.
           </p>
 
           <div className="flex items-center justify-center gap-2 text-slate-500 text-sm mb-2">
@@ -791,7 +791,7 @@ export default function HomePage() {
               <div>
                 <p className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-2">Browser Tools</p>
                 <h2 className="text-4xl font-black text-white leading-tight">
-                  60+ tools.<br />
+                  85+ tools.<br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-pink-400">Zero installs.</span>
                 </h2>
                 <p className="text-slate-500 text-sm mt-3 max-w-sm">Every tool runs entirely in your browser. No sign-up, no uploads, no waiting.</p>
@@ -881,7 +881,7 @@ export default function HomePage() {
             <div className="mt-10 text-center">
               <Link href="/tools"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition-colors shadow-lg shadow-blue-500/20">
-                Browse all 60+ tools
+                Browse all 85+ tools
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
               </Link>
             </div>
@@ -913,7 +913,7 @@ export default function HomePage() {
                 {/* Feature grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-auto">
                   {[
-                    { icon: "⚡", label: "Browser-powered", desc: "All 60+ tools run 100% client-side" },
+                    { icon: "⚡", label: "Browser-powered", desc: "All 85+ tools run 100% client-side" },
                     { icon: "🗑️", label: "Auto-deleted", desc: "Server files wiped immediately after conversion" },
                     { icon: "🔑", label: "Zero accounts", desc: "No login, no email, no sign-up ever" },
                     { icon: "📜", label: "Local history", desc: "Conversion history stays on your device only" },
