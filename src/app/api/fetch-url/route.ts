@@ -30,9 +30,14 @@ export async function POST(req: NextRequest) {
     upstream = await fetch(url, {
       headers: { "User-Agent": "FileSpark/1.0 (file converter)" },
       redirect: "follow",
+      signal: AbortSignal.timeout(15_000),
     });
-  } catch {
-    return new NextResponse("Failed to fetch URL", { status: 502 });
+  } catch (e) {
+    const timedOut = e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError");
+    return new NextResponse(
+      timedOut ? "Timed out — the site took too long to respond (15s limit)" : "Failed to fetch URL",
+      { status: timedOut ? 504 : 502 }
+    );
   }
 
   if (!upstream.ok) {

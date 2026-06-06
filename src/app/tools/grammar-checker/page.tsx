@@ -33,7 +33,24 @@ export default function GrammarCheckerPage() {
   const [checked, setChecked] = useState(false);
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearAll = useCallback(() => {
+    setText("");
+    setMatches([]);
+    setChecked(false);
+    setActiveIdx(null);
+    setError("");
+  }, []);
+
+  const copyText = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch { /* clipboard unavailable */ }
+  }, [text]);
 
   const check = useCallback(async (t?: string, lang?: string) => {
     const src = t ?? text;
@@ -174,6 +191,18 @@ export default function GrammarCheckerPage() {
                 {loading && <span className="text-slate-500 text-xs animate-pulse">Checking…</span>}
               </div>
               <div className="flex items-center gap-2">
+                {text && (
+                  <button onClick={copyText}
+                    className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-lg transition-colors border border-slate-700/60">
+                    {copied ? "Copied" : "Copy"}
+                  </button>
+                )}
+                {text && (
+                  <button onClick={clearAll}
+                    className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-lg transition-colors border border-slate-700/60">
+                    Clear
+                  </button>
+                )}
                 {fixableCount > 0 && (
                   <button onClick={fixAll}
                     className="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-sm font-semibold rounded-lg transition-colors">

@@ -317,7 +317,7 @@ function ToolsPageInner() {
               </svg>
             </button>
           ) : (
-            <kbd className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 text-xs bg-slate-800/80 px-1.5 py-0.5 rounded border border-slate-700 font-mono pointer-events-none">⌘K</kbd>
+            <kbd className="hidden sm:block absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 text-xs bg-slate-800/80 px-1.5 py-0.5 rounded border border-slate-700 font-mono pointer-events-none">⌘K</kbd>
           )}
         </div>
 

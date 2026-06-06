@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 
 type DiffLine = { type: "same" | "added" | "removed"; text: string; leftNum?: number; rightNum?: number };
@@ -120,11 +120,23 @@ export default function DiffPage() {
   const [left, setLeft] = useState("");
   const [right, setRight] = useState("");
   const [viewMode, setViewMode] = useState<"split" | "inline">("split");
+  const [copied, setCopied] = useState(false);
 
   const lines = useMemo(() => (left || right) ? diff(left, right) : [], [left, right]);
   const added = lines.filter(l => l.type === "added").length;
   const removed = lines.filter(l => l.type === "removed").length;
   const splitRows = useMemo(() => buildSplitRows(lines), [lines]);
+
+  const copyDiff = useCallback(async () => {
+    const patch = lines
+      .map(l => (l.type === "added" ? "+ " : l.type === "removed" ? "- " : "  ") + l.text)
+      .join("\n");
+    try {
+      await navigator.clipboard.writeText(patch);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch { /* clipboard unavailable */ }
+  }, [lines]);
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -169,6 +181,12 @@ export default function DiffPage() {
               )}
               {added === 0 && removed === 0 && <span className="text-slate-400 text-xs">No differences found</span>}
               <div className="ml-auto flex gap-1">
+                {(added > 0 || removed > 0) && (
+                  <button onClick={copyDiff}
+                    className="px-3 py-1 rounded-lg text-xs bg-slate-800 text-slate-400 hover:text-white transition-colors">
+                    {copied ? "Copied" : "Copy diff"}
+                  </button>
+                )}
                 {(["split", "inline"] as const).map(m => (
                   <button key={m} onClick={() => setViewMode(m)}
                     className={`px-3 py-1 rounded-lg text-xs capitalize transition-colors ${viewMode === m ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-400 hover:text-white"}`}>

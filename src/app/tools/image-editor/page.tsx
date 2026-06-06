@@ -215,6 +215,19 @@ export default function ImageEditorPage() {
     setCanUndo(h.length > 1);
   }, []);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) return;
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z" && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [undo]);
+
   const setEdits = useCallback((upd: Edits | ((e: Edits) => Edits)) => {
     pushSnap();
     setEditsRaw(upd);
@@ -859,7 +872,7 @@ export default function ImageEditorPage() {
               {/* Action row */}
               <div className="flex gap-2">
                 <button onClick={undo} disabled={!canUndo}
-                  title="Undo"
+                  title="Undo (Ctrl+Z)"
                   className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm rounded-xl disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
