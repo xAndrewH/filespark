@@ -32,6 +32,9 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/python-beautifier",icon: Terminal,       title: "Python Beautifier",         description: "Format Python code with PEP 8 compliant 4-space indentation." },
       { href: "/tools/css-minifier",     icon: PackageMinus,   title: "CSS Minifier",              description: "Strip whitespace and comments from CSS to reduce file size." },
       { href: "/tools/js-minifier",      icon: Minimize2,      title: "JS Minifier",               description: "Minify JavaScript and TypeScript for production builds." },
+      { href: "/tools/find-replace",     icon: Replace,        title: "Find & Replace",            description: "Find and replace text with plain-text or regex patterns." },
+      { href: "/tools/robots-generator", icon: Bot,            title: "Robots.txt Generator",      description: "Build allow/disallow rules and preview your robots.txt file." },
+      { href: "/tools/html-to-markdown", icon: FileText,       title: "HTML → Markdown",           description: "Convert pasted HTML into clean Markdown." },
     ],
   },
   {
@@ -50,6 +53,8 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/css-grid",         icon: LayoutTemplate, title: "CSS Grid Builder",         description: "Visual grid builder — set rows, columns, and gaps, then copy the CSS." },
       { href: "/tools/css-animation",    icon: Layers,         title: "CSS Animation Builder",    description: "Build keyframe animations visually and export the CSS." },
       { href: "/tools/landing-page-template", icon: Newspaper, title: "Landing Page Checklist",  description: "45-item checklist to audit your landing page against conversion best practices." },
+      { href: "/tools/code-to-image",     icon: Code2,        title: "Code to Image",             description: "Turn a code snippet into a shareable, styled PNG." },
+      { href: "/tools/youtube-thumbnail", icon: Play,         title: "YouTube Thumbnail Generator", description: "Design custom 1280×720 thumbnails with text, gradients, and images." },
     ],
   },
   {
@@ -71,6 +76,9 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/age-calculator",          icon: CalendarDays,   title: "Age Calculator",           description: "Calculate exact age in years, months, and days from a birthdate." },
       { href: "/tools/sales-tax",               icon: Receipt,        title: "Sales Tax Calculator",     description: "Calculate tax amount and total price for any rate." },
       { href: "/tools/conversion-rate",         icon: Percent,        title: "Conversion Rate Calculator", description: "Calculate conversion rates, revenue impact, and A/B test significance." },
+      { href: "/tools/roas-calculator",         icon: TrendingUp,     title: "ROAS Calculator",            description: "Enter ad spend and revenue to calculate return on ad spend." },
+      { href: "/tools/roi-calculator",          icon: DollarSign,     title: "ROI Calculator",             description: "Calculate ROI, net profit, and compound growth over time." },
+      { href: "/tools/cpm-calculator",          icon: BarChart2,      title: "CPM / CPC / CTR Calculator", description: "Enter any two ad metrics to instantly calculate the third." },
     ],
   },
   {
@@ -88,6 +96,9 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/dns-lookup",          icon: Server,    title: "DNS Lookup",              description: "Query A, AAAA, CNAME, MX, NS, TXT, and SOA records for any domain." },
       { href: "/tools/page-speed",          icon: Gauge,     title: "Page Speed Estimator",    description: "Check load time, TTFB, resource counts, and get performance tips for any URL." },
       { href: "/tools/regex-cheatsheet",    icon: FileSearch, title: "Regex Cheat Sheet",      description: "Searchable reference for regex syntax — anchors, quantifiers, groups, and common patterns." },
+      { href: "/tools/ip-lookup",            icon: MapPin,     title: "IP Address Lookup",      description: "Look up geolocation and network details for any IP address." },
+      { href: "/tools/http-headers",         icon: Activity,   title: "HTTP Header Analyzer",   description: "Fetch a URL and inspect all response headers, categorized and scored." },
+      { href: "/tools/meta-tag-analyzer",    icon: Globe,      title: "Meta Tag Analyzer",      description: "Enter a URL and see all OG, Twitter Card, and SEO meta tags it serves." },
     ],
   },
   {
@@ -106,6 +117,18 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/qr",                 icon: QrCode,     title: "QR Code Generator",      description: "Generate QR codes from any URL or text. Download as PNG." },
       { href: "/tools/pdf-pages",          icon: FileMinus2, title: "Reorder / Delete PDF Pages", description: "Drag to reorder or remove pages from a PDF before saving." },
       { href: "/tools/placeholder-image",  icon: ImagePlus,  title: "Placeholder Image Generator", description: "Generate placeholder images at any size with custom colors and text." },
+      { href: "/tools/upscale-image",      icon: ZoomIn,     title: "Upscale Image",               description: "Upscale images up to 4× resolution using bilinear or nearest-neighbor." },
+    ],
+  },
+  {
+    id: "marketing",
+    name: "Marketing",
+    icon: TrendingUp,
+    tools: [
+      { href: "/tools/email-preview",       icon: Mail,       title: "Email Subject Previewer",     description: "Preview how your subject line looks in Gmail and Apple Mail." },
+      { href: "/tools/traffic-attribution", icon: PieChart,   title: "Traffic Source Attribution",  description: "Enter channel data and compare last-touch, first-touch, and linear attribution." },
+      { href: "/tools/schema-generator",    icon: ListChecks, title: "Schema Markup Generator",     description: "Choose a Schema.org type and get the JSON-LD snippet for your site." },
+      { href: "/tools/invoice-generator",   icon: PenLine,    title: "Invoice Generator",           description: "Fill in line items and preview a clean, printable invoice." },
     ],
   },
 ];
@@ -128,9 +151,9 @@ const COMING_SOON: { icon: IconComponent; title: string; description: string }[]
   { icon: Fingerprint,     title: "UUID / ULID Generator",         description: "Generate cryptographically random UUIDs and ULIDs in bulk." },
   // DNS Lookup is now live at /tools/dns-lookup
   { icon: Network,         title: "IP Subnet Calculator",          description: "CIDR notation → usable hosts, broadcast address, and IP range." },
-  { icon: MapPin,          title: "IP Address Lookup",             description: "Look up geolocation and network details for any IP." },
+  // IP Address Lookup is now live at /tools/ip-lookup
   { icon: Webhook,         title: "Webhook Tester",                description: "Generate a unique endpoint and inspect incoming POST payloads live." },
-  { icon: Activity,        title: "HTTP Header Analyzer",          description: "Paste or fetch a URL and inspect all response headers." },
+  // HTTP Header Analyzer is now live at /tools/http-headers
   // Developer — CSS & Frontend
   // CSS Minifier is now live at /tools/css-minifier
   // JS Minifier is now live at /tools/js-minifier
@@ -138,45 +161,45 @@ const COMING_SOON: { icon: IconComponent; title: string; description: string }[]
   { icon: SlidersHorizontal, title: "Tailwind Class Sorter",       description: "Sort Tailwind class strings per Prettier Tailwind plugin order." },
   // CSS Animation Builder is now live at /tools/css-animation
   // Developer — Coding Utilities
-  { icon: Bot,             title: "Robots.txt Generator",          description: "Build allow/disallow rules and preview your robots.txt file." },
-  { icon: FileText,        title: "HTML → Markdown",               description: "Convert pasted HTML into clean Markdown." },
+  // Robots.txt Generator is now live at /tools/robots-generator
+  // HTML → Markdown is now live at /tools/html-to-markdown
   { icon: Sigma,           title: "Chmod Calculator",              description: "Click a permissions grid and get the octal code and symbolic notation." },
   { icon: Cpu,             title: "Cron Humanizer",                description: "Paste a cron expression and get a plain-English description." },
-  { icon: Code2,           title: "Code to Image",                 description: "Turn a code snippet into a shareable, styled PNG." },
+  // Code to Image is now live at /tools/code-to-image
   // Placeholder Image Generator is now live at /tools/placeholder-image
   { icon: Workflow,        title: "ASCII Art Generator",           description: "Convert text or images into ASCII art." },
   { icon: Columns,         title: "Markdown Table Generator",      description: "Build Markdown tables visually and copy the formatted output." },
   // Images & Media
-  { icon: ZoomIn,          title: "Upscale Image",                 description: "AI-powered image upscaling up to 4× resolution." },
+  // Upscale Image is now live at /tools/upscale-image
   // Reorder / Delete PDF Pages is now live at /tools/pdf-pages
   { icon: Barcode,         title: "Barcode Generator",             description: "Generate Code 128, QR, EAN, and UPC barcodes." },
-  { icon: Play,            title: "YouTube Thumbnail Downloader",  description: "Download thumbnails from any YouTube video in all resolutions." },
-  { icon: Replace,         title: "Find & Replace",                description: "Find and replace text across one or multiple files." },
+  // YouTube Thumbnail Generator is now live at /tools/youtube-thumbnail
+  // Find & Replace is now live at /tools/find-replace
   // Marketing — Ad & Campaign Math
-  { icon: TrendingUp,      title: "ROAS Calculator",               description: "Enter ad spend and revenue to calculate return on ad spend." },
-  { icon: BarChart2,       title: "CPM / CPC / CTR Calculator",    description: "Enter any two of spend, impressions, or clicks to calculate the third." },
+  // ROAS Calculator is now live at /tools/roas-calculator
+  // CPM / CPC / CTR Calculator is now live at /tools/cpm-calculator
   { icon: FlaskConical,    title: "A/B Test Calculator",           description: "Enter visitors and conversions for two variants to check statistical significance." },
-  { icon: DollarSign,      title: "ROI Calculator",                description: "Calculate return on investment, net profit, and payback period." },
+  // ROI Calculator is now live at /tools/roi-calculator
   { icon: Users,           title: "Customer LTV Calculator",       description: "Estimate customer lifetime value from AOV, purchase frequency, and lifespan." },
   { icon: LineChart,       title: "Break-Even Calculator",         description: "Fixed costs, variable costs, and price → break-even units and revenue." },
   // Marketing — Content & Copy
   { icon: MessageSquare,   title: "Social Media Character Counter", description: "Live character counter with per-platform limits for X, LinkedIn, Instagram, and more." },
-  { icon: Mail,            title: "Email Subject Line Previewer",  description: "Preview how your subject and preheader look in Gmail and Apple Mail." },
+  // Email Subject Line Previewer is now live at /tools/email-preview
   { icon: BookOpen,        title: "Readability Score Checker",     description: "Paste text and get Flesch-Kincaid grade level and reading ease score." },
   { icon: Hash,            title: "Keyword Density Analyzer",      description: "Paste content and see top keywords with their frequency and density percentage." },
   { icon: Megaphone,       title: "Headline Analyzer",             description: "Score your headline on clarity, sentiment, power words, and length." },
   { icon: Mail,            title: "Email Signature Generator",     description: "Fill in your details and generate a formatted HTML email signature." },
   { icon: Star,            title: "NPS Calculator",                description: "Enter promoters, passives, and detractors to calculate your Net Promoter Score." },
-  { icon: PenLine,         title: "Invoice Generator",             description: "Fill in line items and download a clean, printable PDF invoice." },
+  // Invoice Generator is now live at /tools/invoice-generator
   // Marketing — SEO & Web
-  { icon: Globe,           title: "Meta Tag Analyzer",             description: "Enter a URL and see all OG, Twitter Card, and SEO meta tags it serves." },
-  { icon: ListChecks,      title: "Schema Markup Generator",       description: "Choose a type (Article, FAQ, Product) and get the JSON-LD snippet." },
+  // Meta Tag Analyzer is now live at /tools/meta-tag-analyzer
+  // Schema Markup Generator is now live at /tools/schema-generator
   { icon: Smartphone,      title: "Social Image Resizer",          description: "Upload one image and export crops for OG, Twitter, LinkedIn, and Instagram." },
   // Page Speed Estimator is now live at /tools/page-speed
   { icon: Rss,             title: "RSS Feed Reader",               description: "Paste an RSS or Atom feed URL and browse entries in a clean reader." },
   { icon: Newspaper,       title: "Press Release Formatter",       description: "Paste your press release and format it to AP Style with boilerplate." },
   { icon: Languages,       title: "Hreflang Tag Generator",        description: "Specify language/region pairs and get the full set of hreflang link tags." },
-  { icon: PieChart,        title: "Traffic Source Attribution",    description: "Enter channel traffic numbers and see your acquisition mix as a chart." },
+  // Traffic Source Attribution is now live at /tools/traffic-attribution
   { icon: TestTube2,       title: "UTM Campaign Planner",          description: "Plan and document multiple campaign UTM structures in a shareable sheet." },
   { icon: Radio,           title: "Podcast Show Notes Generator",  description: "Paste a transcript excerpt and generate formatted show notes." },
   { icon: BookMarked,      title: "Content Calendar Template",     description: "Generate a weekly/monthly content calendar you can export to CSV." },
