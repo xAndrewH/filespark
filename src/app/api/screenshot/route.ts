@@ -25,6 +25,12 @@ async function autoScroll(page: Page) {
   });
   // Let lazy-loaded images/sections settle after the walk-down.
   await new Promise((resolve) => setTimeout(resolve, 450));
+
+  // Make sure we're really back at the top before measuring/capturing —
+  // some pages animate the scroll-to-top or have scroll-snap that delays it.
+  await page.waitForFunction(() => window.scrollY === 0, { timeout: 2_000 }).catch(async () => {
+    await page.evaluate(() => window.scrollTo(0, 0));
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -79,7 +85,23 @@ export async function POST(req: NextRequest) {
     }
 
     await autoScroll(page);
-    const buf = await page.screenshot({ type: "jpeg", quality: 72, fullPage: true });
+
+    // Resize the viewport to the full content height ourselves rather than
+    // relying on `fullPage: true` — Puppeteer's internal resize-and-capture
+    // triggers a reflow that scroll-aware sites (sticky headers, parallax,
+    // lazy-load observers) react to using stale scroll state, which can
+    // corrupt or shift the top of the captured page.
+    const fullHeight = await page.evaluate(
+      () => Math.ceil(Math.max(document.documentElement.scrollHeight, document.body.scrollHeight))
+    );
+    if (fullHeight > height) {
+      await page.setViewport({ width, height: Math.min(fullHeight, 16_000) });
+      // Let the page settle into its new layout before capturing.
+      await new Promise((resolve) => setTimeout(resolve, 350));
+      await page.evaluate(() => window.scrollTo(0, 0));
+    }
+
+    const buf = await page.screenshot({ type: "jpeg", quality: 72 });
 
     return NextResponse.json({
       image: `data:image/jpeg;base64,${Buffer.from(buf).toString("base64")}`,
