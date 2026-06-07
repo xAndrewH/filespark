@@ -41,7 +41,7 @@ function DeviceCard({ device, shot, loading }: { device: Device; shot?: Shot; lo
       </div>
       <div className="flex items-center justify-center bg-slate-950/60 p-3">
         <div
-          className="relative bg-white rounded-md overflow-hidden shadow-lg shadow-black/30 flex items-center justify-center"
+          className="relative bg-white rounded-md shadow-lg shadow-black/30 flex items-center justify-center overflow-y-auto overflow-x-hidden"
           style={{ width: displayWidth, height: displayHeight }}
         >
           {loading && (
@@ -60,9 +60,9 @@ function DeviceCard({ device, shot, loading }: { device: Device; shot?: Shot; lo
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={shot.image}
-              alt={`${device.name} screenshot`}
-              className="w-full h-full object-cover object-top"
-              style={{ width: displayWidth, height: displayHeight }}
+              alt={`${device.name} full-page screenshot`}
+              className="w-full h-auto block"
+              style={{ width: displayWidth }}
             />
           )}
           {!loading && !shot && (
@@ -70,6 +70,9 @@ function DeviceCard({ device, shot, loading }: { device: Device; shot?: Shot; lo
           )}
         </div>
       </div>
+      {!loading && shot?.image && (
+        <p className="px-3 -mt-1 pb-1 text-slate-600 text-[10px]">Scroll inside the frame to see the full page</p>
+      )}
       {shot?.image && (
         <div className="px-3 pb-3 -mt-1 flex justify-end">
           <a

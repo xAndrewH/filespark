@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
             waitUntil: "networkidle2",
             timeout: 25_000,
           });
-          const buf = await page.screenshot({ type: "jpeg", quality: 72 });
+          const buf = await page.screenshot({ type: "jpeg", quality: 72, fullPage: true });
           return {
             id: size.id,
             image: `data:image/jpeg;base64,${Buffer.from(buf).toString("base64")}`,
