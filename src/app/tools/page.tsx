@@ -97,6 +97,7 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
     name: "SEO & Web",
     icon: Globe,
     tools: [
+      { href: "/tools/responsive-viewer",   icon: Smartphone, title: "Responsive Design Viewer", description: "Preview a page at multiple device sizes side by side, right in your browser." },
       { href: "/tools/page-speed",          icon: Gauge,      title: "Page Speed Estimator",    description: "Check load time, TTFB, resource counts, and get performance tips for any URL." },
       { href: "/tools/meta-tag-analyzer",   icon: Tag,        title: "Meta Tag Analyzer",       description: "Enter a URL and see all OG, Twitter Card, and SEO meta tags it serves." },
       { href: "/tools/og-preview",          icon: Share2,     title: "Social Card Preview",     description: "Enter a URL and see how it renders on Facebook, X, and LinkedIn." },
