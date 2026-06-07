@@ -14,6 +14,12 @@ const nextConfig: NextConfig = {
     "@sparticuz/chromium",
   ],
 
+  // Make sure the headless-chromium binary is included in the
+  // /api/screenshot serverless function bundle (it lives outside src/).
+  outputFileTracingIncludes: {
+    "/api/screenshot": ["./node_modules/@sparticuz/chromium/bin/**"],
+  },
+
   turbopack: {
     resolveAlias: {
       // Stub Node.js built-ins for browser bundles.

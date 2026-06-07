@@ -49,9 +49,9 @@ export async function POST(req: NextRequest) {
   let browser: Browser | null = null;
   try {
     browser = await puppeteer.launch({
-      args: chromium.args,
+      args: await puppeteer.defaultArgs({ args: chromium.args, headless: "shell" }),
       executablePath: await chromium.executablePath(),
-      headless: true,
+      headless: "shell",
     });
 
     const results = await Promise.all(
@@ -79,7 +79,8 @@ export async function POST(req: NextRequest) {
     );
 
     return NextResponse.json({ results });
-  } catch {
+  } catch (e) {
+    console.error("screenshot: failed to launch renderer", e);
     return NextResponse.json({ error: "Failed to start the renderer" }, { status: 502 });
   } finally {
     if (browser) await browser.close().catch(() => {});
