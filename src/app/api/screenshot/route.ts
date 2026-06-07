@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import puppeteer, { type Page } from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
+import sharp from "sharp";
 
 async function autoScroll(page: Page) {
   const needsScroll = await page.evaluate(() => document.body.scrollHeight > window.innerHeight + 200);
@@ -31,6 +32,78 @@ async function autoScroll(page: Page) {
   await page.waitForFunction(() => window.scrollY === 0, { timeout: 2_000 }).catch(async () => {
     await page.evaluate(() => window.scrollTo(0, 0));
   });
+}
+
+// Hide fixed/sticky-positioned elements (headers, cookie banners, chat
+// widgets) so they don't get baked into every tile when we scroll-and-capture
+// — otherwise they'd appear duplicated down the length of the stitched image.
+async function hideFixedElements(page: Page) {
+  await page.evaluate(() => {
+    const els = Array.from(document.querySelectorAll<HTMLElement>("body *"));
+    for (const el of els) {
+      const pos = getComputedStyle(el).position;
+      if (pos === "fixed" || pos === "sticky") {
+        el.dataset.ffHiddenPrevVisibility = el.style.visibility;
+        el.style.visibility = "hidden";
+      }
+    }
+  });
+}
+
+async function restoreFixedElements(page: Page) {
+  await page.evaluate(() => {
+    const els = Array.from(document.querySelectorAll<HTMLElement>("[data-ff-hidden-prev-visibility]"));
+    for (const el of els) {
+      el.style.visibility = el.dataset.ffHiddenPrevVisibility ?? "";
+      delete el.dataset.ffHiddenPrevVisibility;
+    }
+  });
+}
+
+// Capture the page in viewport-sized tiles and stitch them into one image.
+// This sidesteps two pitfalls of large single-shot captures: Chromium's
+// renderer reflows (and scroll-aware scripts misbehave) when the viewport is
+// resized to the full content height, and software rasterizers can silently
+// truncate or corrupt canvases beyond a certain pixel height.
+async function captureFullPage(page: Page, width: number, viewportHeight: number): Promise<Buffer> {
+  const fullHeight = await page.evaluate(
+    () => Math.ceil(Math.max(document.documentElement.scrollHeight, document.body.scrollHeight))
+  );
+
+  if (fullHeight <= viewportHeight + 50) {
+    return Buffer.from(await page.screenshot({ type: "png" }));
+  }
+
+  const targetHeight = Math.min(fullHeight, 20_000);
+
+  const positions: number[] = [];
+  for (let y = 0; y < targetHeight; y += viewportHeight) {
+    positions.push(Math.min(y, targetHeight - viewportHeight));
+  }
+  if (positions[positions.length - 1] !== targetHeight - viewportHeight) {
+    positions.push(targetHeight - viewportHeight);
+  }
+
+  const composites: { input: Buffer; top: number; left: number }[] = [];
+  for (let i = 0; i < positions.length; i++) {
+    const top = positions[i];
+    await page.evaluate((scrollY) => window.scrollTo(0, scrollY), top);
+    await new Promise((resolve) => setTimeout(resolve, 140));
+    // Keep fixed/sticky elements (headers, banners) visible in the very first
+    // tile — that's where they belong — but hide them for the rest so they
+    // don't get baked into every subsequent tile as we scroll down.
+    if (i === 1) await hideFixedElements(page);
+    const buf = Buffer.from(await page.screenshot({ type: "png" }));
+    composites.push({ input: buf, top, left: 0 });
+  }
+  if (positions.length > 1) await restoreFixedElements(page);
+
+  return await sharp({
+    create: { width, height: targetHeight, channels: 3, background: { r: 255, g: 255, b: 255 } },
+  })
+    .composite(composites)
+    .jpeg({ quality: 72 })
+    .toBuffer();
 }
 
 export async function POST(req: NextRequest) {
@@ -85,26 +158,10 @@ export async function POST(req: NextRequest) {
     }
 
     await autoScroll(page);
-
-    // Resize the viewport to the full content height ourselves rather than
-    // relying on `fullPage: true` — Puppeteer's internal resize-and-capture
-    // triggers a reflow that scroll-aware sites (sticky headers, parallax,
-    // lazy-load observers) react to using stale scroll state, which can
-    // corrupt or shift the top of the captured page.
-    const fullHeight = await page.evaluate(
-      () => Math.ceil(Math.max(document.documentElement.scrollHeight, document.body.scrollHeight))
-    );
-    if (fullHeight > height) {
-      await page.setViewport({ width, height: Math.min(fullHeight, 16_000) });
-      // Let the page settle into its new layout before capturing.
-      await new Promise((resolve) => setTimeout(resolve, 350));
-      await page.evaluate(() => window.scrollTo(0, 0));
-    }
-
-    const buf = await page.screenshot({ type: "jpeg", quality: 72 });
+    const buf = await captureFullPage(page, width, height);
 
     return NextResponse.json({
-      image: `data:image/jpeg;base64,${Buffer.from(buf).toString("base64")}`,
+      image: `data:image/jpeg;base64,${buf.toString("base64")}`,
     });
   } catch (e) {
     console.error("screenshot: failed to capture page", e);
