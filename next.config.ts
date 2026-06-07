@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
     "archiver",
     "unzipper",
     "tar",
+    "puppeteer-core",
+    "@sparticuz/chromium",
   ],
 
   turbopack: {

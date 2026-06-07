@@ -2,14 +2,13 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, Smartphone, Plus, X, RotateCw, ExternalLink, AlertTriangle } from "lucide-react";
+import { ChevronLeft, Smartphone, Plus, X, RotateCw, ExternalLink, Camera, Download } from "lucide-react";
 
 type Device = {
   id: string;
   name: string;
   width: number;
   height: number;
-  custom?: boolean;
 };
 
 const PRESETS: Device[] = [
@@ -23,10 +22,11 @@ const PRESETS: Device[] = [
 ];
 
 const DEFAULT_SELECTED = ["iphone-14-pro", "ipad-mini", "laptop"];
-
 const CARD_WIDTH = 280;
 
-function DeviceFrame({ device, url, reloadKey }: { device: Device; url: string; reloadKey: number }) {
+type Shot = { image?: string; error?: string };
+
+function DeviceCard({ device, shot, loading }: { device: Device; shot?: Shot; loading: boolean }) {
   const scale = Math.min(1, CARD_WIDTH / device.width);
   const displayWidth = device.width * scale;
   const displayHeight = device.height * scale;
@@ -41,23 +41,48 @@ function DeviceFrame({ device, url, reloadKey }: { device: Device; url: string; 
       </div>
       <div className="flex items-center justify-center bg-slate-950/60 p-3">
         <div
-          className="relative bg-white rounded-md overflow-hidden shadow-lg shadow-black/30"
+          className="relative bg-white rounded-md overflow-hidden shadow-lg shadow-black/30 flex items-center justify-center"
           style={{ width: displayWidth, height: displayHeight }}
         >
-          <iframe
-            key={reloadKey}
-            src={url}
-            title={`${device.name} preview`}
-            style={{
-              width: device.width,
-              height: device.height,
-              transform: `scale(${scale})`,
-              transformOrigin: "top left",
-              border: 0,
-            }}
-          />
+          {loading && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-100 animate-pulse">
+              <Camera className="w-5 h-5 text-slate-400" />
+              <span className="text-slate-400 text-[11px]">Capturing…</span>
+            </div>
+          )}
+          {!loading && shot?.error && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-slate-100 px-3 text-center">
+              <Camera className="w-5 h-5 text-slate-400" />
+              <span className="text-slate-500 text-[11px]">{shot.error}</span>
+            </div>
+          )}
+          {!loading && shot?.image && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={shot.image}
+              alt={`${device.name} screenshot`}
+              className="w-full h-full object-cover object-top"
+              style={{ width: displayWidth, height: displayHeight }}
+            />
+          )}
+          {!loading && !shot && (
+            <span className="text-slate-400 text-[11px]">Not captured yet</span>
+          )}
         </div>
       </div>
+      {shot?.image && (
+        <div className="px-3 pb-3 -mt-1 flex justify-end">
+          <a
+            href={shot.image}
+            download={`${device.name.replace(/\s+/g, "-").toLowerCase()}-${device.width}x${device.height}.jpg`}
+            className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 transition-colors"
+            title="Download screenshot"
+          >
+            <Download className="w-3 h-3" />
+            Save
+          </a>
+        </div>
+      )}
     </div>
   );
 }
@@ -66,11 +91,12 @@ export default function ResponsiveViewerPage() {
   const [input, setInput] = useState("");
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [shots, setShots] = useState<Record<string, Shot>>({});
   const [selected, setSelected] = useState<string[]>(DEFAULT_SELECTED);
   const [customDevices, setCustomDevices] = useState<Device[]>([]);
   const [customWidth, setCustomWidth] = useState("");
   const [customHeight, setCustomHeight] = useState("");
-  const [reloadKey, setReloadKey] = useState(0);
 
   const allDevices = useMemo(() => [...PRESETS, ...customDevices], [customDevices]);
   const activeDevices = useMemo(
@@ -85,18 +111,50 @@ export default function ResponsiveViewerPage() {
     return `https://${trimmed}`;
   };
 
-  const load = () => {
+  const capture = async () => {
     const normalized = normalizeUrl(input);
     if (!normalized) return;
+    let parsed: URL;
     try {
-      new URL(normalized);
+      parsed = new URL(normalized);
     } catch {
       setError("Enter a valid URL");
       return;
     }
+    if (activeDevices.length === 0) {
+      setError("Select at least one device");
+      return;
+    }
+
     setError("");
-    setUrl(normalized);
-    setReloadKey((k) => k + 1);
+    setUrl(parsed.toString());
+    setLoading(true);
+    setShots({});
+
+    try {
+      const res = await fetch("/api/screenshot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: parsed.toString(),
+          sizes: activeDevices.map((d) => ({ id: d.id, width: d.width, height: d.height })),
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setError(json?.error || "Something went wrong");
+      } else {
+        const map: Record<string, Shot> = {};
+        for (const r of json.results as { id: string; image?: string; error?: string }[]) {
+          map[r.id] = { image: r.image, error: r.error };
+        }
+        setShots(map);
+      }
+    } catch {
+      setError("Network error — could not reach the server");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const toggleDevice = (id: string) => {
@@ -108,7 +166,7 @@ export default function ResponsiveViewerPage() {
     const h = parseInt(customHeight, 10);
     if (!w || !h || w < 50 || h < 50 || w > 4000 || h > 4000) return;
     const id = `custom-${Date.now()}`;
-    setCustomDevices((prev) => [...prev, { id, name: `Custom ${w}×${h}`, width: w, height: h, custom: true }]);
+    setCustomDevices((prev) => [...prev, { id, name: `Custom ${w}×${h}`, width: w, height: h }]);
     setSelected((prev) => [...prev, id]);
     setCustomWidth("");
     setCustomHeight("");
@@ -136,7 +194,7 @@ export default function ResponsiveViewerPage() {
             Responsive Design Viewer
           </h1>
           <p className="text-slate-500 text-sm">
-            Preview a page at multiple device sizes side by side, right in your browser.
+            Capture real screenshots of any page at multiple device sizes, side by side.
           </p>
         </div>
 
@@ -147,39 +205,39 @@ export default function ResponsiveViewerPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") load();
+              if (e.key === "Enter") capture();
             }}
             placeholder="example.com or https://example.com/page"
             className="flex-1 bg-slate-800/60 border border-slate-700/50 rounded-lg px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500/60 placeholder:text-slate-600"
           />
           <button
-            onClick={load}
-            disabled={!input.trim()}
-            className="px-5 py-2.5 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
+            onClick={capture}
+            disabled={loading || !input.trim()}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
             type="button"
           >
-            Load
+            {loading ? (
+              <>
+                <RotateCw className="w-4 h-4 animate-spin" />
+                Capturing…
+              </>
+            ) : (
+              <>
+                <Camera className="w-4 h-4" />
+                Capture
+              </>
+            )}
           </button>
           {url && (
-            <>
-              <button
-                onClick={() => setReloadKey((k) => k + 1)}
-                className="px-3 py-2.5 rounded-lg text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors border border-slate-700/60"
-                type="button"
-                title="Reload all previews"
-              >
-                <RotateCw className="w-4 h-4" />
-              </button>
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-3 py-2.5 rounded-lg text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors border border-slate-700/60"
-                title="Open in new tab"
-              >
-                <ExternalLink className="w-4 h-4" />
-              </a>
-            </>
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-2.5 rounded-lg text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors border border-slate-700/60"
+              title="Open in new tab"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </a>
           )}
         </div>
 
@@ -258,36 +316,35 @@ export default function ResponsiveViewerPage() {
           </div>
         </div>
 
-        {!url && (
+        {!url && !loading && (
           <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-8 text-center">
-            <Smartphone className="w-8 h-8 text-slate-700 mx-auto mb-3" />
-            <p className="text-slate-400 text-sm">Enter a URL above to preview it across devices.</p>
+            <Camera className="w-8 h-8 text-slate-700 mx-auto mb-3" />
+            <p className="text-slate-400 text-sm">
+              Enter a URL, pick your devices, and hit Capture to render real screenshots —
+              works for any public site, not just your own.
+            </p>
           </div>
         )}
 
-        {url && activeDevices.length === 0 && (
-          <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-8 text-center">
-            <p className="text-slate-400 text-sm">Select at least one device above to preview.</p>
+        {(url || loading) && activeDevices.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {activeDevices.map((d) => (
+              <DeviceCard key={d.id} device={d} shot={shots[d.id]} loading={loading} />
+            ))}
           </div>
         )}
 
-        {url && activeDevices.length > 0 && (
-          <>
-            <div className="flex items-start gap-2 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-amber-300 text-xs mb-5">
-              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-              <p>
-                Some sites block embedding via <code className="bg-slate-800/60 px-1 py-0.5 rounded">X-Frame-Options</code> or{" "}
-                <code className="bg-slate-800/60 px-1 py-0.5 rounded">Content-Security-Policy</code> headers — those will show
-                blank. This works best with your own sites or pages that allow framing.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {activeDevices.map((d) => (
-                <DeviceFrame key={d.id} device={d} url={url} reloadKey={reloadKey} />
-              ))}
-            </div>
-          </>
+        {url && !loading && activeDevices.length === 0 && (
+          <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-8 text-center">
+            <p className="text-slate-400 text-sm">Select at least one device above, then capture again.</p>
+          </div>
         )}
+
+        <p className="text-slate-600 text-xs mt-6">
+          Screenshots are rendered server-side with a headless browser and discarded immediately after
+          being sent to you — nothing is stored. Capturing several sizes can take up to a minute for
+          slow-loading pages.
+        </p>
       </div>
     </div>
   );
