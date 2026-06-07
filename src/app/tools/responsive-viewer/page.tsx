@@ -94,8 +94,9 @@ export default function ResponsiveViewerPage() {
   const [input, setInput] = useState("");
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState<Set<string>>(new Set());
   const [shots, setShots] = useState<Record<string, Shot>>({});
+  const loading = pending.size > 0;
   const [selected, setSelected] = useState<string[]>(DEFAULT_SELECTED);
   const [customDevices, setCustomDevices] = useState<Device[]>([]);
   const [customWidth, setCustomWidth] = useState("");
@@ -112,6 +113,42 @@ export default function ResponsiveViewerPage() {
     if (!trimmed) return "";
     if (/^https?:\/\//i.test(trimmed)) return trimmed;
     return `https://${trimmed}`;
+  };
+
+  const captureOne = async (targetUrl: string, device: Device): Promise<Shot> => {
+    try {
+      const res = await fetch("/api/screenshot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: targetUrl, width: device.width, height: device.height }),
+      });
+      const json = await res.json();
+      if (!res.ok) return { error: json?.error || "Failed to capture" };
+      return { image: json.image };
+    } catch {
+      return { error: "Network error — could not reach the server" };
+    }
+  };
+
+  // Run captures with limited concurrency so a slow page doesn't pile up
+  // many headless-browser launches at once, and results stream in as they
+  // finish rather than making the user wait for the slowest device.
+  const CONCURRENCY = 2;
+  const runQueue = async (targetUrl: string, devices: Device[]) => {
+    let next = 0;
+    const worker = async () => {
+      while (next < devices.length) {
+        const device = devices[next++];
+        const shot = await captureOne(targetUrl, device);
+        setShots((prev) => ({ ...prev, [device.id]: shot }));
+        setPending((prev) => {
+          const copy = new Set(prev);
+          copy.delete(device.id);
+          return copy;
+        });
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, devices.length) }, worker));
   };
 
   const capture = async () => {
@@ -131,33 +168,10 @@ export default function ResponsiveViewerPage() {
 
     setError("");
     setUrl(parsed.toString());
-    setLoading(true);
     setShots({});
+    setPending(new Set(activeDevices.map((d) => d.id)));
 
-    try {
-      const res = await fetch("/api/screenshot", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          url: parsed.toString(),
-          sizes: activeDevices.map((d) => ({ id: d.id, width: d.width, height: d.height })),
-        }),
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        setError(json?.error || "Something went wrong");
-      } else {
-        const map: Record<string, Shot> = {};
-        for (const r of json.results as { id: string; image?: string; error?: string }[]) {
-          map[r.id] = { image: r.image, error: r.error };
-        }
-        setShots(map);
-      }
-    } catch {
-      setError("Network error — could not reach the server");
-    } finally {
-      setLoading(false);
-    }
+    await runQueue(parsed.toString(), activeDevices);
   };
 
   const toggleDevice = (id: string) => {
@@ -222,7 +236,7 @@ export default function ResponsiveViewerPage() {
             {loading ? (
               <>
                 <RotateCw className="w-4 h-4 animate-spin" />
-                Capturing…
+                Capturing… ({activeDevices.length - pending.size}/{activeDevices.length})
               </>
             ) : (
               <>
@@ -332,7 +346,7 @@ export default function ResponsiveViewerPage() {
         {(url || loading) && activeDevices.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {activeDevices.map((d) => (
-              <DeviceCard key={d.id} device={d} shot={shots[d.id]} loading={loading} />
+              <DeviceCard key={d.id} device={d} shot={shots[d.id]} loading={pending.has(d.id)} />
             ))}
           </div>
         )}
@@ -345,8 +359,8 @@ export default function ResponsiveViewerPage() {
 
         <p className="text-slate-600 text-xs mt-6">
           Screenshots are rendered server-side with a headless browser and discarded immediately after
-          being sent to you — nothing is stored. Capturing several sizes can take up to a minute for
-          slow-loading pages.
+          being sent to you — nothing is stored. Each device is captured independently and results
+          appear as soon as they&apos;re ready, so a slow page won&apos;t hold up the others.
         </p>
       </div>
     </div>
