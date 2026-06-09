@@ -3,6 +3,9 @@ import puppeteer, { type Page } from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
 import sharp from "sharp";
 
+const CACHE_TTL_MS = 60_000;
+const screenshotCache = new Map<string, { image: string; expires: number }>();
+
 async function autoScroll(page: Page) {
   const needsScroll = await page.evaluate(() => document.body.scrollHeight > window.innerHeight + 200);
   if (!needsScroll) return;
@@ -107,6 +110,12 @@ async function captureFullPage(page: Page, width: number, viewportHeight: number
 }
 
 export async function POST(req: NextRequest) {
+  // Evict expired cache entries on each request.
+  const now = Date.now();
+  for (const [key, entry] of screenshotCache) {
+    if (entry.expires <= now) screenshotCache.delete(key);
+  }
+
   let body: { url?: string; width?: number; height?: number };
   try {
     body = await req.json();
@@ -135,6 +144,13 @@ export async function POST(req: NextRequest) {
   const width = Math.min(2200, Math.max(50, Math.round(body.width as number)));
   const height = Math.min(4400, Math.max(50, Math.round(body.height as number)));
 
+  // Return cached result if still fresh.
+  const cacheKey = `${rawUrl}|${width}|${height}`;
+  const cached = screenshotCache.get(cacheKey);
+  if (cached && cached.expires > Date.now()) {
+    return NextResponse.json({ image: cached.image });
+  }
+
   let browser: Awaited<ReturnType<typeof puppeteer.launch>> | null = null;
   try {
     browser = await puppeteer.launch({
@@ -160,9 +176,10 @@ export async function POST(req: NextRequest) {
     await autoScroll(page);
     const buf = await captureFullPage(page, width, height);
 
-    return NextResponse.json({
-      image: `data:image/jpeg;base64,${buf.toString("base64")}`,
-    });
+    const image = `data:image/jpeg;base64,${buf.toString("base64")}`;
+    screenshotCache.set(cacheKey, { image, expires: Date.now() + CACHE_TTL_MS });
+
+    return NextResponse.json({ image });
   } catch (e) {
     console.error("screenshot: failed to capture page", e);
     return NextResponse.json({ error: "Failed to capture the page" }, { status: 502 });

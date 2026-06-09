@@ -1,7 +1,10 @@
 {
   "functions": {
-    "src/app/api/**": {
+    "src/app/api/screenshot/route.ts": {
       "maxDuration": 60
+    },
+    "src/app/api/**": {
+      "maxDuration": 15
     }
   }
 }
