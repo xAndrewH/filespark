@@ -133,7 +133,7 @@ export default function BackgroundRemoverPage() {
           Tools
         </Link>
         <h1 className="text-3xl font-bold text-white mb-1">Background Remover</h1>
-        <p className="text-slate-500 text-sm mb-8">AI-powered background removal with background replacement, entirely in your browser.</p>
+        <p className="text-slate-500 text-sm mb-8">Remove image backgrounds and replace them — entirely in your browser, nothing uploaded.</p>
 
         <div className="space-y-4">
           {/* Settings */}

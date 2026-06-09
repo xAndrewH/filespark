@@ -20,7 +20,7 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/lorem",            icon: AlignLeft,     title: "Lorem Ipsum Generator",    description: "Generate paragraphs, sentences, or words of placeholder text." },
       { href: "/tools/find-replace",     icon: Replace,       title: "Find & Replace",           description: "Find and replace text with plain-text or regex patterns." },
       { href: "/tools/case-converter",   icon: CaseSensitive, title: "Case Converter",           description: "Convert text between camelCase, snake_case, kebab-case, and more." },
-      { href: "/tools/grammar-checker",  icon: SpellCheck,    title: "Grammar & Spell Checker",  description: "Check grammar, spelling, and style powered by LanguageTool." },
+      { href: "/tools/grammar-checker",  icon: SpellCheck,    title: "Grammar & Spell Checker",  description: "Check grammar, spelling, and style instantly in your browser." },
       { href: "/tools/html-to-markdown", icon: FileText,      title: "HTML → Markdown",          description: "Convert pasted HTML into clean Markdown." },
     ],
   },
@@ -78,7 +78,7 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
     tools: [
       { href: "/tools/image-editor",       icon: ImagePlus,  title: "Image Editor",                description: "Resize, rotate, flip, and adjust quality for any image." },
       { href: "/tools/image-compressor",   icon: Minimize2,  title: "Image Compressor",            description: "Compress JPEG, PNG, and WEBP images in bulk." },
-      { href: "/tools/background-remover", icon: Scissors,   title: "Background Remover",          description: "AI-powered background removal in your browser." },
+      { href: "/tools/background-remover", icon: Scissors,   title: "Background Remover",          description: "Remove backgrounds instantly in your browser." },
       { href: "/tools/upscale-image",      icon: ZoomIn,     title: "Upscale Image",               description: "Upscale images up to 4× resolution using bilinear or nearest-neighbor." },
       { href: "/tools/raster-to-svg",      icon: PenTool,    title: "PNG / JPG → SVG",             description: "Vectorize raster images to scalable SVG." },
       { href: "/tools/svg-to-png",         icon: FileImage,  title: "SVG to PNG",                  description: "Convert SVG files or pasted code to PNG at up to 4× scale." },

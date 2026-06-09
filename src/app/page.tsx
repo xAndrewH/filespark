@@ -816,7 +816,7 @@ export default function HomePage() {
               { href: "/tools/regex",           icon: Search,          title: "Regex Tester",           desc: "Live match highlighting" },
               { href: "/tools/csv-json",        icon: Table2,          title: "CSV ↔ JSON",             desc: "Convert with live table preview" },
               { href: "/tools/case-converter",  icon: CaseSensitive,   title: "Case Converter",        desc: "camelCase, snake_case, kebab & more" },
-              { href: "/tools/grammar-checker", icon: SpellCheck,      title: "Grammar Checker",        desc: "Powered by LanguageTool API" },
+              { href: "/tools/grammar-checker", icon: SpellCheck,      title: "Grammar Checker",        desc: "Grammar & spell check" },
               { href: "/tools/html-beautifier", icon: Code2,           title: "HTML Beautifier",        desc: "Format HTML with W3C standards" },
               { href: "/tools/js-beautifier",   icon: Wand2,           title: "JS Beautifier",          desc: "Format JavaScript & TypeScript" },
               { href: "/tools/css-beautifier",  icon: Paintbrush,      title: "CSS Beautifier",         desc: "Format CSS and SCSS" },
@@ -857,7 +857,7 @@ export default function HomePage() {
             <ToolCategory label="Images & PDFs" icon={Image} href="/tools#images-pdfs" tools={[
               { href: "/tools/image-editor",       icon: ImagePlus,   title: "Image Editor",          desc: "Resize, crop, rotate, markup" },
               { href: "/tools/image-compressor",   icon: Minimize2,   title: "Image Compressor",       desc: "Compress JPEG, PNG, WEBP in bulk" },
-              { href: "/tools/background-remover", icon: Scissors,    title: "Background Remover",    desc: "AI-powered, runs in browser" },
+              { href: "/tools/background-remover", icon: Scissors,    title: "Background Remover",    desc: "Runs entirely in browser" },
               { href: "/tools/raster-to-svg",      icon: PenTool,     title: "PNG/JPG → SVG",         desc: "Vectorize raster images" },
               { href: "/tools/svg-to-png",         icon: FileImage,   title: "SVG → PNG",             desc: "Up to 4× scale output" },
               { href: "/tools/exif",               icon: Camera,      title: "EXIF Viewer",            desc: "Camera, GPS & image metadata" },

@@ -44,7 +44,7 @@ const TOOLS = [
   { href: "/tools/raster-to-svg",       title: "PNG / JPG → SVG",          desc: "Vectorize raster images to scalable SVG.",                         cat: "Images & PDFs" },
   { href: "/tools/image-compressor",    title: "Image Compressor",          desc: "Compress JPEG, PNG, and WEBP images in bulk.",                     cat: "Images & PDFs" },
   { href: "/tools/svg-to-png",          title: "SVG to PNG",                desc: "Convert SVG files or pasted code to PNG.",                         cat: "Images & PDFs" },
-  { href: "/tools/background-remover",  title: "Background Remover",        desc: "AI-powered background removal.",                                   cat: "Images & PDFs" },
+  { href: "/tools/background-remover",  title: "Background Remover",        desc: "Remove backgrounds instantly in your browser.",                                   cat: "Images & PDFs" },
   { href: "/tools/exif",                title: "EXIF Viewer",               desc: "Read camera settings, GPS, and metadata from images.",             cat: "Images & PDFs" },
   { href: "/tools/pdf-merge",           title: "PDF Merge",                 desc: "Combine multiple PDFs into one.",                                  cat: "Images & PDFs" },
   { href: "/tools/pdf-to-images",       title: "PDF to Images",             desc: "Convert each PDF page to a PNG.",                                  cat: "Images & PDFs" },
