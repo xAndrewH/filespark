@@ -35,9 +35,9 @@ export default function ROASCalculatorPage() {
   const netProfit = s !== null && r !== null ? r - s : null;
   const profitMargin = netProfit !== null && r !== null && r > 0 ? (netProfit / r) * 100 : null;
 
-  const roasDisplay = roas !== null ? `${roas.toFixed(2)}x` : "—";
-  const netProfitDisplay = netProfit !== null ? fmtDollar(netProfit) : "—";
-  const marginDisplay = profitMargin !== null ? `${profitMargin.toFixed(1)}%` : "—";
+  const roasDisplay = roas !== null ? `${roas.toFixed(2)}x` : "|";
+  const netProfitDisplay = netProfit !== null ? fmtDollar(netProfit) : "|";
+  const marginDisplay = profitMargin !== null ? `${profitMargin.toFixed(1)}%` : "|";
 
   const guideRows = [
     { roas: "< 1x", label: "Losing money" },
@@ -126,7 +126,7 @@ export default function ROASCalculatorPage() {
             </tbody>
           </table>
           <p className="text-slate-500 text-xs mt-3">
-            Break-even ROAS is always 1.0x — you need $1 in revenue for every $1 spent to cover ad costs. Profit requires ROAS above your cost-of-goods ratio.
+            Break-even ROAS is always 1.0x | you need $1 in revenue for every $1 spent to cover ad costs. Profit requires ROAS above your cost-of-goods ratio.
           </p>
         </div>
       </div>

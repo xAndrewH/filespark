@@ -64,7 +64,7 @@ export default function TermsPage() {
             </p>
             <p className="mt-3">
               You are responsible for ensuring you have the necessary rights and licenses to convert any
-              copyrighted material. FileSpark is a format conversion tool only — it does not grant you any
+              copyrighted material. FileSpark is a format conversion tool only | it does not grant you any
               rights to content you do not already own or have permission to use.
             </p>
             <p className="mt-3">

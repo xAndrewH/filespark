@@ -13,7 +13,7 @@ interface Edits {
 }
 // Crop stored in original-image coordinate space
 interface CropRegion { x: number; y: number; w: number; h: number }
-// Markup strokes — points in canvas pixel space at time of drawing
+// Markup strokes | points in canvas pixel space at time of drawing
 interface Stroke {
   id: string;
   tool: "pen" | "line" | "arrow" | "rect" | "ellipse" | "text";

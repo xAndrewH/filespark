@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     const inputType = detectFontType(inputBuf);
     let   sfntBuf: Buffer; // raw TTF/OTF sfnt bytes
 
-    // Step 1 — normalise input to raw sfnt (TTF/OTF bytes)
+    // Step 1 | normalise input to raw sfnt (TTF/OTF bytes)
     if (inputType === "woff2") {
       const { decompress } = await import("wawoff2");
       sfntBuf = Buffer.from(await decompress(new Uint8Array(inputBuf)));
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       sfntBuf = inputBuf; // already TTF or OTF
     }
 
-    // Step 2 — encode to target format
+    // Step 2 | encode to target format
     let result: Buffer;
     if (format === "woff2") {
       const { compress } = await import("wawoff2");
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       const ttf2woff = (await import("ttf2woff")).default;
       result = Buffer.from(ttf2woff(new Uint8Array(sfntBuf)));
     } else {
-      // ttf or otf — pass through sfnt bytes as-is
+      // ttf or otf | pass through sfnt bytes as-is
       result = sfntBuf;
     }
 

@@ -258,7 +258,7 @@ export default function ConverterDirectory({ activeLabel, selectedCategory, onSe
         </button>
       </div>
 
-      {/* Grid — animated collapse, capped height with internal scroll */}
+      {/* Grid | animated collapse, capped height with internal scroll */}
       <div className={`transition-all duration-300 ease-in-out overflow-hidden ${open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
         <div className="overflow-y-auto max-h-96 scrollbar-thin">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-0 divide-x divide-slate-800/60">

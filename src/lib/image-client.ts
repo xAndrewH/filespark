@@ -92,7 +92,7 @@ export async function convertImageClient(
   canvas.height = img.naturalHeight;
   const ctx = canvas.getContext("2d")!;
 
-  // JPEG has no transparency — fill white so transparent areas don't go black
+  // JPEG has no transparency | fill white so transparent areas don't go black
   if (fmt === "jpg" || fmt === "jpeg") {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -101,14 +101,14 @@ export async function convertImageClient(
   ctx.drawImage(img, 0, 0);
   onProgress?.(85);
 
-  // PNG is lossless — quality parameter is ignored by the browser
+  // PNG is lossless | quality parameter is ignored by the browser
   const q = fmt === "png" ? undefined : quality / 100;
 
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
         if (blob) { onProgress?.(100); resolve(blob); }
-        else reject(new Error("Conversion failed — browser could not encode this format."));
+        else reject(new Error("Conversion failed | browser could not encode this format."));
       },
       mime,
       q

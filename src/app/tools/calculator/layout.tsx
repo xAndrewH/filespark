@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Calculator — FileSpark",
+  title: "Calculator | FileSpark",
   description: "Basic and advanced scientific calculator with history.",
   alternates: { canonical: "/tools/calculator" },
   openGraph: {
-    title: "Calculator — FileSpark",
+    title: "Calculator | FileSpark",
     description: "Basic and advanced scientific calculator with history.",
     url: "/tools/calculator",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "Calculator — FileSpark",
+    title: "Calculator | FileSpark",
     description: "Basic and advanced scientific calculator with history.",
   },
 };

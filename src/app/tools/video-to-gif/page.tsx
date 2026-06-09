@@ -412,7 +412,7 @@ export default function VideoToGifPage() {
         )}
 
         <p className="text-slate-600 text-xs mt-8">
-          All processing happens in your browser — your video is never uploaded.
+          All processing happens in your browser | your video is never uploaded.
         </p>
       </div>
     </div>

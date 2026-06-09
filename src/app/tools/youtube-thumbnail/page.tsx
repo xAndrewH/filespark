@@ -270,7 +270,7 @@ export default function YoutubeThumbnailPage() {
                   onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f && f.type.startsWith("image/")) handleBgImage(f); }}
                 >
                   <Upload className="w-4 h-4 text-slate-500 shrink-0" />
-                  <span className="text-slate-500 text-xs">{bgImageUrl ? "Image loaded — click to replace" : "Drop image or click to upload"}</span>
+                  <span className="text-slate-500 text-xs">{bgImageUrl ? "Image loaded | click to replace" : "Drop image or click to upload"}</span>
                   {bgImageUrl && (
                     <button
                       onClick={(e) => { e.stopPropagation(); setBgImageUrl(null); }}

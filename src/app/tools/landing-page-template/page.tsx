@@ -10,10 +10,10 @@ const CHECKLIST = [
     items: [
       { id: "hero-headline",       text: "Clear, benefit-driven headline (what you do in one line)" },
       { id: "hero-subhead",        text: "Supporting subheadline that adds context or removes doubt" },
-      { id: "hero-cta",            text: "Primary CTA button — one action, action-oriented text (e.g. 'Get Started Free')" },
+      { id: "hero-cta",            text: "Primary CTA button | one action, action-oriented text (e.g. 'Get Started Free')" },
       { id: "hero-visual",         text: "Hero image, screenshot, or short demo video" },
       { id: "hero-above-fold",     text: "CTA visible without scrolling on mobile" },
-      { id: "hero-no-nav-clutter", text: "Minimal navigation — don't distract from the CTA" },
+      { id: "hero-no-nav-clutter", text: "Minimal navigation | don't distract from the CTA" },
     ],
   },
   {
@@ -44,7 +44,7 @@ const CHECKLIST = [
     color: "amber",
     items: [
       { id: "feat-benefits",   text: "Lead with benefits, back them up with features" },
-      { id: "feat-3-5",        text: "3–5 key features — more than 5 causes decision fatigue" },
+      { id: "feat-3-5",        text: "3–5 key features | more than 5 causes decision fatigue" },
       { id: "feat-icons",      text: "Icons or visuals for each feature to aid scannability" },
       { id: "feat-proof",      text: "Each feature tied to a concrete outcome or proof point" },
       { id: "feat-comparison", text: "Comparison table vs. competitors or old way (if relevant)" },
@@ -54,9 +54,9 @@ const CHECKLIST = [
     category: "Calls to Action",
     color: "pink",
     items: [
-      { id: "cta-repeat",   text: "CTA repeated at least 3× — hero, mid-page, and bottom" },
+      { id: "cta-repeat",   text: "CTA repeated at least 3× | hero, mid-page, and bottom" },
       { id: "cta-single",   text: "One primary CTA per section (avoid multiple competing actions)" },
-      { id: "cta-friction", text: "Reduce friction — 'No credit card required', 'Free forever', etc." },
+      { id: "cta-friction", text: "Reduce friction | 'No credit card required', 'Free forever', etc." },
       { id: "cta-contrast", text: "CTA button color contrasts with background (stands out)" },
       { id: "cta-urgency",  text: "Optional: urgency or scarcity element near CTA" },
     ],
@@ -82,7 +82,7 @@ const CHECKLIST = [
       { id: "seo-og",        text: "Open Graph tags (og:title, og:description, og:image) for social sharing" },
       { id: "seo-h1",        text: "Single H1 tag matching your headline" },
       { id: "seo-speed",     text: "Page loads in under 3 seconds on mobile (test with PageSpeed Insights)" },
-      { id: "seo-mobile",    text: "Fully responsive — tested on iOS and Android" },
+      { id: "seo-mobile",    text: "Fully responsive | tested on iOS and Android" },
       { id: "seo-analytics", text: "Analytics installed (GA4, Plausible, etc.)" },
       { id: "seo-canonical", text: "Canonical URL set to avoid duplicate content" },
     ],

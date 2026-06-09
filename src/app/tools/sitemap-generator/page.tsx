@@ -65,7 +65,7 @@ function FetchPanel({ onFetched }: {
         count: json.total,
       });
     } catch {
-      setStatus({ ok: false, msg: "Network error — check your connection and try again." });
+      setStatus({ ok: false, msg: "Network error | check your connection and try again." });
     } finally {
       setLoading(false);
     }
@@ -79,7 +79,7 @@ function FetchPanel({ onFetched }: {
         </svg>
         <h2 className="text-white text-sm font-semibold">Fetch from site</h2>
       </div>
-      <p className="text-slate-500 text-xs">Enter a domain to pull its existing sitemap — reads robots.txt first, then falls back to /sitemap.xml.</p>
+      <p className="text-slate-500 text-xs">Enter a domain to pull its existing sitemap | reads robots.txt first, then falls back to /sitemap.xml.</p>
 
       <div className="flex gap-2">
         <input
@@ -216,7 +216,7 @@ export default function SitemapGeneratorPage() {
         </Link>
 
         <h1 className="text-3xl font-bold text-white mb-1">Sitemap Generator</h1>
-        <p className="text-slate-500 text-sm mb-8">Fetch a live sitemap from any site, or build your own from scratch — then export valid XML.</p>
+        <p className="text-slate-500 text-sm mb-8">Fetch a live sitemap from any site, or build your own from scratch | then export valid XML.</p>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left column */}
@@ -312,7 +312,7 @@ export default function SitemapGeneratorPage() {
                         <select value={selOv.changefreq ?? ""}
                           onChange={e => e.target.value ? updateOverride(selectedUrl, "changefreq", e.target.value) : removeOverride(selectedUrl, "changefreq")}
                           className="w-full bg-slate-800/60 border border-slate-700/50 rounded-lg px-3 py-2 text-slate-200 text-sm focus:outline-none focus:border-blue-500/60 [color-scheme:dark]">
-                          <option value="">— global default —</option>
+                          <option value="">| global default |</option>
                           {CHANGEFREQ_OPTIONS.map(f => <option key={f} value={f}>{f}</option>)}
                         </select>
                       </div>
@@ -321,7 +321,7 @@ export default function SitemapGeneratorPage() {
                         <select value={selOv.priority ?? ""}
                           onChange={e => e.target.value ? updateOverride(selectedUrl, "priority", e.target.value) : removeOverride(selectedUrl, "priority")}
                           className="w-full bg-slate-800/60 border border-slate-700/50 rounded-lg px-3 py-2 text-slate-200 text-sm focus:outline-none focus:border-blue-500/60 [color-scheme:dark]">
-                          <option value="">— global default —</option>
+                          <option value="">| global default |</option>
                           {["1.0","0.9","0.8","0.7","0.6","0.5","0.4","0.3","0.2","0.1","0.0"].map(p => <option key={p} value={p}>{p}</option>)}
                         </select>
                       </div>
@@ -338,7 +338,7 @@ export default function SitemapGeneratorPage() {
             )}
           </div>
 
-          {/* Right column — XML output */}
+          {/* Right column | XML output */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-white text-sm font-semibold">sitemap.xml <span className="text-slate-500 font-normal">({validUrls.length} URLs)</span></h2>

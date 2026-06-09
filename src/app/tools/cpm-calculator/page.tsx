@@ -73,7 +73,7 @@ function CPMMode() {
       </div>
       <ResultCard
         label="CPM (Cost per 1,000 Impressions)"
-        value={cpm !== null ? `$${cpm.toFixed(2)}` : "—"}
+        value={cpm !== null ? `$${cpm.toFixed(2)}` : "|"}
       />
       <p className="text-xs text-slate-500 font-mono text-center">CPM = (Spend ÷ Impressions) × 1,000</p>
     </div>
@@ -98,7 +98,7 @@ function CPCMode() {
       </div>
       <ResultCard
         label="CPC (Cost per Click)"
-        value={cpc !== null ? `$${cpc.toFixed(2)}` : "—"}
+        value={cpc !== null ? `$${cpc.toFixed(2)}` : "|"}
       />
       <p className="text-xs text-slate-500 font-mono text-center">CPC = Spend ÷ Clicks</p>
     </div>
@@ -123,7 +123,7 @@ function CTRMode() {
       </div>
       <ResultCard
         label="CTR (Click-Through Rate)"
-        value={ctr !== null ? `${ctr.toFixed(3)}%` : "—"}
+        value={ctr !== null ? `${ctr.toFixed(3)}%` : "|"}
       />
       <p className="text-xs text-slate-500 font-mono text-center">CTR = (Clicks ÷ Impressions) × 100</p>
     </div>

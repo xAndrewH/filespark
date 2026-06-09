@@ -272,10 +272,10 @@ export const tailwindEntries: Entry[] = [
   {
     title: "Text color scale",
     description: "Named color shades on text",
-    code: `<p class="text-blue-400">400 — soft</p>
-<p class="text-blue-500">500 — medium</p>
-<p class="text-blue-600">600 — saturated</p>
-<p class="text-blue-700">700 — dark</p>
+    code: `<p class="text-blue-400">400 | soft</p>
+<p class="text-blue-500">500 | medium</p>
+<p class="text-blue-600">600 | saturated</p>
+<p class="text-blue-700">700 | dark</p>
 <!-- Also: slate, gray, zinc, red, orange, yellow, green, teal, purple, pink, rose -->`,
   },
   {
@@ -668,7 +668,7 @@ export const tailwindEntries: Entry[] = [
   {
     title: "Container center",
     description: "Centered responsive max-width container",
-    code: `<!-- tailwind.config.ts — enable container centering -->
+    code: `<!-- tailwind.config.ts | enable container centering -->
 // theme: { container: { center: true, padding: '1rem' } }
 
 <div class="container mx-auto px-4">
@@ -910,7 +910,7 @@ export default {
 <ul class="[&>li:nth-child(3)]:bg-blue-500/20 [&>li:nth-child(3)]:text-blue-300">
   <li class="py-2 px-3">Item 1</li>
   <li class="py-2 px-3">Item 2</li>
-  <li class="py-2 px-3">Item 3 — highlighted</li>
+  <li class="py-2 px-3">Item 3 | highlighted</li>
   <li class="py-2 px-3">Item 4</li>
 </ul>`,
   },
@@ -1245,7 +1245,7 @@ export default {
 </div>
 
 <!-- In config you can also use: -->
-<!-- motion-safe:animate-spin — only animate if motion is ok -->`,
+<!-- motion-safe:animate-spin | only animate if motion is ok -->`,
   },
   {
     title: "Print styles",

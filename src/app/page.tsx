@@ -249,13 +249,13 @@ export default function HomePage() {
   const friendlyError = useCallback((err: unknown, category: string): string => {
     const msg = err instanceof Error ? err.message : String(err ?? "Unknown error");
     if (msg.includes("API key not configured") || msg.includes("API key is required"))
-      return "A CloudConvert API key is required. It's free — 25 conversions/day. Click 'Add API Key' above.";
+      return "A CloudConvert API key is required. It's free | 25 conversions/day. Click 'Add API Key' above.";
     if (msg.includes("CloudConvert timed out"))
       return "Conversion timed out. Try a smaller file or check your internet connection, then retry.";
     if (msg.includes("Upload failed"))
       return "Upload to CloudConvert failed. Check your internet connection and try again.";
     if (msg.includes("CloudConvert error 422"))
-      return "CloudConvert rejected the request — your API key may be invalid or the format pair is unsupported.";
+      return "CloudConvert rejected the request | your API key may be invalid or the format pair is unsupported.";
     if (msg.includes("CloudConvert") && msg.toLowerCase().includes("invalid"))
       return "CloudConvert API key looks invalid. Double-check it in the key settings and try again.";
     if (msg.includes("Browser could not decode"))
@@ -267,7 +267,7 @@ export default function HomePage() {
     if (msg.includes("extraction is not supported") || msg.includes("creation is not supported"))
       return msg;
     if (msg.includes("Server error 5") || msg.match(/server error \d{3}/i))
-      return "Server error. Try again in a moment — if it keeps failing, try a different output format.";
+      return "Server error. Try again in a moment | if it keeps failing, try a different output format.";
     if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("network"))
       return "Network error. Check your internet connection and try again.";
     if ((category === "video" || category === "audio" || category === "gif") &&
@@ -533,7 +533,7 @@ export default function HomePage() {
             </button>
           </div>
           {pageMode === "compress" && (
-            <p className="text-center text-slate-500 text-xs mt-2">Reduce file size while keeping the same format — ideal for images, video, and audio.</p>
+            <p className="text-center text-slate-500 text-xs mt-2">Reduce file size while keeping the same format | ideal for images, video, and audio.</p>
           )}
         </div>
 
@@ -668,7 +668,7 @@ export default function HomePage() {
                 </div>
               )}
 
-              {/* Global quality bar — compress mode with 2+ idle files */}
+              {/* Global quality bar | compress mode with 2+ idle files */}
               {pageMode === "compress" && idleCount >= 2 && !isConverting && (
                 <div className="mb-3 flex items-center gap-2.5 px-3 py-2.5 bg-slate-900/70 border border-violet-500/20 rounded-xl">
                   <svg className="w-3.5 h-3.5 text-violet-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -690,7 +690,7 @@ export default function HomePage() {
                 </div>
               )}
 
-              {/* Batch format controls — shown when 2+ idle files share a category (convert mode only) */}
+              {/* Batch format controls | shown when 2+ idle files share a category (convert mode only) */}
               {pageMode === "convert" && idleCategoryGroups.length > 0 && !isConverting && (
                 <div className="mb-3 space-y-1.5">
                   {idleCategoryGroups.map(([category, items]) => {
@@ -719,7 +719,7 @@ export default function HomePage() {
                             <option key={f} value={f}>{f.toUpperCase()}</option>
                           ))}
                         </select>
-                        <span className="text-slate-600 text-xs">— updates instantly</span>
+                        <span className="text-slate-600 text-xs">| updates instantly</span>
                       </div>
                     );
                   })}
@@ -751,19 +751,19 @@ export default function HomePage() {
                 num: "1",
                 icon: <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.32 5.75 5.75 0 011.503 11.096" /></svg>,
                 title: "Drop your file",
-                desc: "Drag & drop or click to browse — any file type works",
+                desc: "Drag & drop or click to browse | any file type works",
               },
               {
                 num: "2",
                 icon: <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" /></svg>,
                 title: "Convert or compress",
-                desc: "Pick from 80+ output formats — or switch to Compress to shrink file size while keeping the same format",
+                desc: "Pick from 80+ output formats | or switch to Compress to shrink file size while keeping the same format",
               },
               {
                 num: "3",
                 icon: <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>,
                 title: "Download instantly",
-                desc: "Converted in your browser — nothing stored, no waiting",
+                desc: "Converted in your browser | nothing stored, no waiting",
               },
             ] as { num: string; icon: React.ReactNode; title: string; desc: string }[]).map(({ num, icon, title, desc }) => (
               <div key={num} className="flex items-start gap-3.5 p-4 rounded-xl bg-slate-900/50 border border-slate-800/60">
@@ -948,7 +948,7 @@ export default function HomePage() {
                   Like what you see?
                 </h2>
                 <p className="text-slate-400 text-sm leading-relaxed max-w-md">
-                  FileSpark is free to start with no account required. If it's saved you time, consider buying me a coffee — it helps keep the lights on and new tools coming.
+                  FileSpark is free to start with no account required. If it's saved you time, consider buying me a coffee | it helps keep the lights on and new tools coming.
                 </p>
                 <div className="flex flex-wrap gap-3 mt-5 justify-center sm:justify-start">
                   {["No account required", "No data harvesting", "New tools regularly"].map(t => (

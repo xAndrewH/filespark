@@ -157,7 +157,7 @@ export default function HttpHeadersPage() {
       if (!res.ok) setError(data.error ?? "Unknown error");
       else setResult(data as HeaderAnalysisResult);
     } catch {
-      setError("Network error — could not reach the API.");
+      setError("Network error | could not reach the API.");
     } finally {
       setLoading(false);
     }

@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     console.error("[api/convert/ebook]", err);
     if (err instanceof Error && err.message.includes("ENOENT")) {
       return new NextResponse(
-        "Calibre is not installed. Download it from https://calibre-ebook.com — set CALIBRE_PATH env var if installed in a custom location.",
+        "Calibre is not installed. Download it from https://calibre-ebook.com | set CALIBRE_PATH env var if installed in a custom location.",
         { status: 500 }
       );
     }

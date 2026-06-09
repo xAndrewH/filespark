@@ -331,7 +331,7 @@ export default function CssAnimationPage() {
                               <input
                                 value={kf.properties[k] ?? ""}
                                 onChange={e => updateProp(i, k, e.target.value)}
-                                placeholder="—"
+                                placeholder="|"
                                 className="w-full bg-slate-800/60 border border-slate-700/50 rounded px-2 py-1 text-slate-200 text-xs focus:outline-none focus:border-blue-500/60"
                               />
                             </td>

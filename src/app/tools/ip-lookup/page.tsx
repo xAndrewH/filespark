@@ -21,7 +21,7 @@ function InfoCard({ label, value, icon }: { label: string; value: string; icon?:
         {icon}
         <span>{label}</span>
       </div>
-      <p className="text-slate-200 text-sm font-medium break-all">{value || <span className="text-slate-600">—</span>}</p>
+      <p className="text-slate-200 text-sm font-medium break-all">{value || <span className="text-slate-600">|</span>}</p>
     </div>
   );
 }
@@ -59,7 +59,7 @@ export default function IpLookupPage() {
       if (!res.ok) setError(data.error ?? "Unknown error");
       else setResult(data as IpLookupResult);
     } catch {
-      setError("Network error — could not reach the API.");
+      setError("Network error | could not reach the API.");
     } finally {
       setLoading(false);
     }
@@ -120,7 +120,7 @@ export default function IpLookupPage() {
               {result.isPrivate && (
                 <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-yellow-400 text-xs font-medium">
                   <Server className="w-3.5 h-3.5" />
-                  Private / Local IP — no geolocation available
+                  Private / Local IP | no geolocation available
                 </div>
               )}
             </div>
@@ -162,7 +162,7 @@ export default function IpLookupPage() {
 
                 <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4">
                   <p className="text-slate-500 text-xs mb-1.5">AS Number</p>
-                  <p className="text-slate-200 text-sm font-mono">{result.as || "—"}</p>
+                  <p className="text-slate-200 text-sm font-mono">{result.as || "|"}</p>
                 </div>
 
                 <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4">

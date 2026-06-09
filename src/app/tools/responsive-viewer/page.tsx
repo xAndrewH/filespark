@@ -126,7 +126,7 @@ export default function ResponsiveViewerPage() {
       if (!res.ok) return { error: json?.error || "Failed to capture" };
       return { image: json.image };
     } catch {
-      return { error: "Network error — could not reach the server" };
+      return { error: "Network error | could not reach the server" };
     }
   };
 
@@ -337,7 +337,7 @@ export default function ResponsiveViewerPage() {
           <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-8 text-center">
             <Camera className="w-8 h-8 text-slate-700 mx-auto mb-3" />
             <p className="text-slate-400 text-sm">
-              Enter a URL, pick your devices, and hit Capture to render real screenshots —
+              Enter a URL, pick your devices, and hit Capture to render real screenshots |
               works for any public site, not just your own.
             </p>
           </div>
@@ -359,7 +359,7 @@ export default function ResponsiveViewerPage() {
 
         <p className="text-slate-600 text-xs mt-6">
           Screenshots are rendered server-side with a headless browser and discarded immediately after
-          being sent to you — nothing is stored. Each device is captured independently and results
+          being sent to you | nothing is stored. Each device is captured independently and results
           appear as soon as they&apos;re ready, so a slow page won&apos;t hold up the others.
         </p>
       </div>

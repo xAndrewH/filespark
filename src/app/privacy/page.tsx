@@ -71,7 +71,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-white font-semibold text-base mb-2">Cookies &amp; Tracking</h2>
             <p>
-              FileSpark does not use cookies of any kind — no tracking cookies, advertising cookies, session cookies,
+              FileSpark does not use cookies of any kind | no tracking cookies, advertising cookies, session cookies,
               or third-party analytics cookies. We do not use Google Analytics, Meta Pixel, or any other tracking
               service. No personal data is collected, processed, or transmitted to any advertising or analytics
               third party.
@@ -88,7 +88,7 @@ export default function PrivacyPage() {
               <a href="https://cloudconvert.com/privacy" className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">
                 Privacy Policy
               </a>.
-              FileSpark never sees or stores your CloudConvert API key on our servers — it is saved only in your
+              FileSpark never sees or stores your CloudConvert API key on our servers | it is saved only in your
               browser&apos;s <code className="text-slate-300 bg-slate-800 px-1 py-0.5 rounded text-xs">localStorage</code>.
             </p>
           </section>

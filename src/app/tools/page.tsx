@@ -66,7 +66,7 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/box-shadow",      icon: BoxSelect,      title: "Box Shadow Builder",       description: "Build CSS box shadows with multiple layers and live preview." },
       { href: "/tools/border-radius",   icon: SquareDashed,   title: "Border Radius Builder",    description: "Shape rounded corners per-side visually and copy the CSS." },
       { href: "/tools/color-contrast",  icon: Contrast,       title: "Color Contrast Checker",   description: "Check foreground/background pairs against WCAG AA and AAA ratios." },
-      { href: "/tools/css-grid",        icon: LayoutTemplate, title: "CSS Grid Builder",         description: "Visual grid builder — set rows, columns, and gaps, then copy the CSS." },
+      { href: "/tools/css-grid",        icon: LayoutTemplate, title: "CSS Grid Builder",         description: "Visual grid builder | set rows, columns, and gaps, then copy the CSS." },
       { href: "/tools/css-animation",   icon: Zap,            title: "CSS Animation Builder",    description: "Build keyframe animations visually and export the CSS." },
       { href: "/tools/favicon",         icon: Bookmark,       title: "Favicon Generator",        description: "Upload any image and get favicon PNGs at all standard sizes." },
     ],
@@ -107,7 +107,7 @@ const CATEGORIES: { id: string; name: string; icon: IconComponent; tools: { href
       { href: "/tools/ip-lookup",           icon: MapPin,     title: "IP Address Lookup",       description: "Look up geolocation and network details for any IP address." },
       { href: "/tools/my-ip",               icon: Wifi,       title: "What's My IP",            description: "See your public IP address, location, and network info." },
       { href: "/tools/sitemap-generator",   icon: Map,        title: "Sitemap Generator",       description: "Paste a list of URLs and generate a valid sitemap.xml with per-URL overrides." },
-      { href: "/tools/og-meta",             icon: Share2,     title: "OG Meta Tag Generator",   description: "Fill in title, description, and image — get the full Open Graph head block." },
+      { href: "/tools/og-meta",             icon: Share2,     title: "OG Meta Tag Generator",   description: "Fill in title, description, and image | get the full Open Graph head block." },
       { href: "/tools/schema-generator",    icon: ListChecks, title: "Schema Markup Generator", description: "Choose a Schema.org type and get the JSON-LD snippet for your site." },
       { href: "/tools/utm-builder",         icon: Tag,        title: "UTM Builder",             description: "Build UTM-tagged URLs for campaign tracking." },
       { href: "/tools/http-status",         icon: Globe,      title: "HTTP Status Codes",       description: "Searchable reference for every HTTP status code." },
@@ -150,7 +150,7 @@ const ALL_TOOLS = CATEGORIES.flatMap(c => c.tools.map(t => ({ ...t, category: c.
 const TOTAL = ALL_TOOLS.length;
 
 const COMING_SOON: { icon: IconComponent; title: string; description: string }[] = [
-  // Developer — Data & Formats
+  // Developer | Data & Formats
   { icon: FileCode2,       title: "YAML ↔ JSON",                  description: "Convert between YAML and JSON with schema validation." },
   { icon: Code,            title: "XML Formatter",                 description: "Format, indent, and validate XML documents." },
   { icon: CheckCheck,      title: "JSON Schema Validator",         description: "Validate any JSON payload against a JSON Schema." },
@@ -159,7 +159,7 @@ const COMING_SOON: { icon: IconComponent; title: string; description: string }[]
   { icon: TableProperties, title: "TOML ↔ JSON",                   description: "Convert between TOML config files and JSON." },
   { icon: Database,        title: "SQL Formatter",                 description: "Format and beautify SQL queries with configurable indentation." },
   { icon: Terminal,        title: ".ENV Formatter",                description: "Sort, deduplicate, and convert .env files to JSON or YAML." },
-  // Developer — Security & Network
+  // Developer | Security & Network
   // JWT Decoder is now live at /tools/jwt-decoder
   { icon: Fingerprint,     title: "UUID / ULID Generator",         description: "Generate cryptographically random UUIDs and ULIDs in bulk." },
   // DNS Lookup is now live at /tools/dns-lookup
@@ -167,13 +167,13 @@ const COMING_SOON: { icon: IconComponent; title: string; description: string }[]
   // IP Address Lookup is now live at /tools/ip-lookup
   { icon: Webhook,         title: "Webhook Tester",                description: "Generate a unique endpoint and inspect incoming POST payloads live." },
   // HTTP Header Analyzer is now live at /tools/http-headers
-  // Developer — CSS & Frontend
+  // Developer | CSS & Frontend
   // CSS Minifier is now live at /tools/css-minifier
   // JS Minifier is now live at /tools/js-minifier
   { icon: MousePointer2,   title: "CSS Specificity Calculator",    description: "Paste a CSS selector and instantly see its specificity score." },
   { icon: SlidersHorizontal, title: "Tailwind Class Sorter",       description: "Sort Tailwind class strings per Prettier Tailwind plugin order." },
   // CSS Animation Builder is now live at /tools/css-animation
-  // Developer — Coding Utilities
+  // Developer | Coding Utilities
   // Robots.txt Generator is now live at /tools/robots-generator
   // HTML → Markdown is now live at /tools/html-to-markdown
   { icon: Sigma,           title: "Chmod Calculator",              description: "Click a permissions grid and get the octal code and symbolic notation." },
@@ -188,14 +188,14 @@ const COMING_SOON: { icon: IconComponent; title: string; description: string }[]
   { icon: Barcode,         title: "Barcode Generator",             description: "Generate Code 128, QR, EAN, and UPC barcodes." },
   // YouTube Thumbnail Generator is now live at /tools/youtube-thumbnail
   // Find & Replace is now live at /tools/find-replace
-  // Marketing — Ad & Campaign Math
+  // Marketing | Ad & Campaign Math
   // ROAS Calculator is now live at /tools/roas-calculator
   // CPM / CPC / CTR Calculator is now live at /tools/cpm-calculator
   { icon: FlaskConical,    title: "A/B Test Calculator",           description: "Enter visitors and conversions for two variants to check statistical significance." },
   // ROI Calculator is now live at /tools/roi-calculator
   { icon: Users,           title: "Customer LTV Calculator",       description: "Estimate customer lifetime value from AOV, purchase frequency, and lifespan." },
   { icon: LineChart,       title: "Break-Even Calculator",         description: "Fixed costs, variable costs, and price → break-even units and revenue." },
-  // Marketing — Content & Copy
+  // Marketing | Content & Copy
   { icon: MessageSquare,   title: "Social Media Character Counter", description: "Live character counter with per-platform limits for X, LinkedIn, Instagram, and more." },
   // Email Subject Line Previewer is now live at /tools/email-preview
   { icon: BookOpen,        title: "Readability Score Checker",     description: "Paste text and get Flesch-Kincaid grade level and reading ease score." },
@@ -204,7 +204,7 @@ const COMING_SOON: { icon: IconComponent; title: string; description: string }[]
   { icon: Mail,            title: "Email Signature Generator",     description: "Fill in your details and generate a formatted HTML email signature." },
   { icon: Star,            title: "NPS Calculator",                description: "Enter promoters, passives, and detractors to calculate your Net Promoter Score." },
   // Invoice Generator is now live at /tools/invoice-generator
-  // Marketing — SEO & Web
+  // Marketing | SEO & Web
   // Meta Tag Analyzer is now live at /tools/meta-tag-analyzer
   // Schema Markup Generator is now live at /tools/schema-generator
   { icon: Smartphone,      title: "Social Image Resizer",          description: "Upload one image and export crops for OG, Twitter, LinkedIn, and Instagram." },

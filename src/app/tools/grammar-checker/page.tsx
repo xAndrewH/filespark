@@ -162,7 +162,7 @@ export default function GrammarCheckerPage() {
           Tools
         </Link>
         <h1 className="text-3xl font-bold text-white mb-1">Grammar &amp; Spell Checker</h1>
-        <p className="text-slate-500 text-sm mb-8">Check grammar, spelling, and style instantly — no signup required.</p>
+        <p className="text-slate-500 text-sm mb-8">Check grammar, spelling, and style instantly | no signup required.</p>
 
         <div className="space-y-4">
           {/* Language selector */}

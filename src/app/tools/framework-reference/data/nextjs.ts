@@ -310,7 +310,7 @@ export default async function DashboardLayout({
     title: "Async server component",
     description: "Server component that fetches its own data.",
     code: `// app/posts/page.tsx
-// No "use client" — server component by default
+// No "use client" | server component by default
 async function getPosts() {
   const res = await fetch("https://api.example.com/posts");
   return res.json() as Promise<{ id: number; title: string }[]>;
@@ -388,7 +388,7 @@ export function Modal({ children }: { children: React.ReactNode }) {
 import { db } from "@/lib/db";
 
 export default async function UsersPage() {
-  // This code only runs on the server — safe to use ORM/DB directly
+  // This code only runs on the server | safe to use ORM/DB directly
   const users = await db.user.findMany({ take: 10 });
   return (
     <ul>
@@ -1278,7 +1278,7 @@ import { getSession } from "@/lib/auth";
 
 export default async function ProtectedPage() {
   const session = await getSession();
-  if (!session) redirect("/login"); // throws internally — no return needed
+  if (!session) redirect("/login"); // throws internally | no return needed
   return <h1>Protected content</h1>;
 }`,
   },
@@ -1563,7 +1563,7 @@ export default function Page() {
   {
     title: ".env.local file",
     description: "Local environment variables not committed.",
-    code: `# .env.local — git-ignored, for local dev only
+    code: `# .env.local | git-ignored, for local dev only
 DATABASE_URL=postgresql://localhost/mydb
 NEXTAUTH_SECRET=supersecret
 NEXT_PUBLIC_API_URL=https://api.example.com`,
@@ -1586,7 +1586,7 @@ export function StripeButton() {
   {
     title: "Server-only env vars",
     description: "Use server env vars only in server code.",
-    code: `// lib/db.ts — server-only module
+    code: `// lib/db.ts | server-only module
 import "server-only"; // throws if accidentally imported by client
 
 export const db = createClient({
@@ -2116,7 +2116,7 @@ export default async function Page({
   {
     title: "Streaming with loading.tsx",
     description: "Automatic Suspense boundary via loading file.",
-    code: `// app/feed/loading.tsx — automatically wraps page in Suspense
+    code: `// app/feed/loading.tsx | automatically wraps page in Suspense
 export default function FeedLoading() {
   return (
     <div aria-label="Loading feed">
@@ -2200,8 +2200,8 @@ export default function Layout({
     </body></html>
   );
 }
-// app/@modal/(.)login/page.tsx — intercepting route
-// app/@modal/default.tsx    — returns null (slot default)`,
+// app/@modal/(.)login/page.tsx | intercepting route
+// app/@modal/default.tsx    | returns null (slot default)`,
   },
   {
     title: "next.config env mapping",

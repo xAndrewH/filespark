@@ -118,17 +118,17 @@ function SimpleROI() {
       <div className="grid grid-cols-3 gap-3">
         <ResultCard
           label="ROI"
-          value={roiPct !== null ? `${roiPct.toFixed(1)}%` : "—"}
+          value={roiPct !== null ? `${roiPct.toFixed(1)}%` : "|"}
           formula="(Gain − Cost) / Cost × 100"
         />
         <ResultCard
           label="Net Profit"
-          value={netProfit !== null ? fmtDollar(netProfit) : "—"}
+          value={netProfit !== null ? fmtDollar(netProfit) : "|"}
           formula="Final Value − Investment"
         />
         <ResultCard
           label="Multiple"
-          value={multiple !== null ? `${multiple.toFixed(2)}x` : "—"}
+          value={multiple !== null ? `${multiple.toFixed(2)}x` : "|"}
           formula="Final Value / Investment"
         />
       </div>
@@ -209,22 +209,22 @@ function InvestmentPeriod() {
       <div className="grid grid-cols-2 gap-3">
         <ResultCard
           label="Final Value"
-          value={finalValue !== null ? fmtDollar(finalValue) : "—"}
+          value={finalValue !== null ? fmtDollar(finalValue) : "|"}
           formula="P × (1 + r)^t"
         />
         <ResultCard
           label="Total Gain"
-          value={totalGain !== null ? fmtDollar(totalGain) : "—"}
+          value={totalGain !== null ? fmtDollar(totalGain) : "|"}
           formula="Final Value − Investment"
         />
         <ResultCard
           label="CAGR"
-          value={cagr !== null ? `${cagr.toFixed(2)}%` : "—"}
+          value={cagr !== null ? `${cagr.toFixed(2)}%` : "|"}
           formula="Annual compound rate"
         />
         <ResultCard
           label="Annualized ROI"
-          value={annualizedROI !== null ? `${annualizedROI.toFixed(2)}%` : "—"}
+          value={annualizedROI !== null ? `${annualizedROI.toFixed(2)}%` : "|"}
           formula="Return per year"
         />
       </div>

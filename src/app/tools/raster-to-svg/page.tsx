@@ -295,7 +295,7 @@ export default function RasterToSvgPage() {
               </button>
               <p className="text-slate-600 text-xs text-center">
                 SVG size: ~{Math.round(new Blob([svgBlob]).size / 1024)} KB
-                {opts.mode === "embed" && " (embeds original raster — not a true vector)"}
+                {opts.mode === "embed" && " (embeds original raster | not a true vector)"}
               </p>
             </div>
           )}

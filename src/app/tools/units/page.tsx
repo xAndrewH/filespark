@@ -253,7 +253,7 @@ export default function UnitsPage() {
                 {cat.units.map((u, i) => <option key={u.label} value={i}>{u.label}</option>)}
               </select>
               <div className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-blue-400 text-lg font-mono min-h-[3rem] flex items-center">
-                {result || <span className="text-slate-600">—</span>}
+                {result || <span className="text-slate-600">|</span>}
               </div>
             </div>
           </div>

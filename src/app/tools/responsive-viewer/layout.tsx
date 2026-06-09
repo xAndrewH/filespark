@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-const title = "Responsive Design Viewer — FileSpark";
-const description = "Capture real screenshots of any page at multiple device sizes, side by side — phone, tablet, laptop, and desktop.";
+const title = "Responsive Design Viewer | FileSpark";
+const description = "Capture real screenshots of any page at multiple device sizes, side by side: phone, tablet, laptop, and desktop.";
 
 export const metadata: Metadata = {
   title,

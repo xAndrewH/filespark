@@ -185,7 +185,7 @@ export default function JwtDecoderPage() {
         </div>
         <p className="text-slate-500 text-sm mb-8">
           Decode a JSON Web Token into its header, payload, and signature. Runs entirely in your
-          browser — nothing is sent anywhere.
+          browser | nothing is sent anywhere.
         </p>
 
         <div className="space-y-5">
@@ -340,7 +340,7 @@ export default function JwtDecoderPage() {
                 </pre>
                 <p className="text-xs text-slate-500 mt-2 flex items-start gap-1.5">
                   <ShieldAlert className="w-3.5 h-3.5 mt-0.5 shrink-0 text-amber-400" />
-                  Signature is not verified — this tool only decodes.
+                  Signature is not verified | this tool only decodes.
                 </p>
               </div>
             </>

@@ -18,7 +18,7 @@ export function isHeic(ext: string): boolean {
  * Returns the original buffer unchanged for non-HEIC inputs.
  *
  * We use `as Buffer<ArrayBuffer>` casts throughout to satisfy TypeScript's
- * strict generic Buffer<ArrayBufferLike> vs Buffer<ArrayBuffer> constraints —
+ * strict generic Buffer<ArrayBufferLike> vs Buffer<ArrayBuffer> constraints |
  * at runtime all buffers here are backed by plain ArrayBuffers.
  */
 export async function maybeDecodeHeic(

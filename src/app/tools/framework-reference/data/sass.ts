@@ -1,7 +1,7 @@
 import type { Entry } from "../types";
 
 export const sassEntries: Entry[] = [
-  // 1. Variables — all types
+  // 1. Variables | all types
   {
     title: "Color Variable",
     description: "Store color values in variables.",
@@ -125,7 +125,7 @@ $spacing-unit: 8px !default;
     code: `$color: blue; // global
 
 .component {
-  $color: red; // local — shadows global
+  $color: red; // local | shadows global
   color: $color; // red
 
   .child {
@@ -423,7 +423,7 @@ $version: 3;
   },
   {
     title: "Placeholder Selector %",
-    description: "Silent classes — extend only, no output.",
+    description: "Silent classes | extend only, no output.",
     code: `%flex-center {
   display: flex;
   align-items: center;
@@ -1087,7 +1087,7 @@ $radius:  4px !default;
   {
     title: "@forward Module",
     description: "Re-export a module through another.",
-    code: `// _index.scss — barrel file
+    code: `// _index.scss | barrel file
 @forward "./variables";
 @forward "./mixins";
 @forward "./functions";
@@ -1782,8 +1782,8 @@ $padding: 0.5rem 1rem !default;
   // 30. Module system migration
   {
     title: "@import Legacy Syntax",
-    description: "Old @import — avoid in new code.",
-    code: `// LEGACY — @import (deprecated):
+    description: "Old @import | avoid in new code.",
+    code: `// LEGACY | @import (deprecated):
 @import "variables";
 @import "mixins";
 @import "components/button";
@@ -1818,7 +1818,7 @@ $padding: 0.5rem 1rem !default;
     title: "Migration Barrel Index",
     description: "Collect partials for single-import migration.",
     code: `// styles/_index.scss
-// Forward everything — acts like the old main import
+// Forward everything | acts like the old main import
 
 @forward "./tokens/colors";
 @forward "./tokens/spacing";

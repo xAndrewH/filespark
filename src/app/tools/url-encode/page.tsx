@@ -7,9 +7,9 @@ type Mode = "encode" | "decode";
 type Variant = "component" | "full" | "form";
 
 const VARIANTS: { id: Variant; label: string; desc: string }[] = [
-  { id: "component", label: "encodeURIComponent", desc: "Encodes everything except A–Z a–z 0–9 - _ . ! ~ * ' ( )  — use for query-string values" },
-  { id: "full",      label: "encodeURI",          desc: "Preserves URL structure chars like : / ? # & = @ — use for full URLs" },
-  { id: "form",      label: "Form-encoded",       desc: "Spaces become +, rest is percent-encoded — used by HTML forms (application/x-www-form-urlencoded)" },
+  { id: "component", label: "encodeURIComponent", desc: "Encodes everything except A–Z a–z 0–9 - _ . ! ~ * ' ( )  | use for query-string values" },
+  { id: "full",      label: "encodeURI",          desc: "Preserves URL structure chars like : / ? # & = @ | use for full URLs" },
+  { id: "form",      label: "Form-encoded",       desc: "Spaces become +, rest is percent-encoded | used by HTML forms (application/x-www-form-urlencoded)" },
 ];
 
 function encode(input: string, variant: Variant): string {
@@ -118,7 +118,7 @@ export default function UrlEncodePage() {
           {doubleEncoded && (
             <div className="flex gap-2 text-amber-400 text-xs bg-amber-400/5 border border-amber-400/20 rounded-xl p-3">
               <span className="shrink-0">⚠</span>
-              <span>Output contains <code className="font-mono">%25</code> — the input may already be encoded. Encoding it again causes double-encoding.</span>
+              <span>Output contains <code className="font-mono">%25</code> | the input may already be encoded. Encoding it again causes double-encoding.</span>
             </div>
           )}
           {plusInDecode && (

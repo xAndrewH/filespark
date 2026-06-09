@@ -120,7 +120,7 @@ export default function ImageToBase64Page() {
       setDecodedSize(binary.length);
       setDecodedUri(uri);
     } catch {
-      setDecodeError("Invalid Base64 — could not decode this string.");
+      setDecodeError("Invalid Base64 | could not decode this string.");
     }
   }, []);
 

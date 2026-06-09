@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
 
     sources.push(url);
 
-    // Sitemap index — queue child sitemaps
+    // Sitemap index | queue child sitemaps
     if (xml.includes("<sitemapindex") || xml.includes("<sitemap>")) {
       sitemapQueue.push(...extractChildSitemaps(xml).slice(0, 20));
     }

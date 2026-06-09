@@ -596,7 +596,7 @@ export const bootstrapEntries: Entry[] = [
         <h5 class="modal-title">Static Modal</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">Click outside — nothing happens.</div>
+      <div class="modal-body">Click outside | nothing happens.</div>
     </div>
   </div>
 </div>`,
@@ -981,7 +981,7 @@ export const bootstrapEntries: Entry[] = [
       </button>
     </h2>
     <div id="alwaysOne" class="accordion-collapse collapse show">
-      <div class="accordion-body">Body one — stays open independently.</div>
+      <div class="accordion-body">Body one | stays open independently.</div>
     </div>
   </div>
   <div class="accordion-item">
@@ -992,7 +992,7 @@ export const bootstrapEntries: Entry[] = [
       </button>
     </h2>
     <div id="alwaysTwo" class="accordion-collapse collapse">
-      <div class="accordion-body">Body two — independent.</div>
+      <div class="accordion-body">Body two | independent.</div>
     </div>
   </div>
 </div>`,

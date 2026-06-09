@@ -43,7 +43,7 @@ export default function SslCheckerPage() {
         setResult(data as SslCheckResult);
       }
     } catch {
-      setError("Network error — could not reach the API.");
+      setError("Network error | could not reach the API.");
     } finally {
       setLoading(false);
     }
@@ -79,7 +79,7 @@ export default function SslCheckerPage() {
         </Link>
 
         <h1 className="text-3xl font-bold text-white mb-1">SSL Certificate Checker</h1>
-        <p className="text-slate-500 text-sm mb-8">Enter a domain to inspect its SSL certificate — expiry, issuer, SANs, and fingerprint.</p>
+        <p className="text-slate-500 text-sm mb-8">Enter a domain to inspect its SSL certificate | expiry, issuer, SANs, and fingerprint.</p>
 
         {/* Input */}
         <div className="bg-slate-900/60 border border-slate-800/60 rounded-2xl p-5">
@@ -153,8 +153,8 @@ export default function SslCheckerPage() {
             {/* Details grid */}
             <div className="space-y-3">
               {[
-                { label: "Issued To", value: [result.subject.CN, result.subject.O].filter(Boolean).join(" — ") || "—" },
-                { label: "Issued By", value: [result.issuer.CN, result.issuer.O].filter(Boolean).join(" — ") || "—" },
+                { label: "Issued To", value: [result.subject.CN, result.subject.O].filter(Boolean).join(" | ") || "|" },
+                { label: "Issued By", value: [result.issuer.CN, result.issuer.O].filter(Boolean).join(" | ") || "|" },
                 { label: "Valid From", value: formatDate(result.validFrom) },
                 { label: "Valid To", value: formatDate(result.validTo) },
               ].map(({ label, value }) => (

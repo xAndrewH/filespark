@@ -142,8 +142,8 @@ export default function AspectRatioPage() {
             <div className="grid grid-cols-3 gap-3">
               {[
                 { label: "Simplified", value: simplified && (simplified.rw !== rw || simplified.rh !== rh) ? `${simplified.rw}:${simplified.rh}` : `${rw}:${rh}` },
-                { label: "Diagonal", value: diagonal ? `${diagonal} px` : "—" },
-                { label: "Megapixels", value: w && h ? `${(w * h / 1000000).toFixed(2)} MP` : "—" },
+                { label: "Diagonal", value: diagonal ? `${diagonal} px` : "|" },
+                { label: "Megapixels", value: w && h ? `${(w * h / 1000000).toFixed(2)} MP` : "|" },
               ].map(({ label, value }) => (
                 <div key={label} className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-3 text-center">
                   <p className="text-white font-mono text-sm font-bold">{value}</p>

@@ -166,7 +166,7 @@ export default function HistoryDrawer({ open, onClose, version, sessionDownloads
           </p>
         </div>
 
-        {/* Clear all confirmation — overlays inside the drawer only */}
+        {/* Clear all confirmation | overlays inside the drawer only */}
         {confirmClear && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/70 backdrop-blur-sm">
             <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 mx-5 shadow-xl w-full max-w-sm">

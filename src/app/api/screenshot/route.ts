@@ -27,7 +27,7 @@ async function autoScroll(page: Page) {
   // Let lazy-loaded images/sections settle after the walk-down.
   await new Promise((resolve) => setTimeout(resolve, 450));
 
-  // Make sure we're really back at the top before measuring/capturing —
+  // Make sure we're really back at the top before measuring/capturing |
   // some pages animate the scroll-to-top or have scroll-snap that delays it.
   await page.waitForFunction(() => window.scrollY === 0, { timeout: 2_000 }).catch(async () => {
     await page.evaluate(() => window.scrollTo(0, 0));
@@ -36,7 +36,7 @@ async function autoScroll(page: Page) {
 
 // Hide fixed/sticky-positioned elements (headers, cookie banners, chat
 // widgets) so they don't get baked into every tile when we scroll-and-capture
-// — otherwise they'd appear duplicated down the length of the stitched image.
+// | otherwise they'd appear duplicated down the length of the stitched image.
 async function hideFixedElements(page: Page) {
   await page.evaluate(() => {
     const els = Array.from(document.querySelectorAll<HTMLElement>("body *"));
@@ -90,7 +90,7 @@ async function captureFullPage(page: Page, width: number, viewportHeight: number
     await page.evaluate((scrollY) => window.scrollTo(0, scrollY), top);
     await new Promise((resolve) => setTimeout(resolve, 140));
     // Keep fixed/sticky elements (headers, banners) visible in the very first
-    // tile — that's where they belong — but hide them for the rest so they
+    // tile | that's where they belong | but hide them for the rest so they
     // don't get baked into every subsequent tile as we scroll down.
     if (i === 1) await hideFixedElements(page);
     const buf = Buffer.from(await page.screenshot({ type: "png" }));

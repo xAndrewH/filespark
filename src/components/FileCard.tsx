@@ -132,7 +132,7 @@ export default function FileCard({ item, onConvert, onRemove, onChange, onOpenKe
               </div>
             </div>
 
-            {/* Controls — idle or error */}
+            {/* Controls | idle or error */}
             {!isProcessing && !isDone && (
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 {/* Mode toggle */}
@@ -161,7 +161,7 @@ export default function FileCard({ item, onConvert, onRemove, onChange, onOpenKe
                   </div>
                 )}
 
-                {/* Format selector — searchable */}
+                {/* Format selector | searchable */}
                 {item.mode === "convert" && outputFormats.length > 0 && (
                   <SearchableSelect
                     value={item.targetFormat}

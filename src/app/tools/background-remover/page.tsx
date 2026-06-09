@@ -133,7 +133,7 @@ export default function BackgroundRemoverPage() {
           Tools
         </Link>
         <h1 className="text-3xl font-bold text-white mb-1">Background Remover</h1>
-        <p className="text-slate-500 text-sm mb-8">Remove image backgrounds and replace them — entirely in your browser, nothing uploaded.</p>
+        <p className="text-slate-500 text-sm mb-8">Remove image backgrounds and replace them | entirely in your browser, nothing uploaded.</p>
 
         <div className="space-y-4">
           {/* Settings */}
@@ -190,13 +190,13 @@ export default function BackgroundRemoverPage() {
           {/* Comparison slider */}
           {original && display && showSlider && (
             <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4 space-y-3">
-              <p className="text-slate-400 text-xs font-medium">Before / After — drag slider</p>
+              <p className="text-slate-400 text-xs font-medium">Before / After | drag slider</p>
               <div className="relative overflow-hidden rounded-xl select-none"
                 style={{ background: "repeating-conic-gradient(#374151 0% 25%,#1e293b 0% 50%) 0 0/16px 16px" }}>
-                {/* After (result) — full width */}
+                {/* After (result) | full width */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={display} alt="Result" className="w-full block" />
-                {/* Before (original) — clipped to slider position */}
+                {/* Before (original) | clipped to slider position */}
                 <div className="absolute inset-0 overflow-hidden" style={{ width: `${sliderPos}%` }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={original} alt="Original" className="block" style={{ width: `${10000 / sliderPos}%`, maxWidth: "none" }} />

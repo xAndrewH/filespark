@@ -117,7 +117,7 @@ export async function convertArchiveClient(file: File, targetFormat: string): Pr
 
   if (entries.length === 0) throw new Error("No files found in archive");
 
-  // Repack — copy into a fresh ArrayBuffer to satisfy Blob's strict type requirements
+  // Repack | copy into a fresh ArrayBuffer to satisfy Blob's strict type requirements
   const toBlob = (d: Uint8Array, type: string) => {
     const buf = new ArrayBuffer(d.byteLength);
     new Uint8Array(buf).set(d);

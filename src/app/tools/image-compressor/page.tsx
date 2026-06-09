@@ -254,14 +254,14 @@ export default function ImageCompressorPage() {
                       </button>
                     </div>
 
-                    {/* Before / after comparison slider — always visible */}
+                    {/* Before / after comparison slider | always visible */}
                     <div className="mt-3 space-y-1.5">
                       <div className="relative overflow-hidden rounded-xl select-none"
                         style={{ background: "repeating-conic-gradient(#374151 0% 25%,#1e293b 0% 50%) 0 0/12px 12px" }}>
-                        {/* After (compressed) — full width */}
+                        {/* After (compressed) | full width */}
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={r.url} alt="Compressed" className="w-full block" />
-                        {/* Before (original) — clipped */}
+                        {/* Before (original) | clipped */}
                         <div className="absolute inset-0 overflow-hidden" style={{ width: `${comparePos}%` }}>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={r.originalUrl} alt="Original" className="block"

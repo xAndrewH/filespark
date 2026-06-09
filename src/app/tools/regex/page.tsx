@@ -11,11 +11,11 @@ type MatchResult = {
 };
 
 const FLAG_OPTS = [
-  { f: "g", title: "Global — find all matches" },
+  { f: "g", title: "Global | find all matches" },
   { f: "i", title: "Ignore case" },
-  { f: "m", title: "Multiline — ^ and $ match line boundaries" },
-  { f: "s", title: "Dot-all — . matches newlines" },
-  { f: "u", title: "Unicode — enables \\p{} properties and correct emoji handling" },
+  { f: "m", title: "Multiline | ^ and $ match line boundaries" },
+  { f: "s", title: "Dot-all | . matches newlines" },
+  { f: "u", title: "Unicode | enables \\p{} properties and correct emoji handling" },
 ];
 
 export default function RegexPage() {

@@ -57,7 +57,7 @@ export default function DnsLookupPage() {
       if (!res.ok) setError(data.error ?? "Unknown error");
       else setResult(data as DnsLookupResult);
     } catch {
-      setError("Network error — could not reach the API.");
+      setError("Network error | could not reach the API.");
     } finally {
       setLoading(false);
     }

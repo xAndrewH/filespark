@@ -1374,7 +1374,7 @@ function UserList({ users }: { users: User[] }) {
   {
     title: "Index Key Pitfall",
     description: "Avoid index keys when list items can reorder.",
-    code: `// ❌ Avoid — index keys break reconciliation when items reorder or insert
+    code: `// ❌ Avoid | index keys break reconciliation when items reorder or insert
 const bad = items.map((item, i) => <li key={i}>{item}</li>);
 
 // ✅ Prefer stable, unique identifiers
@@ -1949,12 +1949,12 @@ type OnWheel   = React.WheelEvent<HTMLDivElement>;`,
     description: "Typing refs for DOM elements and custom handles.",
     code: `import { useRef } from "react";
 
-// DOM element ref (nullable — may not be attached yet)
+// DOM element ref (nullable | may not be attached yet)
 const divRef   = useRef<HTMLDivElement>(null);
 const inputRef = useRef<HTMLInputElement>(null);
 const btnRef   = useRef<HTMLButtonElement>(null);
 
-// Mutable container — does NOT trigger re-renders
+// Mutable container | does NOT trigger re-renders
 const countRef = useRef<number>(0);
 
 // For forwardRef typing:
@@ -1968,7 +1968,7 @@ const countRef = useRef<number>(0);
   ReactNode,       // most permissive: elements, strings, null, arrays, portals
   ReactElement,    // only React elements (JSX), no primitives
   PropsWithChildren, // wraps any Props type, adds children?: ReactNode
-  FC,              // FunctionComponent — includes children in React 18, opt-in in 19
+  FC,              // FunctionComponent | includes children in React 18, opt-in in 19
 } from "react";
 
 // Prefer ReactNode for slot-style children:
@@ -2121,7 +2121,7 @@ export function useTheme() {
       onClick={onClose}
       type="button"
     >
-      {/* Icon — no visible text */}
+      {/* Icon | no visible text */}
       <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24">
         <path d="M6 6l12 12M6 18L18 6" stroke="currentColor" strokeWidth="2" />
       </svg>
@@ -2321,7 +2321,7 @@ function Wrapper({ children }: { children: ReactNode }) {
   if (!isValidElement(children)) {
     return <p>{String(children)}</p>;
   }
-  // children is ReactElement here — safe to clone
+  // children is ReactElement here | safe to clone
   return <div className="wrapped">{children}</div>;
 }`,
   },

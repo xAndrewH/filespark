@@ -50,7 +50,7 @@ export default function DmcaPage() {
             <h2 className="text-white font-semibold text-base mb-2">How FileSpark Works</h2>
             <p>
               FileSpark is a client-side file conversion tool. The vast majority of conversions happen entirely within
-              your browser — files are never uploaded to or stored on our servers. For conversions that do pass through
+              your browser | files are never uploaded to or stored on our servers. For conversions that do pass through
               our servers (such as document conversions), files are processed in memory and immediately discarded.
               We do not host, store, or distribute user-uploaded content.
             </p>

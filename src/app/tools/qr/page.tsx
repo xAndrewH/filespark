@@ -304,7 +304,7 @@ export default function QrPage() {
   const regenerate = useCallback(async () => {
     const url = await renderQR({ text: qrString, outputSize, fgColor, bgColor, errorLevel, dotStyle, eyeOuter, eyeInner, frameStyle, frameColor, frameText, logoDataUrl, logoEmoji });
     if (url) { setDataUrl(url); setError(""); }
-    else setError(qrString ? "Could not generate QR code — input may be too large." : "");
+    else setError(qrString ? "Could not generate QR code | input may be too large." : "");
   }, [qrString, outputSize, fgColor, bgColor, errorLevel, dotStyle, eyeOuter, eyeInner, frameStyle, frameColor, frameText, logoDataUrl, logoEmoji]);
 
   useEffect(() => {
@@ -408,7 +408,7 @@ export default function QrPage() {
         {bulkMode && (
           <div className="space-y-5">
             <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-5">
-              <label className="text-slate-400 text-xs mb-2 block">URLs — one per line (max 20). Uses your current design settings.</label>
+              <label className="text-slate-400 text-xs mb-2 block">URLs | one per line (max 20). Uses your current design settings.</label>
               <textarea
                 value={bulkUrls}
                 onChange={e => setBulkUrls(e.target.value)}
@@ -456,7 +456,7 @@ export default function QrPage() {
           <div className="space-y-5">
             {/* Step 1: Content */}
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">1 — Content type</p>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">1 | Content type</p>
               <div className="flex flex-wrap gap-1.5">
                 {CONTENT_TYPES.map(t => (
                   <button key={t.id} onClick={() => setContentType(t.id)}
@@ -531,7 +531,7 @@ export default function QrPage() {
 
             {/* Step 2: Design */}
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">2 — Design</p>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">2 | Design</p>
               <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl overflow-hidden">
                 {/* Design tabs */}
                 <div className="flex border-b border-slate-800/60">

@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       { timeout: 120_000 }
     );
 
-    // Locate the output file — LibreOffice uses the input basename
+    // Locate the output file | LibreOffice uses the input basename
     outputPath = join(tmpdir(), `${baseName}.${format}`);
 
     // For PDF → JPG, LibreOffice may add a page number suffix (e.g., filespark_xxx0.jpg)

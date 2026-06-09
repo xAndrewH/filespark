@@ -59,7 +59,7 @@ function ColorInput({
     <div className="space-y-2">
       <label className="block text-xs font-medium text-slate-400">{label}</label>
       <div className="flex items-center gap-3">
-        {/* Color swatch — click to open native picker */}
+        {/* Color swatch | click to open native picker */}
         <div className="relative w-12 h-12 flex-shrink-0 rounded-xl border border-slate-700 overflow-hidden shadow-sm">
           <div className="absolute inset-0" style={{ background: valid ? value : "#888" }} />
           <input
@@ -173,7 +173,7 @@ export default function ColorContrastPage() {
           {/* ── Preview ── */}
           <div className="rounded-2xl p-5 space-y-3 border border-slate-700/60" style={{ background: validBg }}>
             <p className="text-base leading-relaxed" style={{ color: validFg }}>
-              Normal text (16px) — The quick brown fox jumps over the lazy dog.
+              Normal text (16px) | The quick brown fox jumps over the lazy dog.
             </p>
             <p className="text-2xl font-bold" style={{ color: validFg }}>
               Large text (24px bold)
@@ -193,10 +193,10 @@ export default function ColorContrastPage() {
               {ratio.toFixed(2)}<span className="text-2xl text-slate-500">:1</span>
             </p>
             <p className="text-slate-600 text-xs mt-2">
-              {ratio >= 7 ? "Excellent — passes all WCAG levels" :
-               ratio >= 4.5 ? "Good — passes AA & AAA Large" :
-               ratio >= 3 ? "Minimal — passes AA Large only" :
-               "Poor — fails all WCAG levels"}
+              {ratio >= 7 ? "Excellent | passes all WCAG levels" :
+               ratio >= 4.5 ? "Good | passes AA & AAA Large" :
+               ratio >= 3 ? "Minimal | passes AA Large only" :
+               "Poor | fails all WCAG levels"}
             </p>
           </div>
 

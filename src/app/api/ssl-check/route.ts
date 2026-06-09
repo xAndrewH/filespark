@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing hostname" }, { status: 400 });
   }
 
-  // Strip protocol and path — extract just the hostname
+  // Strip protocol and path | extract just the hostname
   hostname = hostname.replace(/^https?:\/\//i, "").split("/")[0].split("?")[0].trim();
 
   if (!hostname) {
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
           const validFrom = cert.valid_from ?? "";
           const validTo   = cert.valid_to   ?? "";
 
-          // Node.js TLS dates: "Jun  7 12:00:00 2025 GMT" — collapse double spaces before parsing
+          // Node.js TLS dates: "Jun  7 12:00:00 2025 GMT" | collapse double spaces before parsing
           const parseDate = (s: string) => new Date(s.replace(/\s+/g, " ").trim());
 
           const now        = Date.now();
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
       if (msg.includes("ENOTFOUND") || msg.includes("getaddrinfo")) {
         resolve(NextResponse.json({ error: `Domain not found: ${hostname}` }, { status: 404 }));
       } else if (msg.includes("ECONNREFUSED")) {
-        resolve(NextResponse.json({ error: "Port 443 refused — server may not support HTTPS" }, { status: 502 }));
+        resolve(NextResponse.json({ error: "Port 443 refused | server may not support HTTPS" }, { status: 502 }));
       } else {
         resolve(NextResponse.json({ error: msg }, { status: 502 }));
       }

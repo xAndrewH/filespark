@@ -8,7 +8,7 @@ interface ExifData {
 }
 
 function formatValue(val: unknown): string {
-  if (val == null) return "—";
+  if (val == null) return "|";
   if (val instanceof Date) return val.toLocaleString();
   if (Array.isArray(val)) {
     if (val.length === 2 && typeof val[0] === "number" && typeof val[1] === "number") {

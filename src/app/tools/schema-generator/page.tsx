@@ -502,7 +502,7 @@ export default function SchemaGeneratorPage() {
       case "WebPage":
         return (
           <div className="space-y-3">
-            <Field label="Page Name"><input className={ic} value={webpage.name} onChange={setW("name")} placeholder="Home — Acme" /></Field>
+            <Field label="Page Name"><input className={ic} value={webpage.name} onChange={setW("name")} placeholder="Home | Acme" /></Field>
             <Field label="Description"><input className={ic} value={webpage.description} onChange={setW("description")} placeholder="Description" /></Field>
             <Field label="URL"><input className={ic} value={webpage.url} onChange={setW("url")} placeholder="https://acme.com" /></Field>
             <Field label="Language"><input className={ic} value={webpage.inLanguage} onChange={setW("inLanguage")} placeholder="en" /></Field>

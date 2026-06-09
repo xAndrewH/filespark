@@ -5,7 +5,7 @@ import Link from "next/link";
 
 /** Round to 4 significant figures, stripping unnecessary trailing zeros. */
 function fmt(n: number): string {
-  if (!isFinite(n)) return "—";
+  if (!isFinite(n)) return "|";
   const s = parseFloat(n.toPrecision(4));
   return String(s);
 }
@@ -22,7 +22,7 @@ function Mode1() {
 
   const x = parseNum(pct);
   const y = parseNum(num);
-  const result = x !== null && y !== null ? fmt((x / 100) * y) : "—";
+  const result = x !== null && y !== null ? fmt((x / 100) * y) : "|";
 
   return (
     <Card title='What is X% of Y?'>
@@ -45,7 +45,7 @@ function Mode2() {
 
   const x = parseNum(val);
   const y = parseNum(total);
-  const result = x !== null && y !== null && y !== 0 ? fmt((x / y) * 100) + "%" : "—";
+  const result = x !== null && y !== null && y !== 0 ? fmt((x / y) * 100) + "%" : "|";
 
   return (
     <Card title="X is what % of Y?">
@@ -68,7 +68,7 @@ function Mode3() {
   const x = parseNum(from);
   const y = parseNum(to);
 
-  let result = "—";
+  let result = "|";
   let colorClass = "text-white";
   if (x !== null && y !== null && x !== 0) {
     const change = ((y - x) / Math.abs(x)) * 100;
@@ -106,7 +106,7 @@ function Mode4() {
 
   const x = parseNum(base);
   const y = parseNum(pct);
-  let result = "—";
+  let result = "|";
   if (x !== null && y !== null) {
     const newVal = dir === "increase" ? x * (1 + y / 100) : x * (1 - y / 100);
     result = fmt(newVal);
@@ -140,7 +140,7 @@ function Mode5() {
 
   const x = parseNum(pct);
   const y = parseNum(base);
-  let result = "—";
+  let result = "|";
   if (x !== null && y !== null) {
     const newVal = dir === "more" ? y * (1 + x / 100) : y * (1 - x / 100);
     result = fmt(newVal);
@@ -217,7 +217,7 @@ function Result({
 }) {
   return (
     <div className="bg-slate-800/40 rounded-lg p-4 mt-3 text-center">
-      <span className={`text-2xl font-bold ${value === "—" ? "text-slate-600" : colorClass}`}>
+      <span className={`text-2xl font-bold ${value === "|" ? "text-slate-600" : colorClass}`}>
         {value}
       </span>
     </div>

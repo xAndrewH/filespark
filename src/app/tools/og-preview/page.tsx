@@ -96,7 +96,7 @@ export default function OgPreviewPage() {
         setData(json as OgPreviewResult);
       }
     } catch {
-      setError("Network error — could not reach the server");
+      setError("Network error | could not reach the server");
     } finally {
       setLoading(false);
     }
@@ -309,11 +309,11 @@ export default function OgPreviewPage() {
               <dl className="space-y-3 text-sm">
                 <div>
                   <dt className="text-slate-500 text-xs mb-0.5">Title</dt>
-                  <dd className="text-slate-200">{rTitle || <span className="text-slate-600">—</span>}</dd>
+                  <dd className="text-slate-200">{rTitle || <span className="text-slate-600">|</span>}</dd>
                 </div>
                 <div>
                   <dt className="text-slate-500 text-xs mb-0.5">Description</dt>
-                  <dd className="text-slate-200">{rDesc || <span className="text-slate-600">—</span>}</dd>
+                  <dd className="text-slate-200">{rDesc || <span className="text-slate-600">|</span>}</dd>
                 </div>
                 <div>
                   <dt className="text-slate-500 text-xs mb-0.5">Image</dt>
@@ -324,7 +324,7 @@ export default function OgPreviewPage() {
                 </div>
                 <div>
                   <dt className="text-slate-500 text-xs mb-0.5">Domain</dt>
-                  <dd className="text-slate-200">{domain || <span className="text-slate-600">—</span>}</dd>
+                  <dd className="text-slate-200">{domain || <span className="text-slate-600">|</span>}</dd>
                 </div>
               </dl>
             </div>

@@ -85,7 +85,7 @@ function BasicRow({ label, value, lengthBadge }: { label: string; value: string;
             )}
           </div>
         ) : (
-          <span className="text-slate-600 text-sm italic">—</span>
+          <span className="text-slate-600 text-sm italic">|</span>
         )}
         {lengthBadge && value && (
           <span className={`mt-1 inline-block text-xs px-1.5 py-0.5 rounded font-mono ${value.length > 160 || (label === "Title" && value.length > 60) ? "bg-orange-500/20 text-orange-400" : "bg-slate-800 text-slate-400"}`}>

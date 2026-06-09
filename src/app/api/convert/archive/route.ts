@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!existsSync(outputPath)) {
-      return new NextResponse("Archive creation failed — no output produced", { status: 500 });
+      return new NextResponse("Archive creation failed | no output produced", { status: 500 });
     }
 
     const result = await readFile(outputPath);

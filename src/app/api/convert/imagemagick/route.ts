@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     await writeFile(inputFile, Buffer.from(await file.arrayBuffer()));
 
-    // Build ImageMagick args — flatten multi-layer inputs (PSD/XCF) to first layer
+    // Build ImageMagick args | flatten multi-layer inputs (PSD/XCF) to first layer
     const args: string[] = [];
     if (["psd", "xcf"].includes(inputExt)) {
       // [0] selects the merged/composite layer

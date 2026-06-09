@@ -75,7 +75,7 @@ export default function AverageCalculatorPage() {
   const stats = useMemo(() => computeStats(numbers), [numbers]);
 
   const fmt = (n: number) => toSigFigs(n, 4);
-  const dash = "—";
+  const dash = "|";
 
   const modeDisplay = stats
     ? stats.mode.length === 0

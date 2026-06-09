@@ -15,7 +15,7 @@ export const CATEGORIES: Record<Category, { label: string; emoji: string; mime: 
 export const INPUT_FORMATS: Record<Category, string[]> = {
   video:    ["mp4", "avi", "mov", "mkv", "webm", "flv", "wmv", "mpeg", "mpg", "m4v", "3gp"],
   audio:    ["mp3", "wav", "flac", "aac", "ogg", "m4a", "wma", "opus"],
-  // gif and apng intentionally excluded — they belong to the gif category for FFmpeg handling
+  // gif and apng intentionally excluded | they belong to the gif category for FFmpeg handling
   image:    ["jpg", "jpeg", "jfif", "jpe", "png", "webp", "tiff", "bmp", "avif", "heic", "heif", "svg",
              "psd", "eps", "ai", "xcf", "tga", "ico", "dds", "pcx", "cr2", "nef", "arw", "dng"],
   pdf:      ["pdf", "jpg", "jpeg", "png", "webp", "heic", "heif"],
@@ -41,7 +41,7 @@ export const OUTPUT_FORMATS: Record<Category, string[]> = {
 
 export const ALL_INPUT_EXTS = [...new Set(Object.values(INPUT_FORMATS).flat())];
 
-// Formats Sharp can't handle — route to ImageMagick WASM instead
+// Formats Sharp can't handle | route to ImageMagick WASM instead
 // svg: Sharp needs librsvg; bmp: Sharp doesn't support output; pdf/gif: canvas can't encode them
 const IMAGEMAGICK_INPUT_EXTS  = new Set(["psd", "eps", "ai", "xcf", "tga", "dds", "pcx", "cr2", "nef", "arw", "dng", "svg"]);
 const IMAGEMAGICK_OUTPUT_EXTS = new Set(["ico", "tga", "eps", "bmp", "pdf", "svg", "gif"]);

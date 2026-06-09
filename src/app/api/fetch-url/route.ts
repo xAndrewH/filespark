@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     const timedOut = e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError");
     return new NextResponse(
-      timedOut ? "Timed out — the site took too long to respond (15s limit)" : "Failed to fetch URL",
+      timedOut ? "Timed out | the site took too long to respond (15s limit)" : "Failed to fetch URL",
       { status: timedOut ? 504 : 502 }
     );
   }

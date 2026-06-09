@@ -246,7 +246,7 @@ export default function PdfPagesPage() {
             <div className="flex items-center justify-between mb-5 gap-4 flex-wrap">
               <div className="flex items-center gap-3">
                 <span className="text-slate-400 text-sm">
-                  <span className="text-white font-medium">{fileName}</span> — {activeCount} page{activeCount !== 1 ? "s" : ""}
+                  <span className="text-white font-medium">{fileName}</span> | {activeCount} page{activeCount !== 1 ? "s" : ""}
                   {deletedCount > 0 && <span className="text-red-400 ml-1">({deletedCount} removed)</span>}
                 </span>
               </div>

@@ -369,7 +369,7 @@ function buildBestPractices(d: Omit<PageAnalysis, "categories">): CategoryResult
   if (!d.passwordInputOnHttp) { passed++; }
   else {
     deductions += 20;
-    issues.push({ id: "password-on-http", title: "Password field on non-HTTPS page", description: "Never put password inputs on pages served over HTTP — credentials will be sent in plain text.", impact: "high" });
+    issues.push({ id: "password-on-http", title: "Password field on non-HTTPS page", description: "Never put password inputs on pages served over HTTP | credentials will be sent in plain text.", impact: "high" });
   }
 
   return { score: Math.max(5, 100 - deductions), passed, total: checks, issues };
@@ -482,7 +482,7 @@ export async function POST(req: NextRequest) {
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     if (msg.includes("abort") || msg.includes("timeout"))
-      return NextResponse.json({ error: "Request timed out — site took too long to respond." }, { status: 504 });
+      return NextResponse.json({ error: "Request timed out | site took too long to respond." }, { status: 504 });
     return NextResponse.json({ error: `Could not reach the URL: ${msg}` }, { status: 502 });
   }
   const ttfb = Date.now() - start;
@@ -547,7 +547,7 @@ export async function POST(req: NextRequest) {
       if (type) parts.push(`type="${type}"`);
       if (id) parts.push(`id="${id}"`);
       else if (cls) parts.push(`class="${cls.split(" ").slice(0, 3).join(" ")}"`);
-      return parts.join(" ") + "> — no visible text or aria-label";
+      return parts.join(" ") + "> | no visible text or aria-label";
     });
 
   const allInputs = [...html.matchAll(/<input([^>]*)>/gi)];
@@ -567,7 +567,7 @@ export async function POST(req: NextRequest) {
       if (id) parts.push(`id="${id}"`);
       if (name) parts.push(`name="${name}"`);
       if (placeholder) parts.push(`placeholder="${placeholder.slice(0, 40)}"`);
-      return parts.join(" ") + "> — no associated label";
+      return parts.join(" ") + "> | no associated label";
     });
 
   // Accessibility extras

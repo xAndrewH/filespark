@@ -155,7 +155,7 @@ export default function MyIpPage() {
         </div>
 
         <p className="text-slate-600 text-xs text-center mt-6">
-          Location is approximate — IP geolocation can be off by city or region and is not always accurate.</p>
+          Location is approximate | IP geolocation can be off by city or region and is not always accurate.</p>
         <p className="text-slate-600 text-xs text-center mt-1">
           Your IP is visible to every website you visit.
         </p>

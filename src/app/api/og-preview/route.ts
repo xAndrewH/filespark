@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     const isTimeout = e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError");
     return NextResponse.json(
-      { error: isTimeout ? "Request timed out after 10s" : "Failed to fetch URL — the site may be unreachable or blocking requests" },
+      { error: isTimeout ? "Request timed out after 10s" : "Failed to fetch URL | the site may be unreachable or blocking requests" },
       { status: 502 }
     );
   }
@@ -204,21 +204,21 @@ export async function POST(req: NextRequest) {
 
   const warnings: string[] = [];
   if (!og.image && !twitter.image) {
-    warnings.push("No og:image — your link will show no preview image");
+    warnings.push("No og:image | your link will show no preview image");
   } else if (ogImageRaw && !/^https?:\/\//i.test(ogImageRaw) && !ogImageRaw.startsWith("//")) {
-    warnings.push("og:image is not an absolute URL — some platforms require a full https:// URL");
+    warnings.push("og:image is not an absolute URL | some platforms require a full https:// URL");
   }
-  if (!og.title) warnings.push("No og:title — falling back to the page <title>");
-  if (!og.description) warnings.push("No og:description — falling back to the meta description");
-  if (!twitter.card) warnings.push("No twitter:card — X may render a small or no card");
+  if (!og.title) warnings.push("No og:title | falling back to the page <title>");
+  if (!og.description) warnings.push("No og:description | falling back to the meta description");
+  if (!twitter.card) warnings.push("No twitter:card | X may render a small or no card");
   if (resolved.title && resolved.title.length > 60) {
-    warnings.push(`Title is ${resolved.title.length} chars — over 60, it may be truncated`);
+    warnings.push(`Title is ${resolved.title.length} chars | over 60, it may be truncated`);
   }
   if (resolved.description && resolved.description.length > 200) {
-    warnings.push(`Description is ${resolved.description.length} chars — over 200, it may be truncated`);
+    warnings.push(`Description is ${resolved.description.length} chars | over 200, it may be truncated`);
   }
   if (resolved.image) {
-    warnings.push("Image dimensions unknown — recommended og:image is 1200×630 (1.91:1)");
+    warnings.push("Image dimensions unknown | recommended og:image is 1200×630 (1.91:1)");
   }
 
   const result: OgPreviewResult = {

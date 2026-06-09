@@ -45,7 +45,7 @@ export default function PdfToImagesPage() {
     setProgress("Loading PDF…");
     try {
       const pdfjsLib = await import("pdfjs-dist");
-      // Use the locally served worker — avoids CDN version mismatch
+      // Use the locally served worker | avoids CDN version mismatch
       pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
       const arrayBuffer = await file.arrayBuffer();

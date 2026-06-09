@@ -59,7 +59,7 @@ export default function TrafficAttributionPage() {
     (bestI, cvr, i) => (cvr > channelCVRs[bestI] ? i : bestI),
     0
   );
-  const bestChannel = totalConversions > 0 ? CHANNELS[bestIdx].name : "—";
+  const bestChannel = totalConversions > 0 ? CHANNELS[bestIdx].name : "|";
 
   const totalConvForAttr = totalConversions;
 
