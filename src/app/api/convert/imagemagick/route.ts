@@ -6,10 +6,13 @@ import { writeFile, readFile, unlink, readdir } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 import { randomBytes } from "crypto";
+import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
 const execFileAsync = promisify(execFile);
 
 const MAGICK = process.env.MAGICK_PATH ?? "magick";
+
+const MAX_UPLOAD = 100 * 1024 * 1024; // 100MB
 
 const MIME_MAP: Record<string, string> = {
   jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png",
@@ -20,6 +23,9 @@ const MIME_MAP: Record<string, string> = {
 };
 
 export async function POST(request: NextRequest) {
+  const rl = rateLimit(request, "convert-imagemagick", 20, 60_000); // 20 conversions/min
+  if (!rl.ok) return NextResponse.json({ error: "Too many requests, please slow down." }, { status: 429, headers: rateLimitHeaders(rl) });
+
   const uid = randomBytes(8).toString("hex");
   const inputPath  = path.join(tmpdir(), `magick_${uid}_in`);
   let   outputPath = "";
@@ -30,6 +36,7 @@ export async function POST(request: NextRequest) {
     const format = (formData.get("format") as string | null)?.toLowerCase();
 
     if (!file)   return new NextResponse("Missing file", { status: 400 });
+    if (file.size > MAX_UPLOAD) return new NextResponse("File too large (max 100MB)", { status: 413 });
     if (!format) return new NextResponse("Missing format", { status: 400 });
 
     const inputExt = file.name.split(".").pop()?.toLowerCase() ?? "";

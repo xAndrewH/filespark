@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { assertPublicUrl, SsrfError } from "@/lib/ssrf";
 
 export interface OgPreviewResult {
   url: string;
@@ -66,8 +67,11 @@ export async function POST(req: NextRequest) {
 
   let parsedInput: URL;
   try {
-    parsedInput = new URL(normalized);
-  } catch {
+    parsedInput = await assertPublicUrl(normalized);
+  } catch (e) {
+    if (e instanceof SsrfError) {
+      return NextResponse.json({ error: e.message }, { status: 400 });
+    }
     return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
   }
   if (!parsedInput.hostname.includes(".")) {

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { assertPublicUrl, SsrfError } from "@/lib/ssrf";
 
 const MAX_BYTES = 50 * 1024 * 1024; // 50 MB
 
@@ -16,13 +17,12 @@ export async function POST(req: NextRequest) {
 
   let parsed: URL;
   try {
-    parsed = new URL(url);
-  } catch {
+    parsed = await assertPublicUrl(url);
+  } catch (e) {
+    if (e instanceof SsrfError) {
+      return NextResponse.json({ error: e.message }, { status: 400 });
+    }
     return new NextResponse("Invalid URL", { status: 400 });
-  }
-
-  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-    return new NextResponse("Only http/https URLs are supported", { status: 400 });
   }
 
   let upstream: Response;

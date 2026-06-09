@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { tmpdir } from "os";
@@ -11,6 +12,8 @@ const execFileAsync = promisify(execFile);
 const SOFFICE =
   process.env.SOFFICE_PATH ??
   "C:\\Program Files\\LibreOffice\\program\\soffice.exe";
+
+const MAX_UPLOAD = 100 * 1024 * 1024; // 100MB
 
 const MIME_MAP: Record<string, string> = {
   pdf:  "application/pdf",
@@ -25,6 +28,9 @@ const MIME_MAP: Record<string, string> = {
 };
 
 export async function POST(request: NextRequest) {
+  const rl = rateLimit(request, "convert-document", 20, 60_000); // 20 conversions/min
+  if (!rl.ok) return NextResponse.json({ error: "Too many requests, please slow down." }, { status: 429, headers: rateLimitHeaders(rl) });
+
   let inputPath = "";
   let outputPath = "";
 
@@ -35,6 +41,7 @@ export async function POST(request: NextRequest) {
     const mode = (formData.get("mode") as string | null) ?? "convert";
 
     if (!file) return new NextResponse("Missing file", { status: 400 });
+    if (file.size > MAX_UPLOAD) return new NextResponse("File too large (max 100MB)", { status: 413 });
 
     const inputExt = file.name.split(".").pop()?.toLowerCase() ?? "docx";
     const uid = randomUUID();

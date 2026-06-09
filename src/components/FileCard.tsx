@@ -51,7 +51,7 @@ function ImageThumbnail({ file }: { file: File }) {
   return (
     <img
       src={src}
-      alt=""
+      alt="File preview"
       className="w-full h-full object-cover rounded-lg"
       onError={() => setSrc(null)}
     />
@@ -112,6 +112,7 @@ export default function FileCard({ item, onConvert, onRemove, onChange, onOpenKe
                     {...dragHandleProps}
                     className="p-1 text-slate-600 hover:text-slate-400 cursor-grab active:cursor-grabbing transition-colors rounded"
                     title="Drag to reorder"
+                    aria-label="Drag to reorder"
                   >
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
                       <circle cx="4" cy="3" r="1" /><circle cx="8" cy="3" r="1" />
@@ -123,6 +124,7 @@ export default function FileCard({ item, onConvert, onRemove, onChange, onOpenKe
                 <button
                   onClick={() => onRemove(item.id)}
                   title="Remove"
+                  aria-label="Remove file"
                   className="text-slate-600 hover:text-slate-300 transition-colors p-1 rounded-md hover:bg-slate-800"
                 >
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -225,7 +227,7 @@ export default function FileCard({ item, onConvert, onRemove, onChange, onOpenKe
 
             {/* Loading FFmpeg */}
             {item.status === "loading-ffmpeg" && (
-              <div className="mt-3">
+              <div className="mt-3" aria-busy={true}>
                 <p className="text-blue-400 text-xs mb-1.5 font-medium">Loading FFmpeg engine…</p>
                 <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
                   <div className="h-full w-2/5 bg-blue-500 rounded-full progress-indeterminate" />
@@ -235,7 +237,7 @@ export default function FileCard({ item, onConvert, onRemove, onChange, onOpenKe
 
             {/* Converting progress */}
             {item.status === "converting" && (
-              <div className="mt-3">
+              <div className="mt-3" aria-busy={true}>
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-blue-400 text-xs font-medium">Converting…</span>
                   <span className="text-blue-400 text-xs font-mono">{item.progress}%</span>

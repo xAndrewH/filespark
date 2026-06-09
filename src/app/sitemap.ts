@@ -6,7 +6,7 @@ const TOOLS = [
   "/tools/age-calculator","/tools/aspect-ratio","/tools/average-calculator",
   "/tools/background-remover","/tools/base-converter","/tools/base64",
   "/tools/border-radius","/tools/box-shadow","/tools/calculator",
-  "/tools/case-converter","/tools/code-to-image","/tools/color-contrast",
+  "/tools/case-converter","/tools/code-beautifier","/tools/code-to-image","/tools/color-contrast",
   "/tools/color-picker","/tools/conversion-rate","/tools/cpm-calculator",
   "/tools/cron","/tools/css-animation","/tools/css-beautifier",
   "/tools/css-grid","/tools/css-minifier","/tools/csv-json",

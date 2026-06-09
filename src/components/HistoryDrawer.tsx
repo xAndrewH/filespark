@@ -136,7 +136,7 @@ export default function HistoryDrawer({ open, onClose, version, sessionDownloads
               <div className="w-14 h-14 rounded-2xl bg-slate-900 flex items-center justify-center text-2xl">
                 🕐
               </div>
-              <p className="text-slate-400 text-sm">No conversions yet</p>
+              <p className="text-slate-400 text-sm">No conversion history yet</p>
               <p className="text-slate-600 text-xs max-w-48 leading-relaxed">
                 Every file you convert will appear here automatically.
               </p>

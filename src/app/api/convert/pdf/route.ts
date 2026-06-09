@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { PDFDocument } from "pdf-lib";
 import { maybeDecodeHeic } from "@/lib/heic";
 
+const MAX_UPLOAD = 100 * 1024 * 1024; // 100MB
+
 export async function POST(request: NextRequest) {
+  const rl = rateLimit(request, "convert-pdf", 20, 60_000); // 20 conversions/min
+  if (!rl.ok) return NextResponse.json({ error: "Too many requests, please slow down." }, { status: 429, headers: rateLimitHeaders(rl) });
+
   try {
     const formData = await request.formData();
     const files = formData.getAll("file") as File[];
@@ -10,6 +16,7 @@ export async function POST(request: NextRequest) {
     const mode = (formData.get("mode") as string | null) ?? "convert";
 
     if (files.length === 0) return new NextResponse("No files provided", { status: 400 });
+    if (files.some((f) => f.size > MAX_UPLOAD)) return new NextResponse("File too large (max 100MB)", { status: 413 });
 
     const firstExt = files[0].name.split(".").pop()?.toLowerCase() ?? "pdf";
 

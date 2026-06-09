@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { assertPublicUrl, SsrfError } from "@/lib/ssrf";
+import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
 export interface ResourceItem {
   url: string;
@@ -456,6 +458,9 @@ function buildSeo(d: Omit<PageAnalysis, "categories">): CategoryResult {
 
 /* ── Route handler ───────────────────────────────────────────────── */
 export async function POST(req: NextRequest) {
+  const rl = rateLimit(req, "page-speed", 15, 60_000);
+  if (!rl.ok) return NextResponse.json({ error: "Too many requests, please slow down." }, { status: 429, headers: rateLimitHeaders(rl) });
+
   let url: string;
   try { ({ url } = await req.json()); }
   catch { return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 }); }
@@ -463,8 +468,14 @@ export async function POST(req: NextRequest) {
   if (!url || typeof url !== "string")
     return NextResponse.json({ error: "Missing URL" }, { status: 400 });
   if (!url.startsWith("http://") && !url.startsWith("https://")) url = `https://${url}`;
-  try { new URL(url); }
-  catch { return NextResponse.json({ error: "Invalid URL" }, { status: 400 }); }
+  try {
+    await assertPublicUrl(url);
+  } catch (e) {
+    if (e instanceof SsrfError) {
+      return NextResponse.json({ error: e.message }, { status: 400 });
+    }
+    return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
+  }
 
   let res: Response;
   const start = Date.now();

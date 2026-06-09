@@ -464,6 +464,26 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-slate-950">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            name: "FileSpark",
+            url: "https://filespark.app",
+            description:
+              "Free file converter and 85+ browser tools — convert images, video, audio, documents, and more, right in your browser.",
+            applicationCategory: "UtilitiesApplication",
+            operatingSystem: "Any",
+            offers: {
+              "@type": "Offer",
+              price: "0",
+              priceCurrency: "USD",
+            },
+          }),
+        }}
+      />
       <Navbar historyCount={historyCount} onHistoryClick={() => setHistoryOpen(true)} onKeyClick={() => setKeyModalOpen(true)} />
       <HistoryDrawer open={historyOpen} onClose={() => setHistoryOpen(false)} version={historyVersion} sessionDownloads={sessionDownloads.current} />
       <CloudConvertKeyModal open={keyModalOpen} onClose={() => setKeyModalOpen(false)} />

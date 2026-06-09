@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { assertPublicUrl, SsrfError } from "@/lib/ssrf";
 
 export interface MetaTag {
   type: "meta" | "link" | "title";
@@ -39,6 +40,15 @@ export async function POST(req: NextRequest) {
     }
 
     const normalized = url.startsWith("http") ? url : `https://${url}`;
+
+    try {
+      await assertPublicUrl(normalized);
+    } catch (e) {
+      if (e instanceof SsrfError) {
+        return NextResponse.json({ error: e.message }, { status: 400 });
+      }
+      return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
+    }
 
     const res = await fetch(normalized, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; MetaTagAnalyzer/1.0)" },

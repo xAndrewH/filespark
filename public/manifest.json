@@ -1,0 +1,22 @@
+{
+  "name": "FileSpark",
+  "short_name": "FileSpark",
+  "description": "Free file converter and 85+ browser tools — convert images, video, audio, documents, and more, right in your browser.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.ico",
+      "type": "image/x-icon",
+      "sizes": "48x48"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { assertPublicUrl, SsrfError } from "@/lib/ssrf";
 
 export interface HeaderAnalysisResult {
   url: string;
@@ -101,6 +102,15 @@ export async function POST(req: NextRequest) {
   url = url.trim();
   if (!/^https?:\/\//i.test(url)) {
     url = "https://" + url;
+  }
+
+  try {
+    await assertPublicUrl(url);
+  } catch (e) {
+    if (e instanceof SsrfError) {
+      return NextResponse.json({ error: e.message }, { status: 400 });
+    }
+    return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
   }
 
   const redirectChain: string[] = [];

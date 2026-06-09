@@ -8,8 +8,11 @@ import path from "path";
 import { randomBytes } from "crypto";
 import archiver from "archiver";
 import { createWriteStream } from "fs";
+import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
 const execFileAsync = promisify(execFile);
+
+const MAX_UPLOAD = 100 * 1024 * 1024; // 100MB
 const SEVENZIP = process.env.SEVENZIP_PATH ?? "C:\\Program Files\\7-Zip\\7z.exe";
 
 const SUPPORTED_INPUT  = new Set(["zip", "tar", "gz", "bz2", "7z", "rar", "xz"]);
@@ -39,6 +42,9 @@ async function packWith7z(extractDir: string, outputPath: string): Promise<void>
 }
 
 export async function POST(request: NextRequest) {
+  const rl = rateLimit(request, "convert-archive", 20, 60_000); // 20 conversions/min
+  if (!rl.ok) return NextResponse.json({ error: "Too many requests, please slow down." }, { status: 429, headers: rateLimitHeaders(rl) });
+
   const uid        = randomBytes(8).toString("hex");
   const extractDir = path.join(tmpdir(), `archive_${uid}_extracted`);
   let   outputPath = "";
@@ -50,6 +56,7 @@ export async function POST(request: NextRequest) {
     const format = (formData.get("format") as string | null)?.toLowerCase();
 
     if (!file)   return new NextResponse("Missing file", { status: 400 });
+    if (file.size > MAX_UPLOAD) return new NextResponse("File too large (max 100MB)", { status: 413 });
     if (!format) return new NextResponse("Missing format", { status: 400 });
 
     const inputExt = file.name.split(".").pop()?.toLowerCase() ?? "";
@@ -78,8 +85,14 @@ export async function POST(request: NextRequest) {
           .filter((f) => f.type === "File")
           .map(async (f) => {
             const outPath = path.join(extractDir, path.basename(f.path));
+            // Defense in depth against zip-slip: ensure the resolved path
+            // stays inside the extract directory before writing.
+            const safePath = path.resolve(extractDir, outPath);
+            if (safePath !== extractDir && !safePath.startsWith(extractDir + path.sep)) {
+              return; // skip entries that escape the extract dir
+            }
             const buf = await f.buffer();
-            await writeFile(outPath, buf);
+            await writeFile(safePath, buf);
           })
       );
     } else {

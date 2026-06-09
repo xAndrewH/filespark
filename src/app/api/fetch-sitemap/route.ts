@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { assertPublicUrl, SsrfError } from "@/lib/ssrf";
 
 export interface SitemapEntry {
   loc: string;
@@ -38,6 +39,11 @@ function extractChildSitemaps(xml: string): string[] {
 
 async function fetchText(url: string): Promise<string | null> {
   try {
+    await assertPublicUrl(url);
+  } catch {
+    return null;
+  }
+  try {
     const res = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; FileSpark/1.0 Sitemap Checker)" },
       signal: AbortSignal.timeout(8000),
@@ -64,6 +70,15 @@ export async function POST(req: NextRequest) {
   const base = raw.trim().startsWith("http")
     ? raw.trim().replace(/\/$/, "")
     : `https://${raw.trim().replace(/\/$/, "")}`;
+
+  try {
+    await assertPublicUrl(base);
+  } catch (e) {
+    if (e instanceof SsrfError) {
+      return NextResponse.json({ error: e.message }, { status: 400 });
+    }
+    return NextResponse.json({ error: "Invalid domain" }, { status: 400 });
+  }
 
   // Discover sitemap URLs from robots.txt first
   const sitemapQueue: string[] = [];

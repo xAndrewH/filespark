@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import Footer from "@/components/Footer";
@@ -13,6 +13,7 @@ export const metadata: Metadata = {
   description:
     "Convert and compress 80+ file formats. Use 85+ free browser tools for developers, designers, and marketers. No account, no installs, nothing stored.",
   metadataBase: new URL("https://filespark.app"),
+  manifest: "/manifest.json",
   openGraph: {
     siteName: "FileSpark",
     title: "FileSpark | File Converter & Browser Tools",
@@ -20,14 +21,18 @@ export const metadata: Metadata = {
       "Convert and compress 80+ file formats. Use 85+ free browser tools for developers, designers, and marketers. No account, no installs, nothing stored.",
     url: "https://filespark.app",
     type: "website",
+    images: ["/og-image.png"],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "FileSpark | File Converter & Browser Tools",
     description:
       "Convert and compress 80+ file formats. Use 85+ free browser tools for developers, designers, and marketers. No account, no installs, nothing stored.",
+    images: ["/og-image.png"],
   },
 };
+
+export const viewport: Viewport = { themeColor: "#0f172a" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import puppeteer, { type Page } from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
 import sharp from "sharp";
+import { assertPublicUrl, SsrfError } from "@/lib/ssrf";
+import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
 const CACHE_TTL_MS = 60_000;
 const screenshotCache = new Map<string, { image: string; expires: number }>();
@@ -110,6 +112,9 @@ async function captureFullPage(page: Page, width: number, viewportHeight: number
 }
 
 export async function POST(req: NextRequest) {
+  const rl = rateLimit(req, "screenshot", 10, 60_000);
+  if (!rl.ok) return NextResponse.json({ error: "Too many requests, please slow down." }, { status: 429, headers: rateLimitHeaders(rl) });
+
   // Evict expired cache entries on each request.
   const now = Date.now();
   for (const [key, entry] of screenshotCache) {
@@ -130,12 +135,12 @@ export async function POST(req: NextRequest) {
 
   let target: URL;
   try {
-    target = new URL(rawUrl);
-  } catch {
+    target = await assertPublicUrl(rawUrl);
+  } catch (e) {
+    if (e instanceof SsrfError) {
+      return NextResponse.json({ error: e.message }, { status: 400 });
+    }
     return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
-  }
-  if (target.protocol !== "http:" && target.protocol !== "https:") {
-    return NextResponse.json({ error: "Only http/https URLs are supported" }, { status: 400 });
   }
 
   if (!Number.isFinite(body.width) || !Number.isFinite(body.height)) {

@@ -29,7 +29,7 @@ export default function CloudConvertKeyModal({ open, onClose }: Props) {
             <h2 className="text-white font-semibold text-base">CloudConvert API Key</h2>
             <p className="text-slate-400 text-sm mt-1">Required for document &amp; eBook conversions (DOCX, XLSX, EPUB, MOBI…)</p>
           </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors mt-0.5">
+          <button onClick={onClose} aria-label="Close" className="text-slate-500 hover:text-white transition-colors mt-0.5">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -46,8 +46,9 @@ export default function CloudConvertKeyModal({ open, onClose }: Props) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-slate-400 text-xs font-medium uppercase tracking-wide">API Key</label>
+          <label htmlFor="cloudconvert-api-key" className="text-slate-400 text-xs font-medium uppercase tracking-wide">API Key</label>
           <input
+            id="cloudconvert-api-key"
             type="password"
             value={key}
             onChange={e => { setKey(e.target.value); setSaved(false); }}

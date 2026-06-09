@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
+
+const MAX_UPLOAD = 100 * 1024 * 1024; // 100MB
 
 const MIME_MAP: Record<string, string> = {
   ttf:   "font/ttf",
@@ -24,12 +27,16 @@ function detectFontType(buf: Buffer): "ttf" | "otf" | "woff" | "woff2" | "unknow
 }
 
 export async function POST(request: NextRequest) {
+  const rl = rateLimit(request, "convert-font", 20, 60_000); // 20 conversions/min
+  if (!rl.ok) return NextResponse.json({ error: "Too many requests, please slow down." }, { status: 429, headers: rateLimitHeaders(rl) });
+
   try {
     const formData = await request.formData();
     const file   = formData.get("file") as File | null;
     const format = (formData.get("format") as string | null)?.toLowerCase();
 
     if (!file)   return new NextResponse("Missing file", { status: 400 });
+    if (file.size > MAX_UPLOAD) return new NextResponse("File too large (max 100MB)", { status: 413 });
     if (!format) return new NextResponse("Missing format", { status: 400 });
 
     const inputBuf  = Buffer.from(await file.arrayBuffer());
