@@ -8,6 +8,30 @@ import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 const CACHE_TTL_MS = 60_000;
 const screenshotCache = new Map<string, { image: string; expires: number }>();
 
+// Many sites set `scroll-behavior: smooth` globally (for anchor links), which
+// makes every programmatic `window.scrollTo()` animate instead of jumping
+// instantly. That left screenshots capturing a transient mid-scroll position
+// (e.g. the first tile showing content from partway down the page instead of
+// the true top). Force instant scrolling everywhere before we start.
+async function disableSmoothScroll(page: Page) {
+  await page.evaluate(() => {
+    const style = document.createElement("style");
+    style.textContent = "* { scroll-behavior: auto !important; }";
+    document.head.appendChild(style);
+    document.documentElement.style.scrollBehavior = "auto";
+    if (document.body) document.body.style.scrollBehavior = "auto";
+  });
+}
+
+// Scroll to a position and wait for it to actually take effect before
+// proceeding | guards against any residual scroll animation/inertia.
+async function scrollToAndSettle(page: Page, y: number) {
+  await page.evaluate((scrollY) => window.scrollTo(0, scrollY), y);
+  await page
+    .waitForFunction((scrollY) => Math.abs(window.scrollY - scrollY) < 2, { timeout: 1_000 }, y)
+    .catch(() => {});
+}
+
 async function autoScroll(page: Page) {
   const needsScroll = await page.evaluate(() => document.body.scrollHeight > window.innerHeight + 200);
   if (!needsScroll) return;
@@ -34,9 +58,7 @@ async function autoScroll(page: Page) {
 
   // Make sure we're really back at the top before measuring/capturing |
   // some pages animate the scroll-to-top or have scroll-snap that delays it.
-  await page.waitForFunction(() => window.scrollY === 0, { timeout: 2_000 }).catch(async () => {
-    await page.evaluate(() => window.scrollTo(0, 0));
-  });
+  await scrollToAndSettle(page, 0);
 }
 
 // Hide fixed/sticky-positioned elements (headers, cookie banners, chat
@@ -92,7 +114,7 @@ async function captureFullPage(page: Page, width: number, viewportHeight: number
   const composites: { input: Buffer; top: number; left: number }[] = [];
   for (let i = 0; i < positions.length; i++) {
     const top = positions[i];
-    await page.evaluate((scrollY) => window.scrollTo(0, scrollY), top);
+    await scrollToAndSettle(page, top);
     await new Promise((resolve) => setTimeout(resolve, 140));
     // Keep fixed/sticky elements (headers, banners) visible in the very first
     // tile | that's where they belong | but hide them for the rest so they
@@ -178,6 +200,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    await disableSmoothScroll(page);
     await autoScroll(page);
     const buf = await captureFullPage(page, width, height);
 
