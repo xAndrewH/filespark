@@ -49,7 +49,7 @@ function DeviceCard({ device, shot, loading }: { device: Device; shot?: Shot; lo
       </div>
       <div className="flex items-center justify-center bg-slate-950/60 p-3">
         <div
-          className="relative bg-white rounded-md shadow-lg shadow-black/30 flex items-center justify-center overflow-y-auto overflow-x-hidden"
+          className="relative bg-white rounded-md shadow-lg shadow-black/30 flex items-start justify-start overflow-y-auto overflow-x-hidden"
           style={
             isWide
               ? { width: "100%", maxWidth: device.width, aspectRatio: `${device.width} / ${device.height}` }
@@ -78,7 +78,7 @@ function DeviceCard({ device, shot, loading }: { device: Device; shot?: Shot; lo
             />
           )}
           {!loading && !shot && (
-            <span className="text-slate-400 text-[11px]">Not captured yet</span>
+            <span className="m-auto text-slate-400 text-[11px]">Not captured yet</span>
           )}
         </div>
       </div>
