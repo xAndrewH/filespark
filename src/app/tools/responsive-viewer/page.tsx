@@ -27,12 +27,20 @@ const CARD_WIDTH = 280;
 type Shot = { image?: string; error?: string };
 
 function DeviceCard({ device, shot, loading }: { device: Device; shot?: Shot; loading: boolean }) {
+  // Landscape devices (laptop/desktop) are far too wide to scale down to the
+  // same fixed card width as phones without becoming a tiny sliver | give
+  // them the full grid width instead and size the frame off that.
+  const isWide = device.width > device.height;
   const scale = Math.min(1, CARD_WIDTH / device.width);
   const displayWidth = device.width * scale;
   const displayHeight = device.height * scale;
 
   return (
-    <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl overflow-hidden">
+    <div
+      className={`bg-slate-900/60 border border-slate-800/60 rounded-xl overflow-hidden ${
+        isWide ? "sm:col-span-2 lg:col-span-3" : ""
+      }`}
+    >
       <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800/60 bg-slate-900/80">
         <span className="text-slate-300 text-xs font-medium truncate">{device.name}</span>
         <span className="text-slate-600 text-[11px] tabular-nums shrink-0 ml-2">
@@ -42,7 +50,11 @@ function DeviceCard({ device, shot, loading }: { device: Device; shot?: Shot; lo
       <div className="flex items-center justify-center bg-slate-950/60 p-3">
         <div
           className="relative bg-white rounded-md shadow-lg shadow-black/30 flex items-center justify-center overflow-y-auto overflow-x-hidden"
-          style={{ width: displayWidth, height: displayHeight }}
+          style={
+            isWide
+              ? { width: "100%", maxWidth: device.width, aspectRatio: `${device.width} / ${device.height}` }
+              : { width: displayWidth, height: displayHeight }
+          }
         >
           {loading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-100 animate-pulse">
@@ -62,7 +74,7 @@ function DeviceCard({ device, shot, loading }: { device: Device; shot?: Shot; lo
               src={shot.image}
               alt={`${device.name} full-page screenshot`}
               className="w-full h-auto block"
-              style={{ width: displayWidth }}
+              style={isWide ? undefined : { width: displayWidth }}
             />
           )}
           {!loading && !shot && (
