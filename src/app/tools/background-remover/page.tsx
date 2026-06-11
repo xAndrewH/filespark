@@ -2,11 +2,22 @@
 
 import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
+import { Eraser, Brush, Undo2, RotateCcw, Check, X, Eye } from "lucide-react";
 import { ErrorAlert } from "@/components/ErrorAlert";
 import { RelatedTools } from "@/components/RelatedTools";
 
 type BgOption = "transparent" | "white" | "black" | "custom" | "blur";
 type ModelSize = "isnet_quint8" | "isnet";
+type EditTool = "erase" | "restore";
+
+function loadImageEl(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
 
 function applyBackground(resultUrl: string, bg: BgOption, customColor: string): Promise<string> {
   return new Promise((resolve) => {
@@ -52,7 +63,7 @@ const BG_OPTIONS: { id: BgOption; label: string; preview: string }[] = [
 
 export default function BackgroundRemoverPage() {
   const [original, setOriginal]     = useState<string | null>(null);
-  const [rawResult, setRawResult]   = useState<string | null>(null);  // transparent PNG from model
+  const [rawResult, setRawResult]   = useState<string | null>(null);  // current cutout (with manual edits applied)
   const [display, setDisplay]       = useState<string | null>(null);  // with bg applied
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress]     = useState("");
@@ -66,6 +77,20 @@ export default function BackgroundRemoverPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const currentFile = useRef<File | null>(null);
 
+  // Manual touch-up (erase/restore) state
+  const [editMode, setEditMode]       = useState(false);
+  const [editTool, setEditTool]       = useState<EditTool>("erase");
+  const [brushSize, setBrushSize]     = useState(40);
+  const [canUndo, setCanUndo]         = useState(false);
+  const [showOriginalEdit, setShowOriginalEdit] = useState(false);
+  const [cursorPos, setCursorPos]     = useState<{ x: number; y: number } | null>(null);
+  const editCanvasRef = useRef<HTMLCanvasElement>(null);
+  const origCanvasRef = useRef<HTMLCanvasElement>(null);
+  const aiResultRef   = useRef<string | null>(null);
+  const historyRef    = useRef<ImageData[]>([]);
+  const drawingRef    = useRef(false);
+  const lastPointRef  = useRef<{ x: number; y: number } | null>(null);
+
   const updateDisplay = useCallback(async (resultUrl: string, bgOpt: BgOption, color: string) => {
     const out = await applyBackground(resultUrl, bgOpt, color);
     setDisplay(out);
@@ -77,6 +102,8 @@ export default function BackgroundRemoverPage() {
     setDisplay(null);
     setError("");
     setShowSlider(false);
+    setEditMode(false);
+    aiResultRef.current = null;
     setProcessing(true);
     setProgress("Loading AI model…");
     currentFile.current = file;
@@ -92,6 +119,7 @@ export default function BackgroundRemoverPage() {
       });
       const url = URL.createObjectURL(blob);
       setRawResult(url);
+      aiResultRef.current = url;
       await updateDisplay(url, bg, customColor);
       setShowSlider(true);
     } catch (e) {
@@ -125,6 +153,140 @@ export default function BackgroundRemoverPage() {
     a.download = `${fileName}_no_bg.png`;
     a.click();
   };
+
+  // ---- Manual erase / restore editor ----
+
+  const openEditor = useCallback(async () => {
+    if (!rawResult || !original) return;
+    const [resImg, origImg] = await Promise.all([loadImageEl(rawResult), loadImageEl(original)]);
+    const canvas = editCanvasRef.current;
+    const oc = origCanvasRef.current;
+    if (!canvas || !oc) return;
+
+    canvas.width = resImg.naturalWidth;
+    canvas.height = resImg.naturalHeight;
+    canvas.getContext("2d")!.drawImage(resImg, 0, 0, canvas.width, canvas.height);
+
+    oc.width = canvas.width;
+    oc.height = canvas.height;
+    oc.getContext("2d")!.drawImage(origImg, 0, 0, oc.width, oc.height);
+
+    historyRef.current = [];
+    setCanUndo(false);
+    setShowOriginalEdit(false);
+    setEditMode(true);
+  }, [rawResult, original]);
+
+  const paintAt = useCallback((x: number, y: number, radius: number) => {
+    const canvas = editCanvasRef.current;
+    const oc = origCanvasRef.current;
+    if (!canvas || !oc) return;
+    const ctx = canvas.getContext("2d")!;
+    if (editTool === "erase") {
+      ctx.save();
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    } else {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(oc, 0, 0, canvas.width, canvas.height);
+      ctx.restore();
+    }
+  }, [editTool]);
+
+  const getImagePos = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const canvas = editCanvasRef.current!;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY,
+      radius: (brushSize / 2) * scaleX,
+    };
+  };
+
+  const strokeTo = useCallback((x: number, y: number, radius: number) => {
+    const last = lastPointRef.current;
+    if (!last) {
+      paintAt(x, y, radius);
+    } else {
+      const dist = Math.hypot(x - last.x, y - last.y);
+      const step = Math.max(1, radius / 2);
+      const steps = Math.max(1, Math.ceil(dist / step));
+      for (let i = 1; i <= steps; i++) {
+        const t = i / steps;
+        paintAt(last.x + (x - last.x) * t, last.y + (y - last.y) * t, radius);
+      }
+    }
+    lastPointRef.current = { x, y };
+  }, [paintAt]);
+
+  const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (showOriginalEdit) return;
+    e.preventDefault();
+    const canvas = editCanvasRef.current!;
+    const ctx = canvas.getContext("2d")!;
+    historyRef.current.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+    if (historyRef.current.length > 20) historyRef.current.shift();
+    setCanUndo(true);
+    drawingRef.current = true;
+    lastPointRef.current = null;
+    const { x, y, radius } = getImagePos(e);
+    strokeTo(x, y, radius);
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const canvas = editCanvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    setCursorPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    if (!drawingRef.current || showOriginalEdit) return;
+    if (e.buttons !== 1) { drawingRef.current = false; return; }
+    const { x, y, radius } = getImagePos(e);
+    strokeTo(x, y, radius);
+  };
+
+  const stopDrawing = () => {
+    drawingRef.current = false;
+    lastPointRef.current = null;
+  };
+
+  const undo = () => {
+    const canvas = editCanvasRef.current;
+    if (!canvas) return;
+    const snap = historyRef.current.pop();
+    if (!snap) return;
+    canvas.getContext("2d")!.putImageData(snap, 0, 0);
+    setCanUndo(historyRef.current.length > 0);
+  };
+
+  const resetEdits = async () => {
+    const canvas = editCanvasRef.current;
+    if (!canvas || !aiResultRef.current) return;
+    const img = await loadImageEl(aiResultRef.current);
+    const ctx = canvas.getContext("2d")!;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    historyRef.current = [];
+    setCanUndo(false);
+  };
+
+  const applyEdits = async () => {
+    const canvas = editCanvasRef.current;
+    if (!canvas) return;
+    const url = canvas.toDataURL("image/png");
+    setRawResult(url);
+    await updateDisplay(url, bg, customColor);
+    setEditMode(false);
+  };
+
+  const cancelEdits = () => setEditMode(false);
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -187,7 +349,7 @@ export default function BackgroundRemoverPage() {
           <ErrorAlert message={error} />
 
           {/* Comparison slider */}
-          {original && display && showSlider && (
+          {original && display && showSlider && !editMode && (
             <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4 space-y-3">
               <p className="text-slate-400 text-xs font-medium">Before / After | drag slider</p>
               <div className="relative overflow-hidden rounded-xl select-none"
@@ -230,8 +392,102 @@ export default function BackgroundRemoverPage() {
             </div>
           )}
 
+          {/* Touch up: erase / restore */}
+          {rawResult && !processing && (
+            <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-white text-sm font-medium">Touch up cutout</p>
+                  <p className="text-slate-500 text-xs mt-0.5">Erase leftover background or restore parts the AI removed by mistake.</p>
+                </div>
+                {!editMode ? (
+                  <button onClick={openEditor}
+                    className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors">
+                    <Eraser className="w-3.5 h-3.5" />
+                    Erase / Restore
+                  </button>
+                ) : (
+                  <div className="shrink-0 flex gap-2">
+                    <button onClick={cancelEdits}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-lg transition-colors">
+                      <X className="w-3.5 h-3.5" />
+                      Cancel
+                    </button>
+                    <button onClick={applyEdits}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors">
+                      <Check className="w-3.5 h-3.5" />
+                      Done
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {editMode && (
+                <>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex gap-1 bg-slate-800/60 border border-slate-700/60 rounded-lg p-1">
+                      <button onClick={() => setEditTool("erase")}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs transition-colors ${editTool === "erase" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"}`}>
+                        <Eraser className="w-3.5 h-3.5" />
+                        Erase
+                      </button>
+                      <button onClick={() => setEditTool("restore")}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs transition-colors ${editTool === "restore" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"}`}>
+                        <Brush className="w-3.5 h-3.5" />
+                        Restore
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2 flex-1 min-w-[140px]">
+                      <span className="text-slate-400 text-xs shrink-0">Brush size</span>
+                      <input type="range" min={5} max={150} value={brushSize} onChange={(e) => setBrushSize(+e.target.value)} className="flex-1 accent-blue-500" />
+                      <span className="text-slate-500 text-xs w-8 text-right font-mono">{brushSize}</span>
+                    </div>
+                    <button onClick={undo} disabled={!canUndo}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                      <Undo2 className="w-3.5 h-3.5" />
+                      Undo
+                    </button>
+                    <button onClick={resetEdits}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-lg transition-colors">
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      Reset
+                    </button>
+                    <button
+                      onPointerDown={() => setShowOriginalEdit(true)}
+                      onPointerUp={() => setShowOriginalEdit(false)}
+                      onPointerLeave={() => setShowOriginalEdit(false)}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-lg transition-colors select-none">
+                      <Eye className="w-3.5 h-3.5" />
+                      Hold to compare
+                    </button>
+                  </div>
+
+                  <div className="relative rounded-xl overflow-hidden select-none"
+                    style={{ background: "repeating-conic-gradient(#374151 0% 25%,#1e293b 0% 50%) 0 0/16px 16px", touchAction: "none" }}>
+                    <canvas
+                      ref={editCanvasRef}
+                      className="w-full block cursor-none"
+                      onPointerDown={onPointerDown}
+                      onPointerMove={onPointerMove}
+                      onPointerUp={stopDrawing}
+                      onPointerLeave={() => { stopDrawing(); setCursorPos(null); }}
+                    />
+                    <canvas ref={origCanvasRef} className={`absolute inset-0 w-full h-full pointer-events-none ${showOriginalEdit ? "" : "hidden"}`} />
+                    {cursorPos && !showOriginalEdit && (
+                      <div className="pointer-events-none absolute rounded-full border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,0.5)] -translate-x-1/2 -translate-y-1/2"
+                        style={{ left: cursorPos.x, top: cursorPos.y, width: brushSize, height: brushSize }} />
+                    )}
+                  </div>
+                  <p className="text-slate-500 text-xs">
+                    {showOriginalEdit ? "Showing original image." : editTool === "erase" ? "Paint to remove pixels." : "Paint to restore pixels from the original image."}
+                  </p>
+                </>
+              )}
+            </div>
+          )}
+
           {/* Background options */}
-          {rawResult && (
+          {rawResult && !editMode && (
             <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4 space-y-3">
               <p className="text-white text-sm font-medium">Background</p>
               <div className="flex flex-wrap gap-2">
@@ -252,7 +508,7 @@ export default function BackgroundRemoverPage() {
             </div>
           )}
 
-          {display && (
+          {display && !editMode && (
             <button onClick={download}
               className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-blue-500/20">
               Download PNG
