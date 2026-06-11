@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+import { RelatedTools } from "@/components/RelatedTools";
 
 type Channel = {
   name: string;
@@ -192,7 +193,7 @@ export default function TrafficAttributionPage() {
                   })}
                 </tbody>
               </table>
-              <p className="text-xs text-slate-600 mt-3">
+              <p className="text-xs text-slate-500 mt-3">
                 Last-Touch & First-Touch give 100% credit to one channel. Linear distributes equally across all channels with conversions.
               </p>
             </div>
@@ -223,6 +224,8 @@ export default function TrafficAttributionPage() {
             <p className="text-slate-500 text-sm">Enter visit data above to see attribution analysis.</p>
           </div>
         )}
+
+        <RelatedTools current="/tools/traffic-attribution" />
       </div>
     </div>
   );

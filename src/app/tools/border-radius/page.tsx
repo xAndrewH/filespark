@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from "react";
 import Link from "next/link";
+import { CopyButton } from "@/components/CopyButton";
+import { RelatedTools } from "@/components/RelatedTools";
 
 interface Corners { tl: number; tr: number; br: number; bl: number }
 
@@ -9,7 +11,6 @@ export default function BorderRadiusPage() {
   const [linked, setLinked] = useState(true);
   const [corners, setCorners] = useState<Corners>({ tl: 16, tr: 16, br: 16, bl: 16 });
   const [unit, setUnit] = useState<"px" | "%">("px");
-  const [copied, setCopied] = useState(false);
 
   const update = useCallback((key: keyof Corners, val: number) => {
     if (linked) {
@@ -25,12 +26,6 @@ export default function BorderRadiusPage() {
     ? `${tl}${unit}`
     : `${tl}${unit} ${tr}${unit} ${br}${unit} ${bl}${unit}`;
   const css = `border-radius: ${value};`;
-
-  const copy = useCallback(() => {
-    navigator.clipboard.writeText(css);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  }, [css]);
 
   const max = unit === "%" ? 50 : 120;
 
@@ -72,10 +67,7 @@ export default function BorderRadiusPage() {
           {/* CSS output */}
           <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl px-4 py-3 flex items-center gap-3">
             <code className="flex-1 text-blue-300 text-sm font-mono">{css}</code>
-            <button onClick={copy}
-              className="shrink-0 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors">
-              {copied ? "Copied!" : "Copy"}
-            </button>
+            <CopyButton text={css} label="Copy CSS" className="shrink-0" />
           </div>
 
           {/* Unit + link */}
@@ -137,6 +129,8 @@ export default function BorderRadiusPage() {
             </div>
           </div>
         </div>
+
+        <RelatedTools current="/tools/border-radius" />
       </div>
     </div>
   );

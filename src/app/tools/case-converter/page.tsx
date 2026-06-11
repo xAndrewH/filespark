@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
+import { CopyButton } from "@/components/CopyButton";
+import { RelatedTools } from "@/components/RelatedTools";
 
 type CaseId = "sentence" | "lower" | "upper" | "capitalized" | "alternating" | "title" | "inverse" | "camel" | "pascal" | "snake" | "constant" | "kebab" | "dot" | "path";
 
@@ -108,23 +110,36 @@ const CASES: CaseOption[] = [
   },
 ];
 
+const STORAGE_KEY = "filespark:case-converter:input";
+const SAMPLE_TEXT = "the quick brown fox jumps over the lazy dog. PACK MY BOX with five dozen liquor jugs!";
+
 export default function CaseConverterPage() {
   const [text, setText] = useState("");
   const [activeCase, setActiveCase] = useState<CaseId>("sentence");
-  const [copied, setCopied] = useState(false);
+
+  // Hydrate from localStorage after mount to avoid SSR mismatch.
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(STORAGE_KEY);
+      if (saved) setText(saved);
+    } catch { /* storage unavailable */ }
+  }, []);
+
+  // Persist input with a debounce; skip saving anything over 100KB.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        if (text.length <= 100_000) window.localStorage.setItem(STORAGE_KEY, text);
+      } catch { /* storage unavailable */ }
+    }, 500);
+    return () => clearTimeout(t);
+  }, [text]);
 
   const applyCase = useCallback((id: CaseId) => {
     setActiveCase(id);
     const c = CASES.find(c => c.id === id)!;
     setText(t => c.fn(t));
   }, []);
-
-  const copy = useCallback(() => {
-    if (!text) return;
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  }, [text]);
 
   const download = useCallback(() => {
     const blob = new Blob([text], { type: "text/plain" });
@@ -163,11 +178,7 @@ export default function CaseConverterPage() {
           <div className="flex items-center justify-between px-4 py-3 border-t border-slate-800/60">
             <div className="flex items-center gap-1">
               {/* Copy */}
-              <button onClick={copy} title="Copy" className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                </svg>
-              </button>
+              <CopyButton text={text} disabled={!text} />
               {/* Download */}
               <button onClick={download} title="Download" className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -180,7 +191,11 @@ export default function CaseConverterPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m-7 0a1 1 0 01-1-1V5a1 1 0 011-1h8a1 1 0 011 1v1a1 1 0 01-1 1H9z" />
                 </svg>
               </button>
-              {copied && <span className="text-green-400 text-xs ml-1">Copied!</span>}
+              {/* Sample */}
+              <button onClick={() => setText(SAMPLE_TEXT)}
+                className="bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-300 text-xs rounded-lg px-3 py-1.5 transition-colors">
+                Try an example
+              </button>
             </div>
             <span className="text-slate-500 text-xs">
               Character Count: {charCount} | Word Count: {wordCount} | Line Count: {lineCount}
@@ -206,6 +221,8 @@ export default function CaseConverterPage() {
             ))}
           </div>
         </div>
+
+        <RelatedTools current="/tools/case-converter" />
       </div>
     </div>
   );

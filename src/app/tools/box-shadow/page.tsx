@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from "react";
 import Link from "next/link";
+import { CopyButton } from "@/components/CopyButton";
+import { RelatedTools } from "@/components/RelatedTools";
 
 interface Shadow {
   x: number; y: number; blur: number; spread: number;
@@ -33,7 +35,6 @@ export default function BoxShadowPage() {
   const [active, setActive] = useState(0);
   const [bgColor, setBgColor] = useState("#1e293b");
   const [boxColor, setBoxColor] = useState("#ffffff");
-  const [copied, setCopied] = useState(false);
 
   const css = `box-shadow: ${shadows.map(shadowToCss).join(",\n             ")};`;
 
@@ -50,12 +51,6 @@ export default function BoxShadowPage() {
     if (shadows.length === 1) return;
     setShadows(s => s.filter((_, idx) => idx !== i));
     setActive(Math.max(0, active - 1));
-  };
-
-  const copy = () => {
-    navigator.clipboard.writeText(css);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
   };
 
   const s = shadows[active];
@@ -90,9 +85,7 @@ export default function BoxShadowPage() {
           {/* CSS output */}
           <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl px-4 py-3 flex items-start gap-3">
             <code className="flex-1 text-blue-300 text-xs font-mono break-all whitespace-pre">{css}</code>
-            <button onClick={copy} className="shrink-0 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors">
-              {copied ? "Copied!" : "Copy"}
-            </button>
+            <CopyButton text={css} label="Copy CSS" className="shrink-0" />
           </div>
 
           {/* Background / box colors */}
@@ -173,6 +166,8 @@ export default function BoxShadowPage() {
             </div>
           </div>
         </div>
+
+        <RelatedTools current="/tools/box-shadow" />
       </div>
     </div>
   );

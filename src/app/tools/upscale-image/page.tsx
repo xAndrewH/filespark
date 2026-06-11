@@ -3,6 +3,8 @@
 import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { ChevronLeft, Upload, Download, ImageIcon } from "lucide-react";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { RelatedTools } from "@/components/RelatedTools";
 
 type Scale = 2 | 3 | 4;
 type Algorithm = "bilinear" | "nearest";
@@ -157,9 +159,7 @@ export default function UpscaleImagePage() {
             />
           </div>
 
-          {error && (
-            <p className="text-amber-400 text-sm bg-amber-400/10 border border-amber-400/20 rounded-lg px-4 py-3">{error}</p>
-          )}
+          <ErrorAlert message={error} />
 
           {file && originalDims && (
             <>
@@ -274,6 +274,8 @@ export default function UpscaleImagePage() {
             </>
           )}
         </div>
+
+        <RelatedTools current="/tools/upscale-image" />
       </div>
     </div>
   );

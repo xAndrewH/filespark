@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from "react";
 import Link from "next/link";
+import { CopyButton } from "@/components/CopyButton";
+import { RelatedTools } from "@/components/RelatedTools";
 
 const WORDS = "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum curabitur pretium tincidunt lacus nulla gravida orci a odio tempor orci dapibus ultrices in iaculis nunc sed augue lacinia at egestas eget nullam elementum tempus feugiat sed lobortis aliquam elementum lorem".split(" ");
 
@@ -28,7 +30,6 @@ export default function LoremPage() {
   const [count, setCount] = useState(3);
   const [startWithLorem, setStartWithLorem] = useState(true);
   const [output, setOutput] = useState("");
-  const [copied, setCopied] = useState(false);
 
   const generate = useCallback(() => {
     let result = "";
@@ -50,13 +51,6 @@ export default function LoremPage() {
     }
     setOutput(result);
   }, [type, count, startWithLorem]);
-
-  const copy = () => {
-    if (!output) return;
-    navigator.clipboard.writeText(output);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -104,13 +98,12 @@ export default function LoremPage() {
               <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-5 text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
                 {output}
               </div>
-              <button onClick={copy}
-                className="absolute top-3 right-3 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors">
-                {copied ? "Copied!" : "Copy"}
-              </button>
+              <CopyButton text={output} label="Copy" className="absolute top-3 right-3" />
             </div>
           )}
         </div>
+
+        <RelatedTools current="/tools/lorem" />
       </div>
     </div>
   );

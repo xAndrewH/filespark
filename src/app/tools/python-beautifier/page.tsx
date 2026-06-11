@@ -2,6 +2,8 @@
 
 import { useState, useCallback, useRef } from "react";
 import Link from "next/link";
+import { CopyButton } from "@/components/CopyButton";
+import { RelatedTools } from "@/components/RelatedTools";
 
 const EXAMPLE = `import os,json\nfrom datetime import datetime\nclass UserManager:\ndef __init__(self,db_path):\nself.db_path=db_path\nself.users=[]\ndef load_users(self):\nif os.path.exists(self.db_path):\nwith open(self.db_path,'r') as f:\nself.users=json.load(f)\nreturn self.users\ndef add_user(self,name,email):\nuser={'id':len(self.users)+1,'name':name,'email':email,'created':datetime.now().isoformat()}\nself.users.append(user)\nself._save()\nreturn user\ndef _save(self):\nwith open(self.db_path,'w') as f:\njson.dump(self.users,f,indent=2)\ndef get_active_users(self):\nreturn[u for u in self.users if u.get('active',True)]`;
 
@@ -34,7 +36,6 @@ function beautifyPython(code: string): string {
 export default function PythonBeautifierPage() {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
-  const [copied, setCopied] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const beautify = useCallback((src?: string) => {
@@ -46,13 +47,6 @@ export default function PythonBeautifierPage() {
       setOutput("Error formatting Python.");
     }
   }, [input]);
-
-  const copy = useCallback(() => {
-    if (!output) return;
-    navigator.clipboard.writeText(output);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  }, [output]);
 
   const download = useCallback(() => {
     if (!output) return;
@@ -96,7 +90,7 @@ export default function PythonBeautifierPage() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-slate-400 text-xs">Input</label>
-              {input && <button onClick={() => { setInput(""); setOutput(""); }} className="text-slate-600 hover:text-slate-400 text-xs transition-colors">Clear</button>}
+              {input && <button onClick={() => { setInput(""); setOutput(""); }} className="text-slate-500 hover:text-slate-300 text-xs transition-colors">Clear</button>}
             </div>
             <textarea
               value={input}
@@ -113,7 +107,7 @@ export default function PythonBeautifierPage() {
               <div className="flex gap-2">
                 {output && (
                   <>
-                    <button onClick={copy} className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors">{copied ? "Copied!" : "Copy"}</button>
+                    <CopyButton text={output} className="px-2.5 py-1" />
                     <button onClick={download} className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors">Download</button>
                   </>
                 )}
@@ -129,6 +123,8 @@ export default function PythonBeautifierPage() {
           className="w-full mt-4 py-3 bg-green-700 hover:bg-green-600 disabled:opacity-40 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-green-500/20">
           Beautify Python
         </button>
+
+        <RelatedTools current="/tools/python-beautifier" />
       </div>
     </div>
   );

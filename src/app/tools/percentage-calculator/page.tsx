@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { RelatedTools } from "@/components/RelatedTools";
 
 /** Round to 4 significant figures, stripping unnecessary trailing zeros. */
 function fmt(n: number): string {
@@ -286,6 +287,8 @@ export default function PercentageCalculatorPage() {
           <Mode4 />
           <Mode5 />
         </div>
+
+        <RelatedTools current="/tools/percentage-calculator" />
       </div>
     </div>
   );

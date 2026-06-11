@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useRef } from "react";
 import Link from "next/link";
+import { CopyButton } from "@/components/CopyButton";
+import { RelatedTools } from "@/components/RelatedTools";
 
 function hexToHsl(hex: string): [number, number, number] {
   let r = parseInt(hex.slice(1, 3), 16) / 255;
@@ -122,7 +124,6 @@ const HARMONIES: { value: Harmony; label: string }[] = [
 export default function PalettePage() {
   const [base, setBase] = useState("#6366f1");
   const [harmony, setHarmony] = useState<Harmony>("complementary");
-  const [copied, setCopied] = useState<string | null>(null);
   const [source, setSource] = useState<Source>("color");
   const [imgPalette, setImgPalette] = useState<string[]>([]);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -131,18 +132,6 @@ export default function PalettePage() {
   const imgFileRef = useRef<HTMLInputElement>(null);
 
   const palette = useMemo(() => generatePalette(base, harmony), [base, harmony]);
-
-  const copy = useCallback((hex: string) => {
-    navigator.clipboard.writeText(hex);
-    setCopied(hex);
-    setTimeout(() => setCopied(null), 1500);
-  }, []);
-
-  const copyAll = (colors: string[]) => {
-    navigator.clipboard.writeText(colors.join(", "));
-    setCopied("all");
-    setTimeout(() => setCopied(null), 1500);
-  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -246,7 +235,7 @@ export default function PalettePage() {
               <canvas ref={imgCanvasRef} className={`w-full rounded-lg border border-slate-700/60 ${imgLoaded ? "block" : "hidden"}`} />
               {!imgLoaded && (
                 <button onClick={() => imgFileRef.current?.click()}
-                  className="w-full h-32 border-2 border-dashed border-slate-700 rounded-lg text-slate-600 text-xs hover:border-slate-600 hover:text-slate-400 transition-colors flex flex-col items-center justify-center gap-2">
+                  className="w-full h-32 border-2 border-dashed border-slate-700 rounded-lg text-slate-500 text-xs hover:border-slate-600 hover:text-slate-300 transition-colors flex flex-col items-center justify-center gap-2">
                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
                   Click to upload an image
                 </button>
@@ -275,26 +264,23 @@ export default function PalettePage() {
                         <p className="text-white font-mono font-bold">{p.hex.toUpperCase()}</p>
                         <p className="text-slate-500 text-xs mt-0.5">{p.label} · rgb({r}, {g}, {b}) · hsl({ph}, {ps}%, {pl}%)</p>
                       </div>
-                      <button onClick={() => copy(p.hex)}
-                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors shrink-0">
-                        {copied === p.hex ? "Copied!" : "Copy"}
-                      </button>
+                      <CopyButton text={p.hex} className="shrink-0" />
                     </div>
                   );
                 })}
               </div>
 
-              <button onClick={() => copyAll(displayColors)}
-                className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors">
-                {copied === "all" ? "Copied all!" : "Copy all as comma-separated HEX"}
-              </button>
+              <CopyButton text={() => displayColors.join(", ")} label="Copy all as comma-separated HEX"
+                className="w-full justify-center py-2.5 text-sm rounded-xl" />
             </>
           )}
 
           {source === "image" && !imgLoaded && (
-            <p className="text-slate-600 text-sm text-center">Upload an image above to extract its dominant colors.</p>
+            <p className="text-slate-500 text-sm text-center">Upload an image above to extract its dominant colors.</p>
           )}
         </div>
+
+        <RelatedTools current="/tools/palette" />
       </div>
     </div>
   );

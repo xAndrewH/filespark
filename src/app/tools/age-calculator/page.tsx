@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { RelatedTools } from "@/components/RelatedTools";
 
 function todayString() {
   const d = new Date();
@@ -169,6 +170,8 @@ export default function AgeCalculatorPage() {
             )}
           </div>
         </div>
+
+        <RelatedTools current="/tools/age-calculator" />
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
+import { RelatedTools } from "@/components/RelatedTools";
 
 type Mode = "basic" | "advanced";
 
@@ -210,6 +211,8 @@ export default function CalculatorPage() {
             </div>
           </div>
         )}
+
+        <RelatedTools current="/tools/calculator" />
       </div>
     </div>
   );

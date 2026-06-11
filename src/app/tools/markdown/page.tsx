@@ -2,6 +2,22 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { CopyButton } from "@/components/CopyButton";
+
+const STORAGE_KEY = "filespark:markdown:input";
+
+const SAMPLE_MARKDOWN = `# Project Notes
+
+A quick example of **markdown** in action.
+
+- Write in plain text
+- See the [preview](https://example.com) update live
+- Use \`inline code\` anywhere
+
+\`\`\`js
+const greet = (name) => "Hello, " + name + "!";
+\`\`\`
+`;
 
 export default function MarkdownPage() {
   const [markdown, setMarkdown] = useState(`# Hello, Markdown!
@@ -28,11 +44,27 @@ function hello() {
 | Cell 1   | Cell 2   |
 | Cell 3   | Cell 4   |
 `);
-  const [copied, setCopied] = useState(false);
   const [view, setView] = useState<"split" | "preview" | "editor">("split");
   const [showExport, setShowExport] = useState(false);
   const [renderedHtml, setRenderedHtml] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Restore the last edited document on return visits.
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(STORAGE_KEY);
+      if (saved) setMarkdown(saved);
+    } catch { /* storage unavailable */ }
+  }, []);
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      try {
+        if (markdown.length <= 100_000) window.localStorage.setItem(STORAGE_KEY, markdown);
+      } catch { /* storage unavailable */ }
+    }, 500);
+    return () => clearTimeout(id);
+  }, [markdown]);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -46,12 +78,6 @@ function hello() {
     }, 80);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [markdown]);
-
-  const copyHtml = () => {
-    navigator.clipboard.writeText(renderedHtml);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
 
   const exportHtml = () => {
     const styles = document.querySelector("style[data-md]")?.textContent ?? "";
@@ -131,10 +157,11 @@ ${styles.replace(/\.md-preview /g, "")}
               {label}
             </button>
           ))}
-          <button onClick={copyHtml}
+          <button onClick={() => setMarkdown(SAMPLE_MARKDOWN)}
             className="ml-2 px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors">
-            {copied ? "Copied HTML!" : "Copy HTML"}
+            Try an example
           </button>
+          <CopyButton text={() => renderedHtml} label="Copy HTML" className="ml-1" />
           <div className="relative ml-1">
             <button onClick={() => setShowExport(o => !o)}
               className="px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors flex items-center gap-1">

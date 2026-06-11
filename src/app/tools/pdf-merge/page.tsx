@@ -3,6 +3,8 @@
 import { useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { formatBytes } from "@/lib/utils";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { RelatedTools } from "@/components/RelatedTools";
 
 interface PdfFile {
   id: string;
@@ -158,7 +160,7 @@ export default function PdfMergePage() {
           </div>
         )}
 
-        {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+        <ErrorAlert message={error} className="mb-4" />
 
         <button
           onClick={merge}
@@ -184,10 +186,12 @@ export default function PdfMergePage() {
         </button>
 
         {pdfs.length > 0 && (
-          <p className="text-slate-600 text-xs text-center mt-3">
+          <p className="text-slate-500 text-xs text-center mt-3">
             {pdfs.length} file{pdfs.length !== 1 ? "s" : ""} · processed entirely in your browser
           </p>
         )}
+
+        <RelatedTools current="/tools/pdf-merge" />
       </div>
     </div>
   );

@@ -2,6 +2,8 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { RelatedTools } from "@/components/RelatedTools";
 
 export default function SvgToPngPage() {
   const [svg, setSvg] = useState("");
@@ -115,7 +117,7 @@ export default function SvgToPngPage() {
             </div>
           </div>
 
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          <ErrorAlert message={error} />
 
           {/* Preview */}
           {preview && (
@@ -133,6 +135,8 @@ export default function SvgToPngPage() {
             </button>
           )}
         </div>
+
+        <RelatedTools current="/tools/svg-to-png" />
       </div>
     </div>
   );

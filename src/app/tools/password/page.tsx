@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
+import { CopyButton } from "@/components/CopyButton";
 import { RelatedTools } from "@/components/RelatedTools";
 
 const CHARS = {
@@ -122,7 +123,6 @@ export default function PasswordPage() {
 
   const [passwords, setPasswords] = useState<string[]>([]);
   const [copied, setCopied]       = useState<string | null>(null);
-  const [copiedAll, setCopiedAll] = useState(false);
 
   const generateAll = useCallback(() => {
     if (mode === "password") {
@@ -138,12 +138,6 @@ export default function PasswordPage() {
     navigator.clipboard.writeText(pw);
     setCopied(pw);
     setTimeout(() => setCopied(null), 1500);
-  };
-
-  const copyAll = () => {
-    navigator.clipboard.writeText(passwords.join("\n"));
-    setCopiedAll(true);
-    setTimeout(() => setCopiedAll(false), 1500);
   };
 
   const toggle = (key: string) => setOpts(o => ({ ...o, [key]: !o[key as keyof typeof o] }));
@@ -181,7 +175,7 @@ export default function PasswordPage() {
                   </div>
                 </div>
                 <input type="range" min={4} max={128} value={length} onChange={e => setLength(+e.target.value)} className="w-full accent-blue-500" />
-                <div className="flex justify-between text-slate-600 text-xs mt-1">
+                <div className="flex justify-between text-slate-500 text-xs mt-1">
                   <span>4</span>
                   <div className="flex gap-3">
                     {[8,12,16,24,32].map(n => (
@@ -314,10 +308,8 @@ export default function PasswordPage() {
                 })}
               </div>
               {passwords.length > 1 && (
-                <button onClick={copyAll}
-                  className={`w-full py-2 rounded-xl text-sm font-medium transition-colors border ${copiedAll ? "bg-green-600 border-green-500 text-white" : "bg-slate-900/60 border-slate-800/60 text-slate-400 hover:text-white"}`}>
-                  {copiedAll ? "✓ Copied all" : `Copy all ${passwords.length}`}
-                </button>
+                <CopyButton text={() => passwords.join("\n")} label={`Copy all ${passwords.length}`}
+                  className="w-full justify-center py-2 text-sm rounded-xl" />
               )}
             </>
           )}

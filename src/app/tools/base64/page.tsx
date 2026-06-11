@@ -2,6 +2,9 @@
 
 import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
+import { CopyButton } from "@/components/CopyButton";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { RelatedTools } from "@/components/RelatedTools";
 
 type Mode = "encode" | "decode";
 
@@ -32,7 +35,6 @@ export default function Base64Page() {
   const [urlSafe, setUrlSafe] = useState(false);
   const [wrap, setWrap]       = useState(false);
   const [error, setError]     = useState("");
-  const [copied, setCopied]   = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -78,10 +80,13 @@ export default function Base64Page() {
     e.target.value = "";
   };
 
-  const copy = async () => {
-    if (!output) return;
-    try { await navigator.clipboard.writeText(output); } catch { return; }
-    setCopied(true); setTimeout(() => setCopied(false), 1500);
+  const loadExample = () => {
+    const sample = mode === "encode"
+      ? "Hello from FileSpark! Encode me to Base64."
+      : "SGVsbG8gZnJvbSBGaWxlU3Bhcmsh";
+    setFileName(null);
+    setInput(sample);
+    run(sample, mode, urlSafe, wrap);
   };
 
   const inputBytes = mode === "encode" && input ? new TextEncoder().encode(input).length : null;
@@ -137,6 +142,10 @@ export default function Base64Page() {
                 {fileName ? `File: ${fileName}` : mode === "encode" ? "Plain text" : "Base64 string"}
               </label>
               <div className="flex items-center gap-3">
+                <button onClick={loadExample}
+                  className="bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-300 text-xs rounded-lg px-3 py-1.5 transition-colors">
+                  Try an example
+                </button>
                 {inputBytes !== null && <span className="text-slate-600 text-xs">{inputBytes} bytes</span>}
                 {(input || fileName) && (
                   <button onClick={() => { setInput(""); setOutput(""); setError(""); setFileName(null); }}
@@ -156,7 +165,7 @@ export default function Base64Page() {
             )}
           </div>
 
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          <ErrorAlert message={error} />
 
           {/* Output */}
           <div className="relative">
@@ -167,13 +176,12 @@ export default function Base64Page() {
             <textarea readOnly value={output} placeholder="Output will appear here…"
               className="w-full h-40 bg-slate-900/60 border border-slate-800/60 rounded-xl p-4 text-white text-sm font-mono resize-none focus:outline-none placeholder-slate-600" />
             {output && (
-              <button onClick={copy}
-                className="absolute bottom-3 right-3 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors">
-                {copied ? "Copied!" : "Copy"}
-              </button>
+              <CopyButton text={output} className="absolute bottom-3 right-3" />
             )}
           </div>
         </div>
+
+        <RelatedTools current="/tools/base64" />
       </div>
     </div>
   );

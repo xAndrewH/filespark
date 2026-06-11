@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { RelatedTools } from "@/components/RelatedTools";
 
 const PRESETS = [
   { label: "16:9 HD",     width: 1280, height: 720 },
@@ -236,6 +237,8 @@ export default function PlaceholderImagePage() {
             </button>
           </div>
         </div>
+
+        <RelatedTools current="/tools/placeholder-image" />
       </div>
     </div>
   );

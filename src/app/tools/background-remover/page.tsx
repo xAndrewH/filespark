@@ -2,6 +2,8 @@
 
 import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { RelatedTools } from "@/components/RelatedTools";
 
 type BgOption = "transparent" | "white" | "black" | "custom" | "blur";
 type ModelSize = "isnet_quint8" | "isnet";
@@ -168,7 +170,7 @@ export default function BackgroundRemoverPage() {
               <div className="space-y-3">
                 <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
                 <p className="text-slate-400 text-sm">{progress}</p>
-                <p className="text-slate-600 text-xs">First use downloads the model (~40 MB). Cached afterwards.</p>
+                <p className="text-slate-500 text-xs">First use downloads the model (~40 MB). Cached afterwards.</p>
               </div>
             ) : (
               <>
@@ -176,16 +178,14 @@ export default function BackgroundRemoverPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                 </svg>
                 <p className="text-slate-400 text-sm">Drop an image or <span className="text-blue-400">browse</span></p>
-                <p className="text-slate-600 text-xs mt-1">Works best with clear subjects: people, products, objects</p>
+                <p className="text-slate-500 text-xs mt-1">Works best with clear subjects: people, products, objects</p>
               </>
             )}
             <input ref={fileRef} type="file" accept="image/*" className="hidden"
               onChange={(e) => { const f = e.target.files?.[0]; e.currentTarget.value = ""; if (f) handleFile(f); }} />
           </div>
 
-          {error && (
-            <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">{error}</div>
-          )}
+          <ErrorAlert message={error} />
 
           {/* Comparison slider */}
           {original && display && showSlider && (
@@ -260,6 +260,8 @@ export default function BackgroundRemoverPage() {
             </button>
           )}
         </div>
+
+        <RelatedTools current="/tools/background-remover" />
       </div>
     </div>
   );

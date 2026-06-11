@@ -4,8 +4,6 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import {
   ChevronLeft,
-  Copy,
-  Check,
   Clock,
   KeyRound,
   ShieldAlert,
@@ -16,6 +14,9 @@ import {
   Building2,
   Users,
 } from "lucide-react";
+import { CopyButton } from "@/components/CopyButton";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { RelatedTools } from "@/components/RelatedTools";
 
 const SAMPLE_TOKEN =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFkYSBMb3ZlbGFjZSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcxNzU0NDAwMCwiZXhwIjoxNzE3NTQ3NjAwfQ.dQw4w9WgXcQ_signature_not_verified_example";
@@ -114,28 +115,6 @@ function relativeTime(unix: number): string {
   return diffMs >= 0 ? `in ${value} ${plural}` : `${value} ${plural} ago`;
 }
 
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false);
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      return;
-    }
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
-  return (
-    <button
-      onClick={copy}
-      className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-300 text-xs transition-colors"
-    >
-      {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-      {copied ? "Copied" : "Copy"}
-    </button>
-  );
-}
-
 const TIMESTAMP_CLAIMS: { key: string; name: string }[] = [
   { key: "iat", name: "Issued At" },
   { key: "nbf", name: "Not Before" },
@@ -229,12 +208,7 @@ export default function JwtDecoderPage() {
             )}
           </div>
 
-          {result && !result.ok && (
-            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-amber-400 text-sm flex items-start gap-2">
-              <ShieldAlert className="w-4 h-4 mt-0.5 shrink-0" />
-              <span>{result.error}</span>
-            </div>
-          )}
+          {result && !result.ok && <ErrorAlert message={result.error} />}
 
           {result && result.ok && (
             <>
@@ -300,7 +274,7 @@ export default function JwtDecoderPage() {
                               <div className="text-xs text-slate-500 mt-0.5">{relativeTime(v)}</div>
                             </div>
                           </div>
-                          <code className="text-xs text-slate-600 font-mono shrink-0">{v}</code>
+                          <code className="text-xs text-slate-500 font-mono shrink-0">{v}</code>
                         </div>
                       );
                     })}
@@ -346,6 +320,8 @@ export default function JwtDecoderPage() {
             </>
           )}
         </div>
+
+        <RelatedTools current="/tools/jwt-decoder" />
       </div>
     </div>
   );

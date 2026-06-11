@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { RelatedTools } from "@/components/RelatedTools";
 
 type Tab = "between" | "add" | "duration";
 
@@ -205,6 +206,8 @@ export default function TimeCalculatorPage() {
             </div>
           </div>
         )}
+
+        <RelatedTools current="/tools/time-calculator" />
       </div>
     </div>
   );

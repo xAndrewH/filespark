@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { RelatedTools } from "@/components/RelatedTools";
 
 type Unit = { label: string; factor: number };
 type Category = { name: string; base: string; units: Unit[]; special?: string };
@@ -258,6 +259,8 @@ export default function UnitsPage() {
             </div>
           </div>
         </div>
+
+        <RelatedTools current="/tools/units" />
       </div>
     </div>
   );

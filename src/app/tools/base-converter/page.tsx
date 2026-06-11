@@ -2,6 +2,9 @@
 
 import { useState, useCallback } from "react";
 import Link from "next/link";
+import { CopyButton } from "@/components/CopyButton";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { RelatedTools } from "@/components/RelatedTools";
 
 /* ── Core conversion ─────────────────────────────────────────────── */
 function toBigInt(s: string, base: number): bigint | null {
@@ -80,7 +83,6 @@ export default function BaseConverterPage() {
   const [values, setValues]     = useState<Map<number, string>>(new Map());
   const [activeBase, setActive] = useState(10);
   const [error, setError]       = useState("");
-  const [copied, setCopied]     = useState<number | null>(null);
   const [customBase, setCustomBase] = useState(12);
   const [showCustom, setShowCustom] = useState(false);
   const [twoBits, setTwoBits]   = useState<BitWidth>(8);
@@ -116,12 +118,6 @@ export default function BaseConverterPage() {
     }
     setValues(next);
   }, [showCustom, customBase]);
-
-  const copy = (base: number) => {
-    navigator.clipboard.writeText((values.get(base) ?? "").replace(/[\s_]/g, ""));
-    setCopied(base);
-    setTimeout(() => setCopied(null), 1500);
-  };
 
   const decStr = (values.get(10) ?? "").replace(/[\s_]/g, "");
   const decVal = decStr ? BigInt(parseInt(decStr, 10)) : null;
@@ -164,10 +160,7 @@ export default function BaseConverterPage() {
                   <span className="text-white text-sm font-medium">{labelFor(base)}</span>
                   <span className="text-slate-600 text-xs font-mono">base {base}</span>
                 </div>
-                <button onClick={() => copy(base)}
-                  className="px-2 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors">
-                  {copied === base ? "✓" : "Copy"}
-                </button>
+                <CopyButton text={() => (values.get(base) ?? "").replace(/[\s_]/g, "")} />
               </div>
               <input
                 value={values.get(base) ?? ""}
@@ -194,7 +187,7 @@ export default function BaseConverterPage() {
             </div>
           )}
 
-          {error && <p className="text-red-400 text-sm px-1">{error}</p>}
+          <ErrorAlert message={error} />
 
           {/* Bit visualizer */}
           {binStr && !error && (
@@ -305,6 +298,8 @@ export default function BaseConverterPage() {
             </div>
           )}
         </div>
+
+        <RelatedTools current="/tools/base-converter" />
       </div>
     </div>
   );

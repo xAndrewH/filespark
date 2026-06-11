@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import Link from "next/link";
+import { RelatedTools } from "@/components/RelatedTools";
 
 function gcd(a: number, b: number): number { return b === 0 ? a : gcd(b, a % b); }
 
@@ -153,6 +154,8 @@ export default function AspectRatioPage() {
             </div>
           )}
         </div>
+
+        <RelatedTools current="/tools/aspect-ratio" />
       </div>
     </div>
   );

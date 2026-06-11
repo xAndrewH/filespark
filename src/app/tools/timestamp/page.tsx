@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { CopyButton } from "@/components/CopyButton";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { RelatedTools } from "@/components/RelatedTools";
 
 const FORMATS = [
   { label: "Local",     fn: (d: Date) => d.toLocaleString() },
@@ -18,7 +21,6 @@ export default function TimestampPage() {
   const [input, setInput] = useState("");
   const [date, setDate] = useState<Date | null>(null);
   const [error, setError] = useState("");
-  const [copied, setCopied] = useState<string | null>(null);
   const [live, setLive] = useState(false);
 
   useEffect(() => {
@@ -50,10 +52,10 @@ export default function TimestampPage() {
     setError("");
   };
 
-  const copy = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(label);
-    setTimeout(() => setCopied(null), 1500);
+  const tryExample = () => {
+    const sample = "1749600000";
+    setInput(sample);
+    parse(sample);
   };
 
   const display = date ?? (live ? now : null);
@@ -90,7 +92,13 @@ export default function TimestampPage() {
 
           {/* Input */}
           <div>
-            <label className="text-slate-400 text-xs mb-1.5 block">Enter a Unix timestamp or date string</label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-slate-400 text-xs">Enter a Unix timestamp or date string</label>
+              <button onClick={tryExample}
+                className="bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-300 text-xs rounded-lg px-3 py-1.5">
+                Try an example
+              </button>
+            </div>
             <input
               value={input}
               onChange={e => { setInput(e.target.value); parse(e.target.value); }}
@@ -98,7 +106,7 @@ export default function TimestampPage() {
               spellCheck={false}
               className={`w-full bg-slate-900/60 border rounded-xl px-4 py-3 text-white font-mono text-sm focus:outline-none transition-colors ${error ? "border-red-500/50" : "border-slate-800/60 focus:border-blue-500/50"}`}
             />
-            {error && <p className="text-red-400 text-xs mt-1.5">{error}</p>}
+            <ErrorAlert message={error} className="mt-1.5" />
           </div>
 
           {/* Results */}
@@ -110,16 +118,15 @@ export default function TimestampPage() {
                   <div key={label} className="bg-slate-900/60 border border-slate-800/60 rounded-xl px-4 py-3 flex items-center gap-3">
                     <span className="text-slate-500 text-xs w-24 shrink-0">{label}</span>
                     <code className="flex-1 text-white text-sm font-mono truncate">{val}</code>
-                    <button onClick={() => copy(val, label)}
-                      className="px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors shrink-0">
-                      {copied === label ? "✓" : "Copy"}
-                    </button>
+                    <CopyButton text={val} label="Copy" className="shrink-0" />
                   </div>
                 );
               })}
             </div>
           )}
         </div>
+
+        <RelatedTools current="/tools/timestamp" />
       </div>
     </div>
   );

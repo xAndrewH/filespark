@@ -20,6 +20,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { PDFDocument } from "pdf-lib";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { RelatedTools } from "@/components/RelatedTools";
 
 interface PageItem {
   id: string;
@@ -214,9 +216,7 @@ export default function PdfPagesPage() {
         <h1 className="text-3xl font-bold text-white mb-1">Reorder / Delete PDF Pages</h1>
         <p className="text-slate-500 text-sm mb-8">Drag to reorder pages or remove unwanted ones, then download the edited PDF.</p>
 
-        {error && (
-          <div className="mb-5 bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm">{error}</div>
-        )}
+        <ErrorAlert message={error} className="mb-5" />
 
         {pages.length === 0 ? (
           <div
@@ -237,7 +237,7 @@ export default function PdfPagesPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <p className="text-slate-300 text-sm font-medium">Drop a PDF here</p>
-                <p className="text-slate-600 text-xs">or click to browse</p>
+                <p className="text-slate-500 text-xs">or click to browse</p>
               </div>
             )}
           </div>
@@ -267,7 +267,7 @@ export default function PdfPagesPage() {
               </div>
             </div>
 
-            <p className="text-slate-600 text-xs mb-4">Drag pages to reorder · hover a page to remove it · click × again to restore</p>
+            <p className="text-slate-500 text-xs mb-4">Drag pages to reorder · hover a page to remove it · click × again to restore</p>
 
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={ids} strategy={rectSortingStrategy}>
@@ -280,6 +280,8 @@ export default function PdfPagesPage() {
             </DndContext>
           </>
         )}
+
+        <RelatedTools current="/tools/pdf-pages" />
       </div>
     </div>
   );

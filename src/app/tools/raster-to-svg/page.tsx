@@ -2,6 +2,8 @@
 
 import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { RelatedTools } from "@/components/RelatedTools";
 
 /* ──────────────────────────────────────────────────────────────────
    Raster → SVG   (PNG / JPG / WEBP → traced vector SVG)
@@ -246,7 +248,7 @@ export default function RasterToSvgPage() {
               <div className="space-y-2">
                 <div className="w-7 h-7 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto" />
                 <p className="text-slate-400 text-sm">{progress}</p>
-                {opts.mode === "color" && <p className="text-slate-600 text-xs">Color tracing may take a moment for large images.</p>}
+                {opts.mode === "color" && <p className="text-slate-500 text-xs">Color tracing may take a moment for large images.</p>}
               </div>
             ) : (
               <>
@@ -254,16 +256,14 @@ export default function RasterToSvgPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                 </svg>
                 <p className="text-slate-400 text-sm">Drop a PNG, JPG, or WEBP or <span className="text-blue-400">browse</span></p>
-                <p className="text-slate-600 text-xs mt-1">Best results with logos, icons, and flat-color artwork</p>
+                <p className="text-slate-500 text-xs mt-1">Best results with logos, icons, and flat-color artwork</p>
               </>
             )}
             <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden"
               onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
           </div>
 
-          {error && (
-            <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">{error}</div>
-          )}
+          <ErrorAlert message={error} />
 
           {/* Before/after */}
           {original && svgResult && (
@@ -293,13 +293,15 @@ export default function RasterToSvgPage() {
                 className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-blue-500/20">
                 Download SVG
               </button>
-              <p className="text-slate-600 text-xs text-center">
+              <p className="text-slate-500 text-xs text-center">
                 SVG size: ~{Math.round(new Blob([svgBlob]).size / 1024)} KB
                 {opts.mode === "embed" && " (embeds original raster | not a true vector)"}
               </p>
             </div>
           )}
         </div>
+
+        <RelatedTools current="/tools/raster-to-svg" />
       </div>
     </div>
   );

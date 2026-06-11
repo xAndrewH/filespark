@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { RelatedTools } from "@/components/RelatedTools";
 
 const CHECKLIST = [
   {
@@ -198,7 +199,9 @@ export default function LandingPageChecklistPage() {
           })}
         </div>
 
-        <p className="text-slate-600 text-xs text-center mt-8">Progress resets on page refresh.</p>
+        <p className="text-slate-500 text-xs text-center mt-8">Progress resets on page refresh.</p>
+
+        <RelatedTools current="/tools/landing-page-template" />
       </div>
     </div>
   );

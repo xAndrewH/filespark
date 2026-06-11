@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { RelatedTools } from "@/components/RelatedTools";
 
 function toSigFigs(n: number, sig: number): string {
   if (!isFinite(n)) return String(n);
@@ -156,6 +157,8 @@ export default function AverageCalculatorPage() {
             </div>
           </div>
         )}
+
+        <RelatedTools current="/tools/average-calculator" />
       </div>
     </div>
   );

@@ -2,6 +2,13 @@
 
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
+import { CopyButton } from "@/components/CopyButton";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { RelatedTools } from "@/components/RelatedTools";
+
+const STORAGE_KEY = "filespark:regex:input";
+const SAMPLE_PATTERN = "(?<user>\\w+)@(\\w+\\.\\w+)";
+const SAMPLE_TEXT = "Contact jane@example.com or john@test.org for details.\nInvalid: not-an-email, foo@bar";
 
 type MatchResult = {
   match: string;
@@ -24,10 +31,41 @@ export default function RegexPage() {
   const [text, setText]         = useState("");
   const [replacement, setReplacement] = useState("");
   const [showReplace, setShowReplace] = useState(false);
-  const [copiedMatches, setCopiedMatches] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [debouncedPattern, setDebouncedPattern] = useState("");
   const [debouncedText, setDebouncedText]       = useState("");
+  const hydratedRef = useRef(false);
+
+  // Hydrate pattern + test text from localStorage after mount (never during
+  // render, to avoid an SSR/hydration mismatch).
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw) as { pattern?: string; text?: string };
+        if (typeof saved.pattern === "string") setPattern(saved.pattern);
+        if (typeof saved.text === "string") setText(saved.text);
+      }
+    } catch {
+      // Ignore unreadable storage
+    }
+    hydratedRef.current = true;
+  }, []);
+
+  // Persist pattern + test text with a ~500ms debounce
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+    const timer = setTimeout(() => {
+      try {
+        const payload = JSON.stringify({ pattern, text });
+        if (payload.length > 100_000) return;
+        localStorage.setItem(STORAGE_KEY, payload);
+      } catch {
+        // Storage full or unavailable
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [pattern, text]);
 
   // Debounce expensive regex computation to guard against catastrophic backtracking
   useEffect(() => {
@@ -97,17 +135,10 @@ export default function RegexPage() {
     }
   }, [showReplace, debouncedPattern, debouncedText, flags, replacement]);
 
-  const copyMatches = async () => {
-    if (!result?.matches.length) return;
-    const text = result.matches.map((m, i) => `${i + 1}: ${m.match || "(empty)"} @ ${m.index}`).join("\n");
-    try { await navigator.clipboard.writeText(text); } catch { return; }
-    setCopiedMatches(true); setTimeout(() => setCopiedMatches(false), 1500);
-  };
-
-  const copyReplace = async () => {
-    if (replaceResult == null) return;
-    try { await navigator.clipboard.writeText(replaceResult); } catch { return; }
-  };
+  const matchesAsText = useCallback(() => {
+    if (!result?.matches.length) return "";
+    return result.matches.map((m, i) => `${i + 1}: ${m.match || "(empty)"} @ ${m.index}`).join("\n");
+  }, [result]);
 
   const hasGroups = result?.matches.some(m => m.groups.length > 0 || m.namedGroups);
 
@@ -139,9 +170,16 @@ export default function RegexPage() {
             </div>
           </div>
 
-          {result?.error && (
-            <p className="text-red-400 text-sm font-mono bg-red-400/5 border border-red-400/20 rounded-xl px-4 py-2">{result.error}</p>
-          )}
+          <div className="flex justify-end">
+            <button
+              onClick={() => { setPattern(SAMPLE_PATTERN); setText(SAMPLE_TEXT); }}
+              type="button"
+              className="bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-300 text-xs rounded-lg px-3 py-1.5">
+              Try an example
+            </button>
+          </div>
+
+          <ErrorAlert message={result?.error} />
 
           {/* Test string */}
           <div>
@@ -159,9 +197,7 @@ export default function RegexPage() {
                   {result?.matches.length ?? 0} match{result?.matches.length !== 1 ? "es" : ""}
                 </p>
                 {result && result.matches.length > 0 && (
-                  <button onClick={copyMatches} className="text-slate-500 hover:text-slate-300 text-xs transition-colors">
-                    {copiedMatches ? "Copied!" : "Copy matches"}
-                  </button>
+                  <CopyButton text={matchesAsText} label="Copy matches" />
                 )}
               </div>
               <div className="font-mono text-sm whitespace-pre-wrap break-all leading-relaxed">
@@ -233,10 +269,11 @@ export default function RegexPage() {
                   <div className="relative bg-slate-900/60 border border-slate-800/60 rounded-xl p-4">
                     <p className="text-slate-400 text-xs mb-2">Result</p>
                     <pre className="text-slate-300 text-sm font-mono whitespace-pre-wrap break-all">{replaceResult}</pre>
-                    <button onClick={copyReplace}
-                      className="absolute bottom-3 right-3 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg transition-colors">
-                      Copy
-                    </button>
+                    <CopyButton
+                      text={replaceResult ?? ""}
+                      label="Copy"
+                      className="absolute bottom-3 right-3"
+                    />
                   </div>
                 )}
               </div>
@@ -265,6 +302,8 @@ export default function RegexPage() {
               ))}
             </div>
           </details>
+
+          <RelatedTools current="/tools/regex" />
         </div>
       </div>
     </div>

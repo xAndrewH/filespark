@@ -2,6 +2,8 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
+import { ErrorAlert } from "@/components/ErrorAlert";
+import { RelatedTools } from "@/components/RelatedTools";
 
 interface PageResult { url: string; pageNum: number; width: number; height: number; }
 
@@ -169,7 +171,7 @@ export default function PdfToImagesPage() {
                 <input type="number" min={1} value={pageTo} onChange={(e) => setPageTo(e.target.value === "" ? "" : Math.max(1, +e.target.value))}
                   placeholder="end"
                   className="w-16 bg-slate-800 border border-slate-700 text-white text-sm rounded-lg px-2 py-1 focus:outline-none focus:border-blue-500 text-center placeholder-slate-600" />
-                {totalPages > 0 && <span className="text-slate-600 text-xs">of {totalPages}</span>}
+                {totalPages > 0 && <span className="text-slate-500 text-xs">of {totalPages}</span>}
               </div>
             </div>
           </div>
@@ -191,19 +193,14 @@ export default function PdfToImagesPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                 </svg>
                 <p className="text-slate-400 text-sm">Drop a PDF here or <span className="text-blue-400">browse</span></p>
-                <p className="text-slate-600 text-xs mt-1">PDF files only</p>
+                <p className="text-slate-500 text-xs mt-1">PDF files only</p>
               </>
             )}
             <input ref={fileRef} type="file" accept="application/pdf,.pdf" className="hidden"
               onChange={(e) => { const f = e.target.files?.[0]; e.currentTarget.value = ""; if (f) handleFile(f); }} />
           </div>
 
-          {error && (
-            <div className="flex items-start gap-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
-              <svg className="w-4 h-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-              {error}
-            </div>
-          )}
+          <ErrorAlert message={error} />
 
           {/* Results */}
           {pages.length > 0 && (
@@ -232,6 +229,8 @@ export default function PdfToImagesPage() {
             </div>
           )}
         </div>
+
+        <RelatedTools current="/tools/pdf-to-images" />
       </div>
     </div>
   );
