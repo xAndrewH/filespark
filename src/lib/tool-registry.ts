@@ -1,5 +1,5 @@
 import React from "react";
-import { Type, FileCode, GitCompare, AlignLeft, Shuffle, Link as LucideLink, Hash, Braces, Search, Table2, CaseSensitive, SpellCheck, Code2, Wand2, Paintbrush, Terminal, Pipette, Palette, Blend, Layers, BoxSelect, SquareDashed, Bookmark, Ruler, Maximize2, Clock, Binary, Timer, Key, Calculator, Coins, Hourglass, Percent, BarChart2, ImagePlus, Minimize2, Scissors, PenTool, FileImage, Camera, FilePlus2, ScanLine, QrCode, Globe, BookOpen, Tag, Image, ZoomIn, FileMinus2, Replace, CalendarDays, Receipt, Wifi, MapPin, Play, ShieldCheck, Share2, Contrast, Database, Lock, Zap, Bot, Map, FileText, Mail, Smartphone, TrendingUp, DollarSign, Gauge, Server, MousePointer2, PackageMinus, Activity, LayoutTemplate, Newspaper, Code, PenLine, ListChecks, FileSearch, PieChart, Film } from "lucide-react";
+import { Type, FileCode, GitCompare, AlignLeft, Shuffle, Link as LucideLink, Hash, Braces, Search, Table2, CaseSensitive, SpellCheck, Code2, Wand2, Paintbrush, Terminal, Pipette, Palette, Blend, Layers, BoxSelect, SquareDashed, Bookmark, Ruler, Maximize2, Clock, Binary, Timer, Key, Calculator, Coins, Hourglass, Percent, BarChart2, ImagePlus, Minimize2, Scissors, PenTool, FileImage, Camera, FilePlus2, ScanLine, QrCode, Globe, BookOpen, Tag, Image, ZoomIn, FileMinus2, Replace, CalendarDays, Receipt, Wifi, MapPin, Play, ShieldCheck, Share2, Contrast, Database, Lock, Zap, Bot, Map, FileText, Mail, Smartphone, TrendingUp, DollarSign, Gauge, Server, MousePointer2, PackageMinus, Activity, LayoutTemplate, Newspaper, Code, PenLine, ListChecks, FileSearch, PieChart, Film, FileOutput, RefreshCw, Images } from "lucide-react";
 
 export type IconComponent = React.ComponentType<{ className?: string }>;
 
@@ -86,6 +86,7 @@ export const TOOL_CATEGORIES: ToolCategory[] = [
     icon: Image,
     tools: [
       { href: "/tools/image-editor",       icon: ImagePlus,  title: "Image Editor",                description: "Resize, rotate, flip, and adjust quality for any image." },
+      { href: "/tools/image-converter",    icon: RefreshCw,  title: "Image Converter",             description: "Convert images between PNG, JPG, and WEBP in bulk." },
       { href: "/tools/image-compressor",   icon: Minimize2,  title: "Image Compressor",            description: "Compress JPEG, PNG, and WEBP images in bulk." },
       { href: "/tools/background-remover", icon: Scissors,   title: "Background Remover",          description: "Remove backgrounds instantly in your browser." },
       { href: "/tools/upscale-image",      icon: ZoomIn,     title: "Upscale Image",               description: "Upscale images up to 4× resolution using bilinear or nearest-neighbor." },
@@ -94,10 +95,12 @@ export const TOOL_CATEGORIES: ToolCategory[] = [
       { href: "/tools/placeholder-image",  icon: ImagePlus,  title: "Placeholder Image Generator", description: "Generate placeholder images at any size with custom colors and text." },
       { href: "/tools/youtube-thumbnail",  icon: Play,       title: "YouTube Thumbnail Generator", description: "Design custom 1280×720 thumbnails with text, gradients, and images." },
       { href: "/tools/video-to-gif",       icon: Film,       title: "Video to GIF",                description: "Turn a clip of any video into an optimized GIF, right in your browser." },
+      { href: "/tools/images-to-gif",      icon: Images,     title: "Images to GIF",               description: "Combine a sequence of images into an animated GIF." },
       { href: "/tools/exif",               icon: Camera,     title: "EXIF Viewer",                 description: "Read camera settings, GPS, and metadata from images." },
       { href: "/tools/qr",                 icon: QrCode,     title: "QR Code Generator",           description: "Generate QR codes from any URL or text. Download as PNG." },
       { href: "/tools/pdf-merge",          icon: FilePlus2,  title: "PDF Merge",                   description: "Combine multiple PDFs into one, reorder pages before merging." },
-      { href: "/tools/pdf-to-images",      icon: ScanLine,   title: "PDF to Images",               description: "Convert each PDF page to a PNG at multiple quality levels." },
+      { href: "/tools/image-to-pdf",       icon: FileOutput, title: "Image to PDF",                description: "Combine JPG, PNG, WEBP, or GIF images into a single PDF." },
+      { href: "/tools/pdf-to-images",      icon: ScanLine,   title: "PDF to JPG / PNG / WEBP",     description: "Convert PDF pages to JPG, PNG, or WEBP images." },
       { href: "/tools/pdf-pages",          icon: FileMinus2, title: "Reorder / Delete PDF Pages",  description: "Drag to reorder or remove pages from a PDF before saving." },
     ],
   },

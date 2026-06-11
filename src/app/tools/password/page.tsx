@@ -12,6 +12,8 @@ const CHARS = {
   symbols: "!@#$%^&*()_+-=[]{}|;:,.<>?",
 };
 
+const SIMILAR_CHARS = "il1IoO0";
+
 const WORDLIST = [
   "able","acid","aged","army","away","baby","back","ball","band","bank","base","bath","bear","beat",
   "bell","belt","best","bird","bite","blue","boat","body","bomb","bond","bone","book","born","bowl",
@@ -67,6 +69,10 @@ function generatePassword(length: number, opts: Record<string, boolean>): string
   if (opts.numbers) pool += CHARS.numbers;
   if (opts.symbols) pool += CHARS.symbols;
   if (!pool) pool = CHARS.lower;
+  if (opts.excludeSimilar) {
+    const filtered = [...pool].filter(c => !SIMILAR_CHARS.includes(c)).join("");
+    if (filtered) pool = filtered;
+  }
   const arr = new Uint32Array(length);
   crypto.getRandomValues(arr);
   return Array.from(arr).map(n => pool[n % pool.length]).join("");
@@ -114,7 +120,7 @@ export default function PasswordPage() {
   const [mode, setMode] = useState<Mode>("password");
 
   const [length, setLength]   = useState(16);
-  const [opts, setOpts]       = useState({ upper: true, lower: true, numbers: true, symbols: false });
+  const [opts, setOpts]       = useState({ upper: true, lower: true, numbers: true, symbols: false, excludeSimilar: false });
   const [count, setCount]     = useState(5);
 
   const [wordCount, setWordCount]   = useState(4);
@@ -211,6 +217,13 @@ export default function PasswordPage() {
                       <span className="text-xs opacity-50 ml-auto font-mono">{ex}</span>
                     </button>
                   ))}
+                </div>
+                <div className="flex items-center gap-3 cursor-pointer mt-3 pt-3 border-t border-slate-800/60" onClick={() => toggle("excludeSimilar")}>
+                  <div className={`w-8 h-4 rounded-full transition-colors relative shrink-0 ${opts.excludeSimilar ? "bg-blue-500" : "bg-slate-700"}`}>
+                    <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${opts.excludeSimilar ? "left-4" : "left-0.5"}`} />
+                  </div>
+                  <span className="text-slate-300 text-sm select-none">Exclude similar characters</span>
+                  <span className="text-xs text-slate-500 font-mono ml-auto">i, l, 1, I, o, O, 0</span>
                 </div>
               </div>
             </>

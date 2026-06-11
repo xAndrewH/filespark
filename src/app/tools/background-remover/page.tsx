@@ -122,8 +122,7 @@ export default function BackgroundRemoverPage() {
     if (!display) return;
     const a = document.createElement("a");
     a.href = display;
-    const ext = bg === "transparent" ? "png" : "png";
-    a.download = `${fileName}_no_bg.${ext}`;
+    a.download = `${fileName}_no_bg.png`;
     a.click();
   };
 

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import Link from "next/link";
+import { RelatedTools } from "@/components/RelatedTools";
 
 function hexToRgb(hex: string) {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -311,6 +312,8 @@ export default function ColorPickerPage() {
             </div>
           )}
         </div>
+
+        <RelatedTools current="/tools/color-picker" />
       </div>
     </div>
   );

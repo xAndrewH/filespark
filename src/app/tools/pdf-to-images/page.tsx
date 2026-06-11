@@ -12,7 +12,7 @@ const SCALES = [
   { label: "High (2×)",     value: 2 },
   { label: "Ultra (3×)",    value: 3 },
 ];
-const FORMATS = ["png", "jpeg", "webp"] as const;
+const FORMATS = ["jpeg", "png", "webp"] as const;
 type Fmt = typeof FORMATS[number];
 
 function fmtSize(b: number) {
@@ -120,8 +120,8 @@ export default function PdfToImagesPage() {
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
           Tools
         </Link>
-        <h1 className="text-3xl font-bold text-white mb-1">PDF to Images</h1>
-        <p className="text-slate-500 text-sm mb-8">Convert PDF pages to PNG, JPEG, or WEBP, entirely in your browser.</p>
+        <h1 className="text-3xl font-bold text-white mb-1">PDF to JPG, PNG &amp; WEBP</h1>
+        <p className="text-slate-500 text-sm mb-8">Convert PDF pages to JPG, PNG, or WEBP images, entirely in your browser.</p>
 
         <div className="space-y-4">
           {/* Settings */}
