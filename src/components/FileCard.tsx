@@ -2,7 +2,7 @@
 
 import { useMemo, useEffect, useState } from "react";
 import type { FileItem, Category } from "@/types";
-import { getCompatibleOutputs } from "@/lib/formats";
+import { getCompatibleOutputs, FORMAT_DESCRIPTIONS } from "@/lib/formats";
 import { formatBytes, replaceExtension } from "@/lib/utils";
 import { getCloudConvertKey } from "@/lib/cloudconvert-client";
 import SearchableSelect from "./SearchableSelect";
@@ -110,11 +110,11 @@ export default function FileCard({ item, onConvert, onRemove, onChange, onOpenKe
                 {dragHandleProps && (
                   <div
                     {...dragHandleProps}
-                    className="p-1 text-slate-600 hover:text-slate-400 cursor-grab active:cursor-grabbing transition-colors rounded"
+                    className="p-1.5 text-slate-500 hover:text-slate-300 cursor-grab active:cursor-grabbing transition-colors rounded"
                     title="Drag to reorder"
                     aria-label="Drag to reorder"
                   >
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                    <svg width="14" height="14" viewBox="0 0 12 12" fill="currentColor">
                       <circle cx="4" cy="3" r="1" /><circle cx="8" cy="3" r="1" />
                       <circle cx="4" cy="6" r="1" /><circle cx="8" cy="6" r="1" />
                       <circle cx="4" cy="9" r="1" /><circle cx="8" cy="9" r="1" />
@@ -125,7 +125,7 @@ export default function FileCard({ item, onConvert, onRemove, onChange, onOpenKe
                   onClick={() => onRemove(item.id)}
                   title="Remove"
                   aria-label="Remove file"
-                  className="text-slate-600 hover:text-slate-300 transition-colors p-1 rounded-md hover:bg-slate-800"
+                  className="text-slate-500 hover:text-slate-300 transition-colors p-1 rounded-md hover:bg-slate-800"
                 >
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                     <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -136,13 +136,13 @@ export default function FileCard({ item, onConvert, onRemove, onChange, onOpenKe
 
             {/* Controls | idle or error */}
             {!isProcessing && !isDone && (
-              <div className="mt-3 flex flex-wrap items-center gap-2">
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                 {/* Mode toggle */}
                 {canCompress && (
-                  <div className="flex rounded-lg overflow-hidden border border-slate-700/80 text-xs shrink-0">
+                  <div className="flex w-full sm:w-auto rounded-lg overflow-hidden border border-slate-700/80 text-xs shrink-0">
                     <button
                       onClick={() => onChange(item.id, { mode: "convert" })}
-                      className={`px-3 py-1.5 transition-colors ${
+                      className={`flex-1 sm:flex-none px-3 py-1.5 transition-colors ${
                         item.mode === "convert"
                           ? "bg-slate-700 text-white"
                           : "text-slate-400 hover:text-white hover:bg-slate-800"
@@ -152,7 +152,7 @@ export default function FileCard({ item, onConvert, onRemove, onChange, onOpenKe
                     </button>
                     <button
                       onClick={() => onChange(item.id, { mode: "compress" })}
-                      className={`px-3 py-1.5 transition-colors ${
+                      className={`flex-1 sm:flex-none px-3 py-1.5 transition-colors ${
                         item.mode === "compress"
                           ? "bg-slate-700 text-white"
                           : "text-slate-400 hover:text-white hover:bg-slate-800"
@@ -169,12 +169,14 @@ export default function FileCard({ item, onConvert, onRemove, onChange, onOpenKe
                     value={item.targetFormat}
                     options={outputFormats}
                     onChange={(val) => onChange(item.id, { targetFormat: val })}
+                    descriptions={FORMAT_DESCRIPTIONS}
+                    className="w-full sm:w-auto"
                   />
                 )}
 
                 {/* Quality slider + savings estimate */}
                 {item.mode === "compress" && (
-                  <div className="flex-1 min-w-40 space-y-1.5">
+                  <div className="w-full sm:w-auto sm:flex-1 sm:min-w-40 space-y-1.5">
                     <div className="flex items-center gap-2">
                       <span className="text-slate-400 text-xs shrink-0">Quality</span>
                       <input
@@ -203,11 +205,22 @@ export default function FileCard({ item, onConvert, onRemove, onChange, onOpenKe
 
                 <button
                   onClick={() => onConvert(item)}
-                  className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs font-semibold rounded-lg transition-colors shrink-0 shadow-sm shadow-blue-500/20"
+                  className="w-full sm:w-auto px-4 py-1.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs font-semibold rounded-lg transition-colors shrink-0 shadow-sm shadow-blue-500/20"
                 >
                   {item.mode === "compress" ? "Compress" : "Convert"}
                 </button>
               </div>
+            )}
+
+            {/* PDF raster output warning */}
+            {!isProcessing && !isDone && item.extension === "pdf" && item.mode === "convert" &&
+              ["jpg", "png", "webp"].includes(item.targetFormat) && (
+              <p className="mt-2 flex items-start gap-1.5 text-yellow-400/80 text-xs leading-relaxed">
+                <svg className="w-3.5 h-3.5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                Each PDF page becomes a separate image. Choose DOCX to keep editable text.
+              </p>
             )}
 
             {/* CloudConvert upfront warning */}

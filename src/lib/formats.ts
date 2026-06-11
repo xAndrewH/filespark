@@ -39,6 +39,39 @@ export const OUTPUT_FORMATS: Record<Category, string[]> = {
   archive:  ["zip", "tar", "gz"],
 };
 
+// One-line descriptions for common formats, shown under options in format selectors.
+export const FORMAT_DESCRIPTIONS: Record<string, string> = {
+  jpg:  "Small files, no transparency | best for photos",
+  jpeg: "Small files, no transparency | best for photos",
+  png:  "Lossless with transparency, larger files",
+  webp: "Modern web format | smaller than JPG and PNG",
+  avif: "Newest format, smallest files | slower to encode",
+  gif:  "Animation support, 256 colors | large files",
+  tiff: "Lossless print quality | very large files",
+  bmp:  "Uncompressed bitmap | huge files, wide support",
+  svg:  "Vector graphics | scales to any size",
+  pdf:  "Universal document | layout preserved everywhere",
+  docx: "Microsoft Word | editable text",
+  xlsx: "Microsoft Excel | editable spreadsheet",
+  pptx: "Microsoft PowerPoint | editable slides",
+  txt:  "Plain text | no formatting",
+  md:   "Markdown | plain text with light formatting",
+  html: "Web page | opens in any browser",
+  epub: "Standard eBook | reflows on any screen",
+  mp4:  "Most compatible video | plays everywhere",
+  webm: "Open web video | great compression",
+  mov:  "Apple QuickTime video",
+  avi:  "Legacy Windows video | large files",
+  mkv:  "Flexible container | multiple tracks and subtitles",
+  mp3:  "Universal audio | good size and quality",
+  wav:  "Uncompressed audio | studio quality, large files",
+  ogg:  "Open audio format | good compression",
+  flac: "Lossless audio | perfect quality, larger files",
+  aac:  "Efficient audio | used by Apple and YouTube",
+  m4a:  "AAC audio in an MP4 container",
+  zip:  "Universal archive | works everywhere",
+};
+
 export const ALL_INPUT_EXTS = [...new Set(Object.values(INPUT_FORMATS).flat())];
 
 // Formats Sharp can't handle | route to ImageMagick WASM instead

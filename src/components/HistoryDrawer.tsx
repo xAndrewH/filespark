@@ -137,7 +137,7 @@ export default function HistoryDrawer({ open, onClose, version, sessionDownloads
                 🕐
               </div>
               <p className="text-slate-400 text-sm">No conversion history yet</p>
-              <p className="text-slate-600 text-xs max-w-48 leading-relaxed">
+              <p className="text-slate-500 text-xs max-w-48 leading-relaxed">
                 Every file you convert will appear here automatically.
               </p>
             </div>
@@ -161,7 +161,7 @@ export default function HistoryDrawer({ open, onClose, version, sessionDownloads
 
         {/* Footer */}
         <div className="px-5 py-3 border-t border-slate-800 flex-shrink-0">
-          <p className="text-xs text-slate-600 text-center">
+          <p className="text-xs text-slate-500 text-center">
             Stored locally in your browser · never uploaded
           </p>
         </div>
@@ -246,7 +246,7 @@ function HistoryCard({ entry, onDelete, download }: {
           )}
         </div>
         <div className="flex items-center gap-2 mt-1">
-          <span className="text-slate-600 text-[10px]">{formatBytes(entry.originalSize)}</span>
+          <span className="text-slate-500 text-[10px]">{formatBytes(entry.originalSize)}</span>
           {sizeChange !== null && (
             <>
               <span className="text-slate-700 text-[10px]">→</span>
@@ -274,10 +274,13 @@ function HistoryCard({ entry, onDelete, download }: {
             </svg>
           </button>
         ) : (
-          <div className="w-6 h-6 flex items-center justify-center rounded-md text-slate-700" title="Not available after page refresh">
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
+          <div className="flex flex-col items-center gap-0.5" title="Available during this session only">
+            <div className="w-6 h-6 flex items-center justify-center rounded-md text-slate-600" aria-label="Download unavailable">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+            </div>
+            <span className="text-slate-500 text-[11px] leading-none whitespace-nowrap">Session expired</span>
           </div>
         )}
         <button

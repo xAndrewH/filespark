@@ -146,7 +146,7 @@ function UrlInput({ onFiles }: { onFiles: (files: File[]) => void }) {
         </button>
       </div>
       {error && <p className="text-red-400 text-xs">{error}</p>}
-      <p className="text-slate-600 text-xs">Paste a direct URL to a file. Works with most public file links.</p>
+      <p className="text-slate-500 text-xs">Paste a direct URL to a file. Works with most public file links.</p>
     </div>
   );
 }
@@ -173,8 +173,11 @@ export default function HomePage() {
   const [activePair, setActivePair]     = useState<string | null>(null);
   const [pageMode, setPageMode]         = useState<"convert" | "compress">("convert");
   const [globalQuality, setGlobalQuality] = useState(80);
+  const [confirmClearAll, setConfirmClearAll] = useState(false);
   const sessionDownloads                = useRef<Map<string, { url: string; filename: string }>>(new Map());
   const converterRef                    = useRef<HTMLDivElement>(null);
+  const addInputRef                     = useRef<HTMLInputElement>(null);
+  const clearAllTimer                   = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => { setHistoryCount(getHistory().length); }, []);
 
@@ -400,6 +403,21 @@ export default function HomePage() {
     files.forEach((f) => { if (f.resultUrl) URL.revokeObjectURL(f.resultUrl); });
     setFiles([]);
   }, [files]);
+
+  /* Two-step Clear All: first click arms a 3s confirmation, second click clears */
+  const handleClearAll = useCallback(() => {
+    if (!confirmClearAll) {
+      setConfirmClearAll(true);
+      if (clearAllTimer.current) clearTimeout(clearAllTimer.current);
+      clearAllTimer.current = setTimeout(() => setConfirmClearAll(false), 3000);
+      return;
+    }
+    if (clearAllTimer.current) clearTimeout(clearAllTimer.current);
+    setConfirmClearAll(false);
+    clearAll();
+  }, [confirmClearAll, clearAll]);
+
+  useEffect(() => () => { if (clearAllTimer.current) clearTimeout(clearAllTimer.current); }, []);
 
   const clearDone = useCallback(() => {
     setFiles((prev) => {
@@ -632,6 +650,27 @@ export default function HomePage() {
                   <h2 className="text-white font-semibold text-base">
                     Files <span className="text-slate-500 font-normal text-sm">({files.length})</span>
                   </h2>
+                  <input
+                    ref={addInputRef}
+                    type="file"
+                    multiple
+                    className="hidden"
+                    aria-label="Add more files"
+                    onChange={(e) => {
+                      const picked = Array.from(e.target.files ?? []);
+                      if (picked.length > 0) addFiles(picked);
+                      e.target.value = "";
+                    }}
+                  />
+                  <button
+                    onClick={() => addInputRef.current?.click()}
+                    className="flex items-center gap-1 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white text-xs font-medium rounded-lg transition-colors"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Add files
+                  </button>
                 </div>
                 <div className="flex gap-2 flex-wrap justify-end items-center">
                   {hasIdle && !isConverting && (
@@ -666,7 +705,18 @@ export default function HomePage() {
                   {hasDone && (
                     <button onClick={clearDone} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm rounded-lg transition-colors">Clear Done</button>
                   )}
-                  <button onClick={clearAll} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm rounded-lg transition-colors">Clear All</button>
+                  <button
+                    onClick={handleClearAll}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-colors border ${
+                      confirmClearAll
+                        ? "bg-red-600 hover:bg-red-500 border-red-500 text-white font-semibold"
+                        : "bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300"
+                    }`}
+                  >
+                    {confirmClearAll
+                      ? isConverting ? "Stop conversions? Click again" : "Click again to confirm"
+                      : "Clear All"}
+                  </button>
                 </div>
               </div>
 
@@ -739,7 +789,7 @@ export default function HomePage() {
                             <option key={f} value={f}>{f.toUpperCase()}</option>
                           ))}
                         </select>
-                        <span className="text-slate-600 text-xs">| updates instantly</span>
+                        <span className="text-slate-500 text-xs">| updates instantly</span>
                       </div>
                     );
                   })}
@@ -1025,7 +1075,7 @@ function ToolCategory({ label, icon: Icon, href, tools }: {
             </div>
             <div className="min-w-0">
               <p className="text-white text-xs font-medium group-hover:text-blue-300 transition-colors leading-snug">{title}</p>
-              <p className="text-slate-600 text-[11px] leading-relaxed mt-0.5 line-clamp-2">{desc}</p>
+              <p className="text-slate-500 text-[11px] leading-relaxed mt-0.5 line-clamp-2">{desc}</p>
             </div>
           </Link>
         ))}
